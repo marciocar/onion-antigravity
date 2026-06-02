@@ -10,7 +10,7 @@ Bem-vindo ao índice central de documentação do projeto. Este documento serve 
 
 Este projeto é o **Sistema Onion** — um framework de comandos `.claude/` para uso interno com:
 
-- 🤖 **94 comandos** Claude Code em 11 categorias
+- 🤖 **77 comandos invocáveis** Claude Code em 9 categorias (+ 12 fragmentos compartilhados em `common/` e 3 READMEs)
 - 🎯 **49 agentes de IA especializados** em 9 categorias
 - 🧩 **4 skills** em `.claude/skills/` (`onion` — cérebro do sistema; `onion-patterns`; `onion-validation`; `language-standards`)
 - 📚 **Knowledge Bases estruturadas** para consumo por IA
@@ -35,17 +35,17 @@ Este projeto é o **Sistema Onion** — um framework de comandos `.claude/` para
 - Arquivos adicionais em `docs/analysis/`, `docs/plans/`, `docs/business-context/`, `docs/technical-context/`
 
 ### Sistema Onion (`.claude/`)
-- **94 comandos** Claude Code distribuídos em:
-  - 22 em `product/` (gestão de produto e descoberta)
-  - 13 em `git/` (GitFlow e versionamento)
-  - 12 em `common/` (templates e prompts compartilhados)
-  - 12 em `engineer/` (engenharia e desenvolvimento)
+- **77 comandos invocáveis** Claude Code distribuídos em:
+  - 20 em `product/` (gestão de produto e descoberta)
+  - 12 em `git/` (GitFlow e versionamento)
+  - 11 em `engineer/` (engenharia e desenvolvimento)
   - 11 em `docs/` (geração e validação de documentação)
   - 10 em `meta/` (meta-comandos e criadores)
   - 6 em `validate/` (validação e testes)
   - 3 em `test/` (unit, integration, e2e)
-  - 1 em `development/`, 1 em `quick/`, 1 em `global/`
+  - 1 em `development/`, 1 em `quick/`
   - 2 no root: `onion.md`, `warm-up.md`
+  - **não-invocáveis**: 12 fragmentos em `common/` (5 templates + 7 prompts) e 3 READMEs de categoria
 - **4 skills** em `.claude/skills/` (`onion`, `onion-patterns`, `onion-validation`, `language-standards`)
 - **49 agentes** IA distribuídos em:
   - 20 em `development/` (frontend, backend, infra, integrações)
@@ -58,7 +58,7 @@ Este projeto é o **Sistema Onion** — um framework de comandos `.claude/` para
 
 ### Total
 - **64 arquivos** de documentação markdown
-- **94 comandos** em 11 categorias + root
+- **77 comandos invocáveis** em 9 categorias + root (+ 12 fragmentos `common/` + 3 READMEs)
 - **49 agentes** especializados em 9 categorias
 - **4 skills** (`.claude/skills/`)
 

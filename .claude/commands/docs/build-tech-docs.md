@@ -75,6 +75,14 @@ Resultado esperado: documentação modular que permite que novos devs entendam o
 - Identificar sistemas de build, frameworks de teste e configs de deploy
 - Detectar stack tecnológica chave
 
+> **Projetos sem manifesto/build (doc-as-code, config-as-code, IaC, frameworks
+> interpretados em runtime).** Quando não houver `package.json`/`requirements.txt`/
+> CI clássico (ex.: um framework em Markdown+YAML como o próprio Onion), NÃO force
+> a descoberta de "stack de build". Em vez disso, trate como stack: o formato dos
+> artefatos (Markdown/YAML/JSON), o runtime que os interpreta, as convenções de
+> diretório e os contratos entre componentes. Registre "sem build/manifesto" como
+> característica explícita, não como lacuna.
+
 **1.2 Padrões arquiteturais**
 - Identificar padrões de design (MVC, microserviços, event-driven, monolito modular)
 - Mapear fluxo de dados e pontos de integração
@@ -86,6 +94,22 @@ Resultado esperado: documentação modular que permite que novos devs entendam o
 - Identificar estratégias de teste e cobertura
 - Revisar `CONTRIBUTING.md` e setup de dev
 - Documentar processos de build, lint e deploy
+
+**1.4 Resolução de evidência conflitante**
+
+Fontes podem se contradizer (ex.: `CLAUDE.md` afirma identidade atual mas
+`CONTRIBUTING.md`/docs antigos descrevem visão abandonada). Aplique esta
+**ordem de precedência** (da mais forte para a mais fraca):
+
+1. Código e configuração reais (o que executa)
+2. `CLAUDE.md` (regras vigentes do projeto)
+3. `README.md` e docs marcadas como atuais
+4. Docs sem marcação de status
+5. Docs marcadas como históricas/abandonadas → **não** usar como verdade atual
+
+Quando houver conflito relevante, **registre-o explicitamente** (no ADR ou
+charter) em vez de propagar a contradição silenciosamente, e sinalize a fonte
+desatualizada como follow-up.
 
 ### Fase 2 — Discussão com o usuário
 
@@ -102,9 +126,22 @@ Faça **pelo menos 10 perguntas** cobrindo áreas estratégicas — mas apenas a
 
 Faça múltiplas rodadas se necessário. Ao final, apresente um **resumo dos pontos detectados** e peça aprovação para gerar a documentação.
 
+> **Modo não-interativo (infer-from-evidence).** Quando executado sem usuário
+> disponível (ex.: por um agente, em piloto ou automação), NÃO bloqueie nas
+> perguntas: infira as respostas a partir da evidência do repo, **marque cada
+> inferência** com `[INFERIDO]` e liste as suposições em uma seção
+> "Pendências de validação" no `index.md`. Itens sem evidência viram
+> `[TO BE COMPLETED]` em vez de invenção.
+
 ### Fase 3 — Geração
 
 Gere os arquivos em `docs/technical-context/` seguindo a estrutura abaixo. Crie apenas os arquivos relevantes ao projeto.
+
+> **Convenção de nomes (esta seção tem precedência sobre o template-base).** Use
+> **kebab-case minúsculo** para todos os arquivos (`codebase-guide.md`,
+> `project-charter.md`), exatamente como na estrutura abaixo. Se o
+> `technical_context_template.md` sugerir nomes em UPPERCASE, **ignore** — a
+> estrutura deste comando é a autoritativa.
 
 ```
 docs/technical-context/

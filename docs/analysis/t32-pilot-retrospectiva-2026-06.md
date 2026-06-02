@@ -55,42 +55,37 @@ Gerou fatia representativa (281 linhas, 4 arquivos) seguindo a estrutura de 4
 camadas sem ambiguidade bloqueante. A própria geração **expôs inconsistências
 reais do repo** (ver achados) — evidência de que o comando entrega valor.
 
-## Achados (gaps a tratar antes de aplicar em projeto-alvo externo)
+## Achados (gaps)
 
-### No comando/template
+### No comando/template — ✅ RESOLVIDOS em 2026-06-02
 
-1. **Divergência de convenção de nomes template ↔ comando.** O template sugere
-   `UPPERCASE` para genéricos (`CODEBASE_GUIDE.md`); o comando usa kebab-case
-   (`codebase-guide.md`). Um operador que ler o template primeiro produz nomes
-   errados. **Ação:** o comando deve declarar que sobrepõe a convenção do template.
-2. **Stack non-code não coberta pela descoberta.** A Fase 1 assume manifestos
-   (`package.json`, CI/CD). Projetos doc-as-code (como o próprio Onion) não têm.
-   **Ação:** adicionar ramo de descoberta "sem build/manifesto".
-3. **Sem regra de precedência para evidência conflitante.** O QA exige "ancorar
-   em código" mas não diz como resolver fontes que se contradizem.
-   **Ação:** definir precedência (ex.: `CLAUDE.md` > docs legados).
-4. **Modo não-interativo ausente.** A Fase 2 (≥10 perguntas) não é testável/
-   executável em modo agente. **Ação:** documentar modo "infer-from-evidence".
+1. ✅ **Divergência de convenção de nomes template ↔ comando.** O template sugeria
+   `UPPERCASE`; o comando usa kebab-case. **Resolvido:** `build-tech-docs.md`
+   Fase 3 agora declara que sua convenção (kebab-case) **tem precedência** sobre
+   o template.
+2. ✅ **Stack non-code não coberta pela descoberta.** **Resolvido:** Fase 1.1
+   ganhou ramo explícito para projetos doc-as-code/sem manifesto/build.
+3. ✅ **Sem regra de precedência para evidência conflitante.** **Resolvido:**
+   nova Fase 1.4 (precedência: código > `CLAUDE.md` > docs atuais > sem-marcação
+   > históricas) em `build-tech-docs.md` **e** `build-business-docs.md`.
+4. ✅ **Modo não-interativo ausente.** **Resolvido:** Fase 2 documenta modo
+   "infer-from-evidence" (`[INFERIDO]` + seção "Pendências de validação") em
+   ambos os comandos.
 
-### Inconsistências reais do repo descobertas pelo probe (follow-ups próprios)
+### Inconsistências reais do repo descobertas pelo probe
 
-5. **`CONTRIBUTING.md` ainda descreve "Onion v4.0 / onion-cli / Node ≥16"** —
-   contradiz a identidade atual (framework template, sem CLI). Resíduo do plano
-   v4.0 abandonado. **Follow-up:** atualizar CONTRIBUTING.md.
-6. **`CLAUDE.md` desatualizado:** afirma "1 skill (`onion`)"; o repo tem **4
-   skills**. **Follow-up:** sincronizar CLAUDE.md (ver Fase 4 deste plano).
-7. **Análise canônica não commitada:** `CLAUDE.md` cita
-   `docs/analysis/onion-review-2026-05.md` mas o arquivo está **untracked** (não
-   apareceu no worktree em HEAD). **Follow-up:** commitar os artefatos do
-   saneamento (vários `??` em `git status`).
+5. ✅ **`CONTRIBUTING.md` descrevia "Onion v4.0 / onion-cli / Node ≥16"** —
+   **Resolvido em 2026-06-02:** reescrito alinhado à identidade atual (framework
+   template, sem npm/CLI).
+6. ✅ **`CLAUDE.md` desatualizado** (afirmava "1 skill"; há 4) —
+   **Resolvido:** CLAUDE.md/INDEX sincronizados (4 skills; 77 comandos invocáveis).
+7. ✅ **Artefatos do saneamento não commitados** —
+   **Resolvido:** commitados em `50cc326` (saneamento 2026-05).
 
 ## Veredito
 
 `build-index`, `build-tech-docs` e `build-business-docs` (por prontidão) estão
-**aptos para projeto-alvo, com ressalvas não-bloqueantes** (gaps 1-4). T3.6 fica
-**resolvido** via auto-piloto. `build-compliance-docs` permanece **pendente de
-piloto regulado** (gap conhecido, não bloqueia uso geral).
-
-Os achados 5-7 são dívidas de documentação do repo-mãe, parcialmente endereçadas
-na Fase 4 deste plano (sincronizar CLAUDE.md/INDEX) — os demais ficam como
-follow-up dedicado.
+**aptos para projeto-alvo**. Todos os gaps 1-4 e inconsistências 5-7 foram
+**resolvidos em 2026-06-02**. T3.6 fica **resolvido** via auto-piloto.
+`build-compliance-docs` permanece **pendente de piloto regulado** (gap conhecido,
+não bloqueia uso geral).

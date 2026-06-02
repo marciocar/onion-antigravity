@@ -85,6 +85,18 @@ Resultado esperado: documentação modular que permite que IA e humanos entendam
 - Mapear jornada via onboarding e UX
 - Identificar padrões de comunicação preferidos
 
+**1.4 Resolução de evidência conflitante**
+
+Fontes podem se contradizer. Ordem de precedência (mais forte → mais fraca):
+1. Dados reais (telemetria, issues, feedback, contratos)
+2. `CLAUDE.md` e docs marcadas como atuais
+3. `README.md` / materiais oficiais vigentes
+4. Docs sem marcação de status
+5. Docs históricas/abandonadas → **não** usar como verdade atual
+
+Registre conflitos relevantes explicitamente e sinalize a fonte desatualizada
+como follow-up, em vez de propagar a contradição.
+
 ### Fase 2 — Discussão com o usuário
 
 Faça **pelo menos 10 perguntas** cobrindo as áreas estratégicas, mas só as relevantes para o projeto (não pergunte o que já está claro nas fontes). Cubra:
@@ -99,6 +111,11 @@ Faça **pelo menos 10 perguntas** cobrindo as áreas estratégicas, mas só as r
 - Oportunidades não óbvias
 
 Faça múltiplas rodadas se necessário. Ao final, apresente um **resumo dos pontos detectados** e peça aprovação para gerar a documentação.
+
+> **Modo não-interativo (infer-from-evidence).** Sem usuário disponível (agente/
+> piloto/automação), não bloqueie: infira das fontes, marque cada inferência com
+> `[INFERIDO]` e liste as suposições numa seção "Pendências de validação" no
+> `index.md`. Sem evidência → `[TO BE COMPLETED]`, nunca invenção.
 
 ### Fase 3 — Geração
 
