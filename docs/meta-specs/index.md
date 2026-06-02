@@ -71,40 +71,47 @@ Meta Specs definem:
 
 ## 📜 Meta Specs Disponíveis
 
-### 🏗️ architecture.md (A CRIAR)
-Padrões arquiteturais do Sistema Onion:
-- Estrutura de diretórios
-- Separação de responsabilidades
-- Fluxos de dados
-- Dependências permitidas
+> Todas as 5 meta-specs foram criadas em 2026-05-18 como parte da execução do [Plano de Saneamento Onion 2026-05](../plans/onion-saneamento-plan-2026-05.md), tarefas T2.1 a T2.5.
 
-### 📝 code-standards.md (A CRIAR)
-Padrões de código:
-- Linguagem (pt-BR para docs, en-US para código)
-- Formatação
-- Documentação
-- Testes
-
-### 🤖 agents.md (A CRIAR)
+### 🤖 [agents.md](./agents.md) — ATIVA (v1.0.0, 2026-05-18)
 Padrões para agentes:
-- Estrutura YAML obrigatória
-- Campos obrigatórios vs opcionais
-- Convenções de nomenclatura
-- Integração com MCPs
+- Estrutura YAML obrigatória (`name`, `description`, `tools`)
+- 9 categorias válidas
+- Convenções de nomenclatura kebab-case
+- Limites de tamanho (1.200 recomendado, 1.500 hard)
+- Padrões de delegação e integração com MCPs
 
-### 🔧 commands.md (A CRIAR)
+### 🔧 [commands.md](./commands.md) — ATIVA (v1.0.0, 2026-05-18)
 Padrões para comandos:
-- Estrutura obrigatória
-- Limite de tamanho (~500 linhas)
-- Modularização
-- Integração com ClickUp
+- Estrutura obrigatória (frontmatter, corpo)
+- Categorias válidas
+- **Workflows faseados como invariantes** (`engineer/plan→pr-update` e `product/collect→feature`)
+- Política de duplicação de nomes
+- Limites de tamanho (500 recomendado, 800 hard)
 
-### 🔌 integrations.md (A CRIAR)
+### 🏗️ [architecture.md](./architecture.md) — ATIVA (v1.0.0, 2026-05-18)
+Padrões arquiteturais:
+- Estrutura obrigatória de `.claude/` e `docs/`
+- Separação operacional vs documentação
+- Princípio de framework instalável
+- Dependências permitidas entre categorias (com diagrama)
+- Plataforma única: Claude Code
+
+### 📝 [code-standards.md](./code-standards.md) — ATIVA (v1.0.0, 2026-05-18)
+Padrões de código e idioma:
+- Separação pt-BR (docs/UX) vs inglês (código/commits/logs)
+- Formatação Markdown
+- Convenções de naming (filenames, slugs, branches, commits)
+- Estilo de escrita
+- Configuração e secrets
+
+### 🔌 [integrations.md](./integrations.md) — ATIVA (v1.0.0, 2026-05-18)
 Padrões para integrações:
-- Gestão de credenciais (.env)
-- Fallback quando indisponível
+- Task Manager Abstraction como referência canônica
+- Estrutura obrigatória de adapter (factory + interface + types + detector + providers)
+- Gestão de `.env` (obrigatórias vs opcionais, fallback gracioso)
 - MCPs suportados
-- Agentes agnósticos vs especializados
+- Formatação por provider (ADF Jira v3, Markdown ClickUp, Unicode comments, HTML Asana, Markdown Linear)
 
 ---
 

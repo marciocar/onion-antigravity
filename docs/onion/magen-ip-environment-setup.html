@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Configuração do Ambiente Onion — Magen IP</title>
+<meta name="description" content="Documento operacional consolidando o setup do ambiente de desenvolvimento da Magen IP sobre o Sistema Onion" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --magen-yellow: #FFB800;
+    --magen-yellow-light: #FFD45C;
+    --magen-yellow-dark: #E5A500;
+    --magen-yellow-glow: rgba(255, 184, 0, 0.25);
+    --black: #0A0A0A;
+    --gray-900: #111827;
+    --gray-800: #1F2937;
+    --gray-700: #374151;
+    --gray-600: #4B5563;
+    --gray-500: #6B7280;
+    --gray-400: #9CA3AF;
+    --gray-300: #D1D5DB;
+    --gray-200: #E5E7EB;
+    --gray-100: #F3F4F6;
+    --gray-50: #F9FAFB;
+    --white: #FFFFFF;
+    --green: #10B981;
+    --green-light: #34D399;
+    --red: #EF4444;
+    --blue: #3B82F6;
+    --purple: #8B5CF6;
+
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+    --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.10), 0 10px 10px -5px rgba(0,0,0,0.04);
+    --shadow-glow: 0 0 40px rgba(255, 184, 0, 0.15);
+
+    --radius-sm: 8px;
+    --radius: 12px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-xl: 32px;
+
+    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+    --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 100px;
+    /* iOS Safari precisa do overflow-x no html (não basta no body) quando há
+       position:fixed na página + pseudo-elementos com right negativo (.hero::before glow). */
+    overflow-x: hidden;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--white);
+    color: var(--black);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+  }
+
+  /* ============ NAV ============ */
+  .navbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--gray-200);
+    z-index: 100;
+    transition: var(--transition);
+  }
+  .navbar-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    color: var(--black);
+    text-decoration: none;
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--magen-yellow), var(--magen-yellow-dark));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--black);
+    font-weight: 900;
+    font-size: 18px;
+    box-shadow: var(--shadow-glow);
+    position: relative;
+    overflow: hidden;
+  }
+  .logo-icon::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.4));
+  }
+  .logo-icon span { position: relative; z-index: 1; }
+  .logo small {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-left: 4px;
+  }
+  .nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .nav-menu a {
+    color: var(--gray-700);
+    text-decoration: none;
+    transition: color var(--transition);
+  }
+  .nav-menu a:hover { color: var(--black); }
+  .nav-cta {
+    background: var(--magen-yellow);
+    color: var(--black);
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    text-decoration: none;
+    transition: var(--transition);
+    box-shadow: 0 4px 14px var(--magen-yellow-glow);
+  }
+  .nav-cta:hover {
+    background: var(--magen-yellow-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px var(--magen-yellow-glow);
+  }
+
+  .mobile-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    color: var(--black);
+  }
+
+  /* ============ HERO ============ */
+  .hero {
+    padding: 140px 32px 80px;
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 100px;
+    right: -100px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, var(--magen-yellow-glow), transparent 70%);
+    z-index: -1;
+    pointer-events: none;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    border: 1px solid var(--gray-200);
+  }
+  .hero-tag-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2); }
+    50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+  }
+  h1 {
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    margin-bottom: 24px;
+  }
+  h1 .accent {
+    color: var(--magen-yellow);
+    background: linear-gradient(135deg, var(--magen-yellow), var(--magen-yellow-dark));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-desc {
+    font-size: 18px;
+    color: var(--gray-600);
+    margin-bottom: 32px;
+    max-width: 540px;
+    line-height: 1.6;
+  }
+  .hero-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .btn-primary, .btn-secondary {
+    padding: 14px 28px;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+  }
+  .btn-primary {
+    background: var(--magen-yellow);
+    color: var(--black);
+    box-shadow: 0 4px 14px var(--magen-yellow-glow);
+  }
+  .btn-primary:hover {
+    background: var(--magen-yellow-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px var(--magen-yellow-glow);
+  }
+  .btn-secondary {
+    background: var(--white);
+    color: var(--black);
+    border: 1px solid var(--gray-300);
+  }
+  .btn-secondary:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-400);
+  }
+  .hero-meta {
+    display: flex;
+    gap: 28px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+  }
+  .hero-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--gray-600);
+    font-weight: 500;
+  }
+  .hero-meta-item svg { color: var(--magen-yellow); }
+
+  /* Status card */
+  .status-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--gray-200);
+  }
+  .status-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    font-size: 15px;
+  }
+  .status-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+    animation: pulse 2s infinite;
+  }
+  .code-block {
+    background: var(--gray-50);
+    border-radius: var(--radius);
+    padding: 18px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    margin-bottom: 20px;
+    border: 1px solid var(--gray-200);
+  }
+  .code-method { color: var(--magen-yellow-dark); font-weight: 700; }
+  .code-path { color: var(--gray-800); }
+  .code-success { color: var(--green); font-weight: 600; margin-top: 6px; display: block; }
+
+  .status-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .stat {
+    background: var(--gray-50);
+    border-radius: var(--radius);
+    padding: 18px;
+    text-align: center;
+    border: 1px solid var(--gray-200);
+    transition: var(--transition);
+  }
+  .stat:hover {
+    border-color: var(--magen-yellow);
+    transform: translateY(-2px);
+  }
+  .stat-value {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--magen-yellow-dark);
+    letter-spacing: -0.02em;
+  }
+  .stat-label {
+    font-size: 12px;
+    color: var(--gray-600);
+    font-weight: 500;
+    margin-top: 4px;
+  }
+
+  /* ============ LAYOUT ============ */
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 60px;
+    align-items: start;
+  }
+
+  /* ============ TOC SIDEBAR ============ */
+  .toc {
+    position: sticky;
+    top: 100px;
+    padding-bottom: 40px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+  }
+  .toc-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gray-500);
+    margin-bottom: 16px;
+    padding-left: 12px;
+  }
+  .toc-list { list-style: none; }
+  .toc-list li { margin-bottom: 2px; }
+  .toc-list a {
+    display: block;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    color: var(--gray-600);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    transition: var(--transition);
+    font-weight: 500;
+  }
+  .toc-list a:hover {
+    background: var(--gray-50);
+    color: var(--black);
+  }
+  .toc-list a.active {
+    color: var(--black);
+    background: rgba(255, 184, 0, 0.08);
+    border-left-color: var(--magen-yellow);
+    font-weight: 600;
+  }
+
+  /* ============ CONTENT ============ */
+  .content { min-width: 0; padding-bottom: 100px; }
+
+  .section {
+    margin-bottom: 80px;
+    scroll-margin-top: 100px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .section-num {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--magen-yellow), var(--magen-yellow-dark));
+    border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--black);
+    box-shadow: var(--shadow-glow);
+    flex-shrink: 0;
+  }
+  h2 {
+    font-size: clamp(26px, 4vw, 38px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+  }
+  h3 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 36px 0 16px;
+    color: var(--black);
+  }
+  h4 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 24px 0 12px;
+    color: var(--gray-800);
+  }
+
+  p {
+    color: var(--gray-700);
+    margin-bottom: 16px;
+    font-size: 16px;
+  }
+
+  /* Card */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    margin-bottom: 24px;
+    transition: var(--transition);
+  }
+  .card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--gray-300);
+  }
+  .card-highlight {
+    border-color: var(--magen-yellow);
+    background: linear-gradient(135deg, rgba(255, 184, 0, 0.03), rgba(255, 184, 0, 0.06));
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Table */
+  .table-wrap {
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-200);
+    overflow: hidden;
+    overflow-x: auto;
+    margin-bottom: 20px;
+    background: var(--white);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  thead {
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-200);
+  }
+  th {
+    text-align: left;
+    padding: 14px 18px;
+    font-weight: 700;
+    color: var(--gray-700);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+  td {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--gray-100);
+    color: var(--gray-700);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr { transition: background var(--transition); }
+  tbody tr:hover { background: rgba(255, 184, 0, 0.04); }
+  td code, p code, li code {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    background: var(--gray-100);
+    color: var(--magen-yellow-dark);
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-weight: 500;
+    border: 1px solid var(--gray-200);
+  }
+
+  /* Lists */
+  ul, ol { padding-left: 24px; margin-bottom: 16px; }
+  li {
+    color: var(--gray-700);
+    margin-bottom: 8px;
+    line-height: 1.65;
+  }
+  ul li::marker { color: var(--magen-yellow); }
+  ol li::marker { color: var(--magen-yellow-dark); font-weight: 700; }
+
+  strong { color: var(--black); font-weight: 700; }
+
+  a:not(.nav-cta):not(.btn-primary):not(.btn-secondary):not(.toc-list a):not(.nav-menu a):not(.logo) {
+    color: var(--magen-yellow-dark);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: var(--transition);
+  }
+  a:not(.nav-cta):not(.btn-primary):not(.btn-secondary):not(.toc-list a):not(.nav-menu a):not(.logo):hover {
+    border-bottom-color: var(--magen-yellow);
+  }
+
+  /* Code block (pre) */
+  pre {
+    background: var(--gray-900);
+    color: var(--gray-100);
+    padding: 20px 24px;
+    border-radius: var(--radius);
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    line-height: 1.65;
+    margin: 16px 0 24px;
+    position: relative;
+    border: 1px solid var(--gray-800);
+  }
+  pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+    border: none;
+    font-size: inherit;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(255,255,255,0.08);
+    color: var(--gray-300);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .copy-btn:hover {
+    background: var(--magen-yellow);
+    color: var(--black);
+    border-color: var(--magen-yellow);
+  }
+  .copy-btn.copied {
+    background: var(--green);
+    color: var(--white);
+    border-color: var(--green);
+  }
+
+  /* Callout */
+  .callout {
+    background: linear-gradient(135deg, rgba(255, 184, 0, 0.06), rgba(255, 184, 0, 0.02));
+    border: 1px solid var(--magen-yellow);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin: 20px 0;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .callout-icon {
+    flex-shrink: 0;
+    width: 28px; height: 28px;
+    background: var(--magen-yellow);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--black);
+    font-weight: 700;
+  }
+  .callout-content { flex: 1; }
+  .callout strong { color: var(--black); }
+  .callout p { margin-bottom: 0; }
+
+  /* Use case cards */
+  .use-case {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 22px 26px;
+    margin-bottom: 16px;
+    transition: var(--transition);
+    cursor: pointer;
+  }
+  .use-case:hover {
+    border-color: var(--magen-yellow);
+    transform: translateX(4px);
+    box-shadow: var(--shadow);
+  }
+  .use-case-title {
+    font-weight: 700;
+    color: var(--black);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+  }
+  .use-case-number {
+    background: var(--magen-yellow);
+    color: var(--black);
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .use-case pre {
+    margin: 0;
+    font-size: 12.5px;
+  }
+
+  /* Flow diagram */
+  .flow-diagram {
+    background: linear-gradient(180deg, var(--gray-50), var(--white));
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    border: 1px solid var(--gray-200);
+    margin: 24px 0;
+  }
+  .flow-section {
+    margin-bottom: 32px;
+  }
+  .flow-section:last-child { margin-bottom: 0; }
+  .flow-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--magen-yellow-dark);
+    text-align: center;
+    padding: 8px 20px;
+    background: rgba(255, 184, 0, 0.1);
+    border-radius: 100px;
+    display: inline-block;
+    margin-bottom: 20px;
+  }
+  .flow-step {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    margin: 8px auto;
+    max-width: 540px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--gray-800);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+  }
+  .flow-step:hover {
+    border-color: var(--magen-yellow);
+    transform: scale(1.02);
+    box-shadow: var(--shadow);
+  }
+  .flow-step.highlight {
+    background: linear-gradient(135deg, var(--magen-yellow), var(--magen-yellow-dark));
+    color: var(--black);
+    font-weight: 700;
+    border-color: var(--magen-yellow);
+    box-shadow: var(--shadow-glow);
+  }
+  .flow-arrow {
+    text-align: center;
+    color: var(--gray-400);
+    font-size: 18px;
+    margin: 6px 0;
+    line-height: 1;
+  }
+
+  /* Stats grid */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .stat-card {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    transition: var(--transition);
+  }
+  .stat-card:hover {
+    border-color: var(--magen-yellow);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+  }
+  .stat-card-value {
+    font-size: 32px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--magen-yellow), var(--magen-yellow-dark));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .stat-card-label {
+    font-size: 13px;
+    color: var(--gray-600);
+    font-weight: 500;
+    margin-top: 6px;
+  }
+
+  /* Tree */
+  .tree {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--gray-700);
+    background: var(--gray-50);
+    border-radius: var(--radius);
+    padding: 24px;
+    border: 1px solid var(--gray-200);
+    overflow-x: auto;
+  }
+  .tree .comment { color: var(--gray-500); }
+  .tree .folder { color: var(--magen-yellow-dark); font-weight: 600; }
+
+  /* Status badge */
+  .status-list {
+    display: grid;
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .status-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    transition: var(--transition);
+  }
+  .status-item:hover {
+    border-color: var(--magen-yellow);
+    background: rgba(255, 184, 0, 0.02);
+  }
+  .status-icon {
+    width: 28px; height: 28px;
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--green);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-weight: 800;
+  }
+  .status-icon.warn {
+    background: rgba(255, 184, 0, 0.15);
+    color: var(--magen-yellow-dark);
+  }
+  .status-item-content { flex: 1; }
+  .status-item-title { font-weight: 600; color: var(--black); }
+  .status-item-desc { font-size: 13px; color: var(--gray-600); margin-top: 2px; }
+
+  /* Footer */
+  footer {
+    background: var(--gray-900);
+    color: var(--gray-300);
+    padding: 60px 32px 40px;
+    margin-top: 80px;
+  }
+  .footer-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 40px;
+  }
+  .footer-brand .logo { color: var(--white); }
+  .footer-brand p {
+    color: var(--gray-400);
+    font-size: 14px;
+    margin-top: 16px;
+    max-width: 320px;
+  }
+  .footer-col h5 {
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+  }
+  .footer-col a {
+    display: block;
+    color: var(--gray-400);
+    text-decoration: none;
+    margin-bottom: 10px;
+    font-size: 14px;
+    transition: var(--transition);
+  }
+  .footer-col a:hover { color: var(--magen-yellow); }
+  .footer-bottom {
+    max-width: 1400px;
+    margin: 40px auto 0;
+    padding-top: 30px;
+    border-top: 1px solid var(--gray-800);
+    text-align: center;
+    color: var(--gray-500);
+    font-size: 13px;
+  }
+
+  /* Scroll progress */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--magen-yellow), var(--magen-yellow-dark));
+    z-index: 101;
+    transition: width 100ms linear;
+    width: 0%;
+    box-shadow: 0 0 10px var(--magen-yellow-glow);
+  }
+
+  /* Reveal animation — só esconde quando JS ativo + IntersectionObserver suportado.
+     Sem JS (preview iOS Files, webviews restritivos), conteúdo fica visível por padrão. */
+  html.js-reveal .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 600ms cubic-bezier(0.4, 0, 0.2, 1), transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  html.js-reveal .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html.js-reveal .reveal { opacity: 1; transform: none; transition: none; }
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+    .container { grid-template-columns: 1fr; }
+    .toc { position: static; max-height: none; }
+    .nav-menu { display: none; }
+    .mobile-toggle { display: flex; }
+    .footer-inner { grid-template-columns: 1fr 1fr; }
+    .navbar-inner { padding: 16px 20px; }
+    .hero { padding: 120px 20px 60px; }
+    .container { padding: 0 20px; }
+    .toc { display: none; }
+    .toc.open { display: block; background: var(--white); padding: 16px; border-radius: var(--radius); border: 1px solid var(--gray-200); margin-bottom: 32px; }
+  }
+  @media (max-width: 640px) {
+    .footer-inner { grid-template-columns: 1fr; gap: 32px; }
+    h1 { font-size: 36px; }
+    .section-num { width: 36px; height: 36px; font-size: 15px; }
+    h2 { font-size: 26px; }
+    .card { padding: 20px; }
+    .status-card { padding: 24px; }
+    .hero { padding: 110px 16px 50px; }
+    .container { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- ==================== NAV ==================== -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="#top" class="logo">
+      <div class="logo-icon"><span>M</span></div>
+      <span>magen</span>
+      <small>onion setup</small>
+    </a>
+    <div class="nav-menu">
+      <a href="#jira">Jira</a>
+      <a href="#onion-arch">Arquitetura</a>
+      <a href="#proximos-passos">Ciclos</a>
+      <a href="#skill-onion">Skill Onion</a>
+    </div>
+    <a href="#proximos-passos" class="nav-cta">Começar →</a>
+    <button class="mobile-toggle" id="mobileToggle" aria-label="menu">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ==================== HERO ==================== -->
+<header class="hero" id="top">
+  <div class="hero-grid">
+    <div class="reveal">
+      <div class="hero-tag">
+        <span class="hero-tag-dot"></span>
+        Ambiente operacional · 2026-05-15
+      </div>
+      <h1>Configuração do Ambiente <span class="accent">Onion — Magen IP</span></h1>
+      <p class="hero-desc">
+        Documento operacional consolidando o setup do ambiente de desenvolvimento da Magen IP sobre o Sistema Onion: configuração do Jira, fundamentos arquiteturais, ciclos de trabalho e uso da skill <code style="font-family: var(--font-mono); background: var(--gray-100); padding: 2px 8px; border-radius: 6px; color: var(--magen-yellow-dark);">onion</code> para orientação contínua.
+      </p>
+      <div class="hero-actions">
+        <a href="#proximos-passos" class="btn-primary">
+          Ver próximos passos
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#skill-onion" class="btn-secondary">Como usar a Skill Onion</a>
+      </div>
+      <div class="hero-meta">
+        <div class="hero-meta-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Jira Cloud v3 + ADF
+        </div>
+        <div class="hero-meta-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Branch: main
+        </div>
+        <div class="hero-meta-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg>
+          2 repos GitHub
+        </div>
+      </div>
+    </div>
+    <div class="status-card reveal">
+      <div class="status-header">
+        <span class="status-dot"></span>
+        Provider Online — Jira
+      </div>
+      <div class="code-block">
+        <span class="code-method">POST</span> <span class="code-path">/rest/api/3/search/jql</span>
+        <span class="code-success">✓ 200 OK — magen.atlassian.net</span>
+      </div>
+      <div class="status-stats">
+        <div class="stat">
+          <div class="stat-value">MAGEN</div>
+          <div class="stat-label">Project Key</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">ADF v3</div>
+          <div class="stat-label">Formato</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">94</div>
+          <div class="stat-label">Comandos</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">49</div>
+          <div class="stat-label">Agentes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ==================== CONTAINER ==================== -->
+<div class="container">
+
+  <!-- TOC -->
+  <aside class="toc" id="toc">
+    <div class="toc-title">Navegação</div>
+    <ul class="toc-list">
+      <li><a href="#jira" class="active">1. Configuração do Jira</a></li>
+      <li><a href="#onion-arch">2. Sistema Onion</a></li>
+      <li><a href="#hoje">3. O que foi feito hoje</a></li>
+      <li><a href="#knowledge-base">4. Knowledge Base & Contexts</a></li>
+      <li><a href="#reverse-engineering">5. Engenharia Reversa</a></li>
+      <li><a href="#proximos-passos">6. Próximos Passos — Ciclos</a></li>
+      <li><a href="#skill-onion">7. Skill Onion — Guia</a></li>
+      <li><a href="#status">✓ Status Final</a></li>
+    </ul>
+  </aside>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <!-- ===== SECTION 1: JIRA ===== -->
+    <section class="section" id="jira">
+      <div class="section-header reveal">
+        <div class="section-num">1</div>
+        <h2>Configuração do Jira</h2>
+      </div>
+      <p class="reveal"><strong>Provider ativo:</strong> <code>TASK_MANAGER_PROVIDER=jira</code></p>
+
+      <div class="card reveal">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Variável</th><th>Valor</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>JIRA_HOST</code></td><td><code>magen.atlassian.net</code> (Cloud — REST v3 + ADF)</td></tr>
+              <tr><td><code>JIRA_EMAIL</code></td><td><code>magen@gmail.com</code></td></tr>
+              <tr><td><code>JIRA_API_TOKEN</code></td><td>configurado ✓ · <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank" rel="noopener" style="color: var(--magen-yellow-dark); font-weight: 600;">gerar/gerenciar token ↗</a></td></tr>
+              <tr><td><code>JIRA_PROJECT_KEY</code></td><td><code>MAGEN</code></td></tr>
+              <tr><td><code>JIRA_AUTH_TYPE</code></td><td><code>basic</code> (default)</td></tr>
+              <tr><td><code>JIRA_API_VERSION</code></td><td><code>3</code> (default)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="reveal"><strong>Roteamento ativo:</strong> qualquer comando que toca tasks delega para <code>@jira-specialist</code>.</p>
+
+      <h3 class="reveal">Particularidades do Jira Cloud v3 que o Onion respeita automaticamente</h3>
+      <div class="card reveal">
+        <ul>
+          <li>Descriptions e comments em <strong>ADF</strong> (Atlassian Document Format — JSON estruturado), nunca Markdown puro</li>
+          <li><strong>Workflow-aware:</strong> nunca seta <code>status</code> direto — sempre <code>POST /issue/{key}/transitions</code></li>
+          <li><strong>Search:</strong> <code>POST /rest/api/3/search/jql</code> com <code>nextPageToken</code> (o antigo <code>GET /search</code> foi removido em maio/2025)</li>
+          <li><strong>Bulk operations</strong> via <code>POST /rest/api/3/issue/bulk</code> (até 50/req)</li>
+        </ul>
+      </div>
+
+      <div class="callout reveal">
+        <div class="callout-icon">!</div>
+        <div class="callout-content">
+          <strong>Issue de referência ativa:</strong> <code>MAGEN-17</code> (revisão estrutural <code>.claude/</code>).
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 2: ONION ARCH ===== -->
+    <section class="section" id="onion-arch">
+      <div class="section-header reveal">
+        <div class="section-num">2</div>
+        <h2>Sistema Onion — Apresentação e Arquitetura</h2>
+      </div>
+
+      <h3 class="reveal">O que é</h3>
+      <p class="reveal">Framework de comandos <code>.claude/</code> para uso interno (não-pacote, não-CLI npm). Multi-Context Development Orchestrator que mescla:</p>
+
+      <div class="stats-row reveal">
+        <div class="stat-card">
+          <div class="stat-card-value">94</div>
+          <div class="stat-card-label">Comandos · 11 categorias</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-value">49</div>
+          <div class="stat-card-label">Agentes · 9 categorias</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-value">4</div>
+          <div class="stat-card-label">Skills core</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-value">4+</div>
+          <div class="stat-card-label">Task Managers</div>
+        </div>
+      </div>
+
+      <ul class="reveal">
+        <li><strong>94 comandos</strong> em 11 categorias (<code>engineer</code>, <code>product</code>, <code>git</code>, <code>docs</code>, <code>meta</code>, <code>validate</code>, <code>test</code>, <code>common</code>, <code>development</code>, <code>quick</code>, <code>global</code>)</li>
+        <li><strong>49 agentes especializados</strong> em 9 categorias (<code>development</code>, <code>product</code>, <code>meta</code>, <code>compliance</code>, <code>git</code>, <code>testing</code>, <code>review</code>, <code>research</code>, <code>deployment</code>)</li>
+        <li><strong>Skills</strong> com ativação semântica (padrão novo, equivalente a custom commands mas com ativação por contexto)</li>
+        <li><strong>Task Manager Abstraction</strong> plugável (Jira/ClickUp/Asana/Linear/none)</li>
+      </ul>
+
+      <h3 class="reveal">Estrutura de Diretórios</h3>
+      <div class="reveal">
+        <pre class="tree"><span class="folder">onion-claude/</span>
+├── <span class="folder">.claude/</span>
+│   ├── <span class="folder">commands/</span>          <span class="comment"># 94 comandos (workflows)</span>
+│   ├── <span class="folder">agents/</span>            <span class="comment"># 49 agentes (subagents especializados)</span>
+│   ├── <span class="folder">skills/</span>            <span class="comment"># Skills (padrão novo, ativação semântica)</span>
+│   │   ├── <span class="folder">onion/</span>         <span class="comment"># Cérebro: routing + dynamic injection</span>
+│   │   ├── <span class="folder">onion-patterns/</span>    <span class="comment"># Padrões estruturais</span>
+│   │   ├── <span class="folder">onion-validation/</span>  <span class="comment"># Regras de validação</span>
+│   │   └── <span class="folder">language-standards/</span> <span class="comment"># Idioma EN/PT-BR</span>
+│   ├── <span class="folder">sessions/</span>          <span class="comment"># Contexto persistente por feature</span>
+│   └── <span class="folder">utils/task-manager/</span> <span class="comment"># Adapters Jira/ClickUp/Asana/Linear</span>
+├── <span class="folder">docs/</span>
+│   ├── <span class="folder">meta-specs/</span>        <span class="comment"># L0 — constituição</span>
+│   ├── <span class="folder">business-context/</span>  <span class="comment"># Especificação de negócio</span>
+│   ├── <span class="folder">technical-context/</span> <span class="comment"># Especificação técnica</span>
+│   ├── <span class="folder">knowledge-base/</span>    <span class="comment"># KBs estruturadas para IA</span>
+│   └── <span class="folder">onion/</span>             <span class="comment"># Docs operacionais do framework</span>
+└── CLAUDE.md              <span class="comment"># Instruções globais (provider-aware)</span></pre>
+      </div>
+
+      <h3 class="reveal">Fundamentos do Onion</h3>
+      <div class="card reveal">
+        <ol>
+          <li><strong>Spec as Code Multi-Context</strong> — Meta Specs (L0) → Business/Technical Context (L1) → Feature Specs (L2) → Task Specs (L3). Toda decisão arquitetural rastreável.</li>
+          <li><strong>Provider-Aware Routing</strong> — comandos não conhecem o provider; lêem <code>TASK_MANAGER_PROVIDER</code> e delegam.</li>
+          <li><strong>Progressive Disclosure</strong> — skills carregam só <code>description</code> no startup; conteúdo completo só quando relevante.</li>
+          <li><strong>Sessões de contexto</strong> — <code>.claude/sessions/&lt;feature-slug&gt;/</code> mantém <code>context.md</code>, <code>plan.md</code>, <code>architecture.md</code> entre invocações.</li>
+          <li><strong>Idioma duplo</strong> — código/commits/branches em EN; comments/docs/respostas em PT-BR.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 3: HOJE ===== -->
+    <section class="section" id="hoje">
+      <div class="section-header reveal">
+        <div class="section-num">3</div>
+        <h2>O que foi feito hoje</h2>
+      </div>
+      <p class="reveal"><strong>Push para GitHub:</strong></p>
+      <div class="status-list reveal">
+        <div class="status-item">
+          <div class="status-icon">✓</div>
+          <div class="status-item-content">
+            <div class="status-item-title">origin → onion-claude</div>
+            <div class="status-item-desc">https://github.com/marciocar/onion-claude</div>
+          </div>
+        </div>
+        <div class="status-item">
+          <div class="status-icon">✓</div>
+          <div class="status-item-content">
+            <div class="status-item-title">magen → onion-claude-magen (privado)</div>
+            <div class="status-item-desc">https://github.com/marciocar/onion-claude-magen</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 4: KB ===== -->
+    <section class="section" id="knowledge-base">
+      <div class="section-header reveal">
+        <div class="section-num">4</div>
+        <h2>Knowledge Base, Business e Technical Context para Magen IP</h2>
+      </div>
+      <p class="reveal">A <strong>estrutura está pronta</strong>, mas <code>business-context/</code> e <code>technical-context/</code> ainda só têm <code>README.md</code> placeholder. Para popular com o conhecimento da Magen IP:</p>
+
+      <h3 class="reveal">Comandos de geração de docs</h3>
+      <div class="card reveal">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Intenção</th><th>Comando</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Gerar docs de negócio (mission, vision, ICP, market)</td><td><code>/docs:build-business-docs</code></td></tr>
+              <tr><td>Gerar docs técnica (stack, arquitetura, integrações)</td><td><code>/docs:build-tech-docs</code></td></tr>
+              <tr><td>Criar nova knowledge base específica</td><td><code>/meta:create-knowledge-base</code></td></tr>
+              <tr><td>Atualizar índices após popular</td><td><code>/docs:build-index</code></td></tr>
+              <tr><td>Engenharia reversa de projeto existente</td><td><code>/docs:reverse-consolidate</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h3 class="reveal">Sequência recomendada para Magen IP</h3>
+      <div class="reveal">
+        <pre><button class="copy-btn" data-copy="seq-kb">📋 Copiar</button><code id="seq-kb">1. /product:collect            # Coletar inputs sobre a Magen IP
+2. /product:refine             # Refinar e estruturar
+3. /docs:build-business-docs   # Gera docs/business-context/
+4. /docs:build-tech-docs       # Gera docs/technical-context/
+5. /meta:create-knowledge-base # KBs específicas (domínio IP)
+6. /docs:build-index           # Atualizar índices</code></pre>
+      </div>
+
+      <h3 class="reveal">Boas práticas</h3>
+      <div class="card reveal">
+        <ul>
+          <li><strong>Cada arquivo em <code>business-context/</code></strong> = uma decisão de negócio rastreável (ICP, value prop, pricing, GTM)</li>
+          <li><strong>Cada arquivo em <code>technical-context/</code></strong> = uma decisão técnica (ADR, integrations, infra, security model)</li>
+          <li><strong>Knowledge bases</strong> ficam em <code>docs/knowledge-base/&lt;categoria&gt;/&lt;topico&gt;.md</code> — categorias: <code>concepts</code>, <code>frameworks</code>, <code>platforms</code>, <code>tools</code></li>
+          <li>Tudo conectado às <strong>meta-specs</strong> (<code>docs/meta-specs/</code>) — a constituição valida conformidade via <code>@metaspec-gate-keeper</code></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 5: REVERSE ENGINEERING ===== -->
+    <section class="section" id="reverse-engineering">
+      <div class="section-header reveal">
+        <div class="section-num">5</div>
+        <h2>Engenharia Reversa — Aplicar o Onion em Projetos Existentes</h2>
+      </div>
+
+      <div class="callout reveal" style="background: linear-gradient(135deg, rgba(255, 184, 0, 0.10), rgba(255, 184, 0, 0.04)); border-width: 2px;">
+        <div class="callout-icon" style="background: linear-gradient(135deg, var(--magen-yellow), var(--magen-yellow-dark));">⚡</div>
+        <div class="callout-content">
+          <strong>Uma das capacidades mais poderosas do Sistema Onion:</strong> documentar projetos legados em <strong>minutos</strong>, usando a IA para fazer 80-90% do trabalho pesado de leitura, mapeamento e descrição — restando ao profissional apenas refinar os 10-20% finais.
+        </div>
+      </div>
+
+      <h3 class="reveal">Por que isso é espetacular</h3>
+      <div class="stats-row reveal">
+        <div class="stat-card">
+          <div class="stat-card-value">📚</div>
+          <div class="stat-card-label">Documentar sistemas legados sem docs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-value">💸</div>
+          <div class="stat-card-label">Recuperar débitos técnicos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-value">🧠</div>
+          <div class="stat-card-label">Onboarding acelerado em dias</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-value">🏗️</div>
+          <div class="stat-card-label">Spec as Code retroativo</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-value">🎯</div>
+          <div class="stat-card-label">Auditoria arquitetural</div>
+        </div>
+      </div>
+
+      <h3 class="reveal">🚀 Procedimento Completo</h3>
+
+      <div class="use-case reveal">
+        <div class="use-case-title"><span class="use-case-number">0</span> Preparar o terreno — clone &amp; copy</div>
+        <p style="margin: 12px 0 14px;">Clone o Sistema Onion e copie <code>.claude/</code> + <code>docs/</code> para o projeto-alvo:</p>
+        <pre><button class="copy-btn" data-copy="rev-step0">📋 Copiar</button><code id="rev-step0"># Clonar o Sistema Onion
+git clone https://github.com/marciocar/onion-claude.git
+
+# Copiar a estrutura Onion para o seu projeto legado
+cp -r onion-claude/.claude /caminho/do/projeto-legado/
+cp -r onion-claude/docs    /caminho/do/projeto-legado/
+
+# Entrar no projeto e configurar
+cd /caminho/do/projeto-legado/
+# (configure .env com o task manager se for usar)</code></pre>
+        <div class="callout" style="margin-top: 12px; margin-bottom: 0;">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong>Resultado:</strong> o projeto-alvo agora tem acesso aos <strong>94 comandos</strong>, <strong>49 agentes</strong> e <strong>4 skills</strong> do Onion — incluindo toda a inteligência de engenharia reversa.
+          </div>
+        </div>
+      </div>
+
+      <div class="use-case reveal">
+        <div class="use-case-title"><span class="use-case-number">1</span> Engenharia reversa do projeto</div>
+        <pre><code>/docs:reverse-consolidate</code></pre>
+        <p style="margin: 10px 0 0; color: var(--gray-600); font-size: 14px;">Cria documentação base em <code>docs/reverse/*</code> — mapeia stack, estrutura, dependências, fluxos principais.</p>
+      </div>
+
+      <div class="use-case reveal">
+        <div class="use-case-title"><span class="use-case-number">2</span> Gerar Business Context</div>
+        <pre><code>/docs:build-business-docs docs/reverse</code></pre>
+        <p style="margin: 10px 0 0; color: var(--gray-600); font-size: 14px;">A IA fará perguntas estratégicas (modelo de negócio, ICP, value prop). <strong>Responda com sinceridade</strong> — quanto melhor o input, melhor o output. <br><strong>Resultado:</strong> <code>docs/business-context/</code> populado com decisões de negócio rastreáveis.</p>
+      </div>
+
+      <div class="use-case reveal">
+        <div class="use-case-title"><span class="use-case-number">3</span> Gerar Technical Context</div>
+        <pre><code>/docs:build-tech-docs docs/reverse</code></pre>
+        <p style="margin: 10px 0 0; color: var(--gray-600); font-size: 14px;">A IA fará perguntas técnicas (arquitetura, integrações, dívidas, riscos). <strong>Responda as perguntas</strong> — esse é o momento de transferir conhecimento tácito para documentação. <br><strong>Resultado:</strong> <code>docs/technical-context/</code> com ADRs, decisões técnicas e mapas de integração.</p>
+      </div>
+
+      <div class="use-case reveal">
+        <div class="use-case-title"><span class="use-case-number">4</span> Indexar a documentação completa</div>
+        <pre><code>/docs:build-index</code></pre>
+        <p style="margin: 10px 0 0; color: var(--gray-600); font-size: 14px;">Atualiza <code>docs/INDEX.md</code> e índices de seção, conectando tudo num hub navegável.</p>
+      </div>
+
+      <div class="use-case reveal" style="border-color: var(--magen-yellow); background: linear-gradient(135deg, rgba(255, 184, 0, 0.04), transparent);">
+        <div class="use-case-title"><span class="use-case-number">5</span> Começar a trabalhar</div>
+        <pre><code>/warm-up</code></pre>
+        <p style="margin: 10px 0 0; color: var(--gray-700); font-size: 14px;">Carrega todo o contexto recém-criado e a inteligência do Onion. <strong>Pronto para a batalha.</strong></p>
+      </div>
+
+      <h3 class="reveal">🧠 O Mantra do Spec as Code com IA</h3>
+      <div class="card card-highlight reveal" style="text-align: center; padding: 40px 28px;">
+        <div style="font-size: 22px; font-weight: 700; color: var(--black); line-height: 1.4; letter-spacing: -0.02em;">
+          "A IA faz <span style="color: var(--magen-yellow-dark);">80% a 90%</span> — depois o profissional revisa e completa os <span style="color: var(--magen-yellow-dark);">10% a 20%</span> que faltam."
+        </div>
+        <p style="margin: 20px 0 0; color: var(--gray-600); font-size: 15px;">
+          A IA traz velocidade absurda na leitura, classificação e descrição inicial. O profissional traz <strong>contexto histórico</strong>, <strong>decisões não escritas</strong> e <strong>intuição arquitetural</strong> que só anos de projeto entregam. Essa combinação transforma sistemas legados opacos em <strong>Spec as Code vivo</strong> em horas — não semanas.
+        </p>
+      </div>
+
+      <h3 class="reveal">🎯 Comparativo: com e sem Onion</h3>
+      <div class="card reveal">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th style="color: var(--red);">Sem Onion ❌</th><th style="color: var(--green);">Com Onion ✓</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Semanas lendo código sem rumo</td><td>Horas com mapa estruturado completo</td></tr>
+              <tr><td>Documentação fica desatualizada</td><td>Specs versionadas em Git ao lado do código</td></tr>
+              <tr><td>Conhecimento concentrado em poucas pessoas</td><td>Spec navegável por qualquer dev ou IA</td></tr>
+              <tr><td>Refatorar é arriscado (não sabe o que quebra)</td><td>Refatorar com clareza do impacto</td></tr>
+              <tr><td>Onboarding leva meses</td><td>Onboarding em dias com <code>/warm-up</code></td></tr>
+              <tr><td>Débito técnico invisível</td><td>Débito técnico catalogado e priorizado</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h3 class="reveal">⚠️ Cuidados importantes</h3>
+      <div class="card reveal">
+        <ol>
+          <li><strong>Revise o output da IA</strong> — ela infere muito do código, mas pode errar nuances de negócio.</li>
+          <li><strong>Responda as perguntas com tempo</strong> — perguntas mal respondidas geram docs medíocres.</li>
+          <li><strong>Trate como rascunho navegável</strong> — refine iterativamente conforme aprende mais do sistema.</li>
+          <li><strong>Versione tudo no Git</strong> — commits dos <code>docs/</code> capturam evolução do entendimento.</li>
+          <li>Use <code>@metaspec-gate-keeper</code> para validar conformidade das specs geradas com a constituição do projeto.</li>
+        </ol>
+      </div>
+
+      <h3 class="reveal">📋 Visual rápido do fluxo</h3>
+      <div class="flow-diagram reveal">
+        <div class="flow-section">
+          <div style="text-align: center;">
+            <div class="flow-title">Engenharia Reversa com Onion</div>
+          </div>
+          <div class="flow-step">git clone onion-claude</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">copy .claude/ + docs/ → projeto-legado/</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">/docs:reverse-consolidate → docs/reverse/*</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">/docs:build-business-docs docs/reverse → docs/business-context/</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">/docs:build-tech-docs docs/reverse → docs/technical-context/</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">/docs:build-index → docs/INDEX.md atualizado</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step highlight">/warm-up → pronto para a batalha 🔥</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 6: PROXIMOS PASSOS ===== -->
+    <section class="section" id="proximos-passos">
+      <div class="section-header reveal">
+        <div class="section-num">6</div>
+        <h2>Próximos Passos — Ciclos de Produto e Engenharia</h2>
+      </div>
+      <p class="reveal">O Onion separa <strong>ciclo de produto</strong> (descoberta + planejamento) do <strong>ciclo de engenharia</strong> (implementação + entrega). Ambos integram com Jira automaticamente.</p>
+
+      <h3 class="reveal">🎯 Ciclo de Produto (descoberta → task)</h3>
+      <p class="reveal">Fluxo: <strong>coletar → refinar → especificar → estimar → criar task no Jira</strong></p>
+      <div class="card card-highlight reveal">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Comando</th><th>O que faz</th><th>Saída no Jira</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td><code>/product:collect</code></td><td>Coleta requisitos brutos</td><td>—</td></tr>
+              <tr><td>2</td><td><code>/product:refine</code></td><td>Estrutura inputs em hipóteses</td><td>—</td></tr>
+              <tr><td>3</td><td><code>/product:spec</code></td><td>Especificação completa</td><td>—</td></tr>
+              <tr><td>4</td><td><code>/product:estimate</code></td><td>Story points via <code>@story-points-framework-specialist</code></td><td>—</td></tr>
+              <tr><td>5</td><td><code>/product/task</code></td><td>Cria task hierárquica via <code>@jira-specialist</code></td><td>Issue em <code>MAGEN</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h4 class="reveal">Comandos auxiliares de produto</h4>
+      <div class="card reveal">
+        <ul>
+          <li><code>/product:whisper</code> — transcrever áudios de reuniões</li>
+          <li><code>/product:extract-meeting</code> — extrair ata estruturada (framework EXTRACT)</li>
+          <li><code>/product:consolidate-meetings</code> — sintetizar várias reuniões em insights</li>
+          <li><code>/product:convert-to-tasks</code> — converter qualquer documento em tasks Jira</li>
+          <li><code>/product:analyze-pain-price</code> — analisar dor do cliente e value-pricing</li>
+          <li><code>/product:branding</code> — branding e posicionamento</li>
+        </ul>
+      </div>
+
+      <div class="callout reveal">
+        <div class="callout-icon">▶</div>
+        <div class="callout-content">
+          <strong>Warm-up de produto:</strong> <code>/product/warm-up</code> (carrega contexto Magen IP no início da sessão).
+        </div>
+      </div>
+
+      <h3 class="reveal">🛠️ Ciclo de Engenharia (task → código → PR)</h3>
+      <p class="reveal">Fluxo: <strong>iniciar → trabalhar → preparar PR → criar PR → sincronizar</strong></p>
+      <div class="card card-highlight reveal">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Comando</th><th>O que faz</th><th>Efeito no Jira</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td><code>/engineer/start &lt;MAGEN-XX&gt;</code></td><td>Valida story points, cria branch + sessão</td><td>Transition "In Progress" + comment ADF</td></tr>
+              <tr><td>2</td><td><code>/engineer/work</code></td><td>Loop iterativo de desenvolvimento</td><td>Sync de progresso (comments)</td></tr>
+              <tr><td>3</td><td><code>/engineer/plan</code></td><td>Planejamento detalhado (subtasks)</td><td>Cria subtasks se necessário</td></tr>
+              <tr><td>4</td><td><code>/engineer/pre-pr</code></td><td>Lint, testes, code review preventivo</td><td>Comment de readiness</td></tr>
+              <tr><td>5</td><td><code>/engineer/pr</code></td><td>Cria Pull Request com template</td><td>Comment com URL do PR</td></tr>
+              <tr><td>6</td><td><code>/engineer/pr-update</code></td><td>Atualiza PR existente após revisão</td><td>—</td></tr>
+              <tr><td>7</td><td><code>/git:sync</code></td><td>Sincroniza branch após merge</td><td>Transition "Done"</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h4 class="reveal">Fluxos paralelos</h4>
+      <div class="card reveal">
+        <ul>
+          <li><strong>Hotfix:</strong> <code>/engineer/hotfix</code> → <code>/engineer/work</code> → <code>/engineer/pr</code> → <code>/git:hotfix:finish</code></li>
+          <li><strong>Bump de versão:</strong> <code>/engineer/bump</code> (semver automático)</li>
+        </ul>
+      </div>
+
+      <div class="callout reveal">
+        <div class="callout-icon">▶</div>
+        <div class="callout-content">
+          <strong>Warm-up de engenharia:</strong> <code>/engineer/warm-up</code> (carrega contexto técnico antes de codar).
+        </div>
+      </div>
+
+      <h3 class="reveal">🧪 Qualidade e Validação (transversal)</h3>
+      <div class="card reveal">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Quando</th><th>Comando</th></tr></thead>
+            <tbody>
+              <tr><td>Antes de PR</td><td><code>/test:unit</code> + <code>/test:integration</code></td></tr>
+              <tr><td>Antes de release</td><td><code>/test:e2e</code></td></tr>
+              <tr><td>Review de branch completa</td><td><code>@branch-code-reviewer</code></td></tr>
+              <tr><td>Validar conformidade arquitetural</td><td><code>@metaspec-gate-keeper</code></td></tr>
+              <tr><td>Validar workflow do Onion</td><td><code>/validate:workflow</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h3 class="reveal">📋 Visão consolidada do ciclo completo (Magen IP no Jira)</h3>
+      <div class="flow-diagram reveal">
+        <div class="flow-section">
+          <div style="text-align: center;">
+            <div class="flow-title">Ciclo de Produto</div>
+          </div>
+          <div class="flow-step">/product:collect</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">/product:refine</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">/product:spec</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">/product:estimate</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step highlight">/product/task → Jira MAGEN-XX</div>
+        </div>
+        <div class="flow-arrow" style="font-size: 28px; margin: 16px 0;">↓</div>
+        <div class="flow-section">
+          <div style="text-align: center;">
+            <div class="flow-title">Ciclo de Engenharia</div>
+          </div>
+          <div class="flow-step">/engineer/start MAGEN-XX</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">/engineer/work (loop)</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">/engineer/pre-pr</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">/engineer/pr → PR GitHub + Jira</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step highlight">/git:sync → Done no Jira ✓</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 6: SKILL ONION ===== -->
+    <section class="section" id="skill-onion">
+      <div class="section-header reveal">
+        <div class="section-num">7</div>
+        <h2>Skill <code style="font-family: var(--font-mono); font-size: 0.85em; background: var(--gray-100); padding: 4px 12px; border-radius: 8px; color: var(--magen-yellow-dark);">onion</code> — O guia anti-perdido</h2>
+      </div>
+      <p class="reveal">A skill <code>onion</code> é o <strong>cérebro do sistema</strong>: orquestrador master que se ativa automaticamente quando você precisa de orientação. Use-a sempre que estiver em dúvida — ela responde com <strong>estado atual do projeto + roteamento exato</strong>.</p>
+
+      <h3 class="reveal">🎯 Quando a skill <code>onion</code> é ativada</h3>
+      <p class="reveal">A skill ativa automaticamente (sem você precisar digitar nada) quando você:</p>
+      <div class="card reveal">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Situação</th><th>Frase típica</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Está perdido</td><td>"o que faço agora?", "por onde começo?"</td></tr>
+              <tr><td>Precisa de próximos passos</td><td>"próximos passos", "qual o próximo comando?"</td></tr>
+              <tr><td>Quer entender o sistema</td><td>"como funciona?", "o que tem aqui?"</td></tr>
+              <tr><td>Procura um agente/comando</td><td>"qual agente para X?", "tem comando pra Y?"</td></tr>
+              <tr><td>Vai configurar integração</td><td>"como configuro o Jira?", "como troco de provider?"</td></tr>
+              <tr><td>Vai criar algo</td><td>"como crio um agente/skill/comando?"</td></tr>
+              <tr><td>Mudou de contexto</td><td>retornou após pausa, abriu janela nova</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="reveal">Você também pode <strong>invocar explicitamente</strong> com <code>/onion</code> ou <code>/onion &lt;pergunta livre&gt;</code>.</p>
+
+      <h3 class="reveal">🔍 O que a skill <code>onion</code> te entrega</h3>
+      <p class="reveal">Quando ativada, ela injeta dinamicamente:</p>
+      <div class="card reveal">
+        <ol>
+          <li><strong>Estado atual do projeto</strong>
+            <ul>
+              <li>Provider ativo (lendo <code>.env</code>): no nosso caso, <code>jira</code></li>
+              <li>Sessões abertas: quais features estão em andamento em <code>.claude/sessions/</code></li>
+              <li>Branch atual (Git)</li>
+            </ul>
+          </li>
+          <li><strong>Tabelas de routing por intenção</strong> — 7 domínios completos: Desenvolvimento, Produto, Documentação, Componentes, Qualidade, Git, Task Managers</li>
+          <li><strong>Lista completa de agentes</strong> por categoria (49 agentes em 9 categorias)</li>
+          <li><strong>Gotchas críticos</strong> — armadilhas comuns: provider, slug, sessões, formatação ADF, commands vs skills, search Jira 2025</li>
+        </ol>
+      </div>
+
+      <h3 class="reveal">💡 Casos de uso típicos</h3>
+
+      <div class="use-case reveal">
+        <div class="use-case-title"><span class="use-case-number">1</span> "Comecei a sessão e não sei o que fazer"</div>
+        <pre><code>você → /onion
+
+onion → mostra:
+  - Provider ativo: jira
+  - Sessões abertas: (nenhuma)
+  - Branch: main
+  - Tabela completa de comandos
+  - Recomendação: /product:collect ou /engineer/start &lt;issue&gt;</code></pre>
+      </div>
+
+      <div class="use-case reveal">
+        <div class="use-case-title"><span class="use-case-number">2</span> "Tenho uma reunião gravada e quero virar tasks"</div>
+        <pre><code>você → /onion como transformo reunião em tasks?
+
+onion → roteia para:
+  1. /product:whisper        (se for áudio)
+  2. /product:extract-meeting (estruturar ata)
+  3. /product:convert-to-tasks (gerar issues no Jira)</code></pre>
+      </div>
+
+      <div class="use-case reveal">
+        <div class="use-case-title"><span class="use-case-number">3</span> "Vou começar a desenvolver MAGEN-23"</div>
+        <pre><code>você → /onion vou começar MAGEN-23
+
+onion → checa sessões abertas + sugere:
+  1. /engineer/start MAGEN-23  (cria branch + sessão)
+  2. /engineer/work             (loop de dev)
+  3. /engineer/pre-pr           (antes do PR)
+  4. /engineer/pr               (criar PR)</code></pre>
+      </div>
+
+      <div class="use-case reveal">
+        <div class="use-case-title"><span class="use-case-number">4</span> "Esqueci qual agente usa pra documentação"</div>
+        <pre><code>você → /onion qual agente para diagramas?
+
+onion → tabela de routing mostra:
+  - @c4-architecture-specialist  (C4 Model + Mermaid)
+  - @mermaid-specialist           (Mermaid puro)
+  - @c4-documentation-specialist  (textual C4)</code></pre>
+      </div>
+
+      <div class="use-case reveal">
+        <div class="use-case-title"><span class="use-case-number">5</span> "Quero criar um agente novo pra um domínio específico"</div>
+        <pre><code>você → /onion como crio um agente?
+
+onion → roteia para:
+  /meta:create-agent
+
+  Agentes que validam o resultado:
+  - @agent-creator-specialist
+  - @metaspec-gate-keeper</code></pre>
+      </div>
+
+      <h3 class="reveal">🚀 Comandos relacionados de navegação</h3>
+      <div class="card reveal">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Comando</th><th>Quando usar</th></tr></thead>
+            <tbody>
+              <tr><td><code>/onion</code></td><td>Visão geral + routing (qualquer dúvida)</td></tr>
+              <tr><td><code>/warm-up</code></td><td>Warm-up geral do projeto (início de dia)</td></tr>
+              <tr><td><code>/product/warm-up</code></td><td>Foco em produto (descoberta, ICP, requisitos)</td></tr>
+              <tr><td><code>/engineer/warm-up</code></td><td>Foco em engenharia (código, arquitetura, testes)</td></tr>
+              <tr><td><code>/meta:all-tools</code></td><td>Lista exaustiva de todas as ferramentas</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h3 class="reveal">⚠️ Dicas para maximizar a skill</h3>
+      <div class="card reveal">
+        <ol>
+          <li><strong>Ative cedo na sessão</strong> — invoque <code>/onion</code> no início para popular o contexto com estado atual.</li>
+          <li><strong>Use linguagem natural</strong> — não precisa decorar comandos. <code>/onion preciso atualizar um PR que abri ontem</code> funciona.</li>
+          <li><strong>Confie no routing</strong> — se a tabela diz <code>@jira-specialist</code>, é onde a expertise está. Não tente reinventar.</li>
+          <li><strong>Leia os gotchas</strong> — eles refletem erros reais já cometidos no projeto.</li>
+          <li><strong>Verifique o provider</strong> — sempre que mudar de máquina ou clonar o repo, confirme que <code>.env</code> está com <code>TASK_MANAGER_PROVIDER=jira</code>.</li>
+        </ol>
+      </div>
+
+      <h3 class="reveal">🔗 Skills complementares</h3>
+      <p class="reveal">A skill <code>onion</code> trabalha junto com:</p>
+      <div class="status-list reveal">
+        <div class="status-item">
+          <div class="status-icon warn">⚙</div>
+          <div class="status-item-content">
+            <div class="status-item-title"><code>onion-patterns</code></div>
+            <div class="status-item-desc">ativa ao editar <code>.claude/**</code> (padrões estruturais)</div>
+          </div>
+        </div>
+        <div class="status-item">
+          <div class="status-icon warn">⚙</div>
+          <div class="status-item-content">
+            <div class="status-item-title"><code>onion-validation</code></div>
+            <div class="status-item-desc">ativa ao validar artefatos <code>.claude/**</code></div>
+          </div>
+        </div>
+        <div class="status-item">
+          <div class="status-icon warn">⚙</div>
+          <div class="status-item-content">
+            <div class="status-item-title"><code>language-standards</code></div>
+            <div class="status-item-desc">ativa ao escrever código/docs/commits</div>
+          </div>
+        </div>
+      </div>
+      <p class="reveal">Você não precisa invocá-las — elas ativam automaticamente pelo contexto.</p>
+    </section>
+
+    <!-- ===== STATUS ===== -->
+    <section class="section" id="status">
+      <div class="section-header reveal">
+        <div class="section-num">✓</div>
+        <h2>Status Final</h2>
+      </div>
+      <div class="status-list reveal">
+        <div class="status-item">
+          <div class="status-icon">✓</div>
+          <div class="status-item-content">
+            <div class="status-item-title">Ambiente Onion</div>
+            <div class="status-item-desc">operacional (skills + comandos + agentes alinhados)</div>
+          </div>
+        </div>
+        <div class="status-item">
+          <div class="status-icon">✓</div>
+          <div class="status-item-content">
+            <div class="status-item-title">Jira (Magen IP)</div>
+            <div class="status-item-desc">conectado (project <code>MAGEN</code>, Cloud v3 + ADF)</div>
+          </div>
+        </div>
+        <div class="status-item">
+          <div class="status-icon">✓</div>
+          <div class="status-item-content">
+            <div class="status-item-title">GitHub</div>
+            <div class="status-item-desc">2 repos sincronizados (<code>onion-claude</code> + <code>onion-claude-magen</code> privado)</div>
+          </div>
+        </div>
+        <div class="status-item">
+          <div class="status-icon warn">⏳</div>
+          <div class="status-item-content">
+            <div class="status-item-title">Conteúdo Magen IP nos contexts</div>
+            <div class="status-item-desc">estrutura pronta, <strong>conteúdo pendente</strong> (próxima sessão de discovery)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout reveal" style="margin-top: 32px;">
+        <div class="callout-icon">→</div>
+        <div class="callout-content">
+          <strong>Próximo comando sugerido:</strong>
+          <ul style="margin-top: 12px; margin-bottom: 0;">
+            <li>Se você tem inputs prontos da Magen IP → <code>/product:collect</code></li>
+            <li>Se você quer popular docs técnicas direto → <code>/docs:build-tech-docs</code></li>
+            <li>Se está sem direção → <code>/onion</code> (a skill te orienta)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ==================== FOOTER ==================== -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="#top" class="logo">
+        <div class="logo-icon"><span>M</span></div>
+        <span style="color: var(--white);">magen</span>
+        <small style="color: var(--gray-500);">onion setup</small>
+      </a>
+      <p>Documento operacional do Sistema Onion adaptado ao ambiente de desenvolvimento da Magen IP. Mantido em sincronia com <code style="background: rgba(255,255,255,0.05); color: var(--magen-yellow); padding: 2px 8px; border-radius: 6px;">docs/onion/</code>.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Documentação</h5>
+      <a href="../INDEX.md">Índice geral</a>
+      <a href="commands-guide.md">Guia de comandos</a>
+      <a href="agents-reference.md">Referência de agentes</a>
+      <a href="../knowledge-base/concepts/task-manager-abstraction.md">Task Manager Abstraction</a>
+    </div>
+    <div class="footer-col">
+      <h5>Repositórios</h5>
+      <a href="https://github.com/marciocar/onion-claude" target="_blank">onion-claude (público)</a>
+      <a href="https://github.com/marciocar/onion-claude-magen" target="_blank">onion-claude-magen (privado)</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    Sistema Onion · 2026-05-15 · Mantido com <span style="color: var(--magen-yellow);">●</span> pela equipe Magen IP
+  </div>
+</footer>
+
+<script>
+  // Progress bar
+  const progressBar = document.getElementById('progressBar');
+  window.addEventListener('scroll', () => {
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    progressBar.style.width = `${(winScroll / height) * 100}%`;
+  });
+
+  // TOC active link
+  const sections = document.querySelectorAll('.section');
+  const tocLinks = document.querySelectorAll('.toc-list a');
+
+  function updateActiveLink() {
+    let current = '';
+    sections.forEach(section => {
+      const top = section.offsetTop - 150;
+      if (window.scrollY >= top) current = section.id;
+    });
+    tocLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === `#${current}`) link.classList.add('active');
+    });
+  }
+  window.addEventListener('scroll', updateActiveLink);
+  updateActiveLink();
+
+  // Mobile menu
+  const mobileToggle = document.getElementById('mobileToggle');
+  const toc = document.getElementById('toc');
+  mobileToggle?.addEventListener('click', () => toc.classList.toggle('open'));
+  tocLinks.forEach(link => link.addEventListener('click', () => toc.classList.remove('open')));
+
+  // Copy buttons
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const targetId = btn.dataset.copy;
+      const text = document.getElementById(targetId).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = '✓ Copiado';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = '📋 Copiar';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    });
+  });
+
+  // Reveal on scroll — só esconde se IntersectionObserver existir.
+  // Failsafe: força visível após 2s se algo travar (webviews antigos, preview iOS).
+  const reveals = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    document.documentElement.classList.add('js-reveal');
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+    reveals.forEach(r => io.observe(r));
+    setTimeout(() => reveals.forEach(r => r.classList.add('visible')), 2000);
+  }
+</script>
+
+</body>
+</html>

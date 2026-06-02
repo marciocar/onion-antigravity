@@ -1,28 +1,31 @@
 # Onion
 
-**Um jeito de organizar produto e engenharia no mesmo ritmo: menos ruído, mais clareza e entregas previsíveis.**
+**Um jeito de organizar produto, engenharia e governança no mesmo ritmo: menos ruído, mais clareza e entregas previsíveis.**
 
 ---
 
 ## O que é
 
-O Onion é um sistema de trabalho que separa **decisão de negócio** e **execução técnica** em contextos distintos, conectados por fluxos e padrões repetíveis. Comandos, agentes especializados e documentação passam a conversar entre si em vez de competir por atenção no chat ou em arquivos soltos.
+O Onion é um **framework template em `.claude/`** que se instala em qualquer projeto — novo, legado ou regulado — para orquestrar o ciclo completo de desenvolvimento com Claude Code. Separa **decisão de negócio**, **execução técnica** e **governança/compliance** em contextos distintos, conectados por fluxos e padrões repetíveis. Comandos, agentes especializados e documentação passam a conversar entre si em vez de competir por atenção no chat ou em arquivos soltos.
+
+O Onion **não é produto npm**, **não é distribuído publicamente** e **não tem CLI standalone**. Plataforma única: Claude Code.
 
 ---
 
 ## Para quem é
 
-- Squads de **produto e engenharia** que precisam alinhar prioridade, implementação e qualidade.
-- Times que sentem **falta de contexto compartilhado** entre quem define o quê e quem entrega o como.
+- Squads de **produto, engenharia e compliance** que precisam alinhar prioridade, implementação, qualidade e conformidade.
+- Times que sentem **falta de contexto compartilhado** entre quem define o quê, quem entrega o como e quem responde por governança.
 - Organizações que querem **padrão sem burocracia** — menos improviso, mais previsibilidade.
+- Projetos **novos** (greenfield), **legados** (com engenharia reversa) e **regulados** (ISO 27001, ISO 22301, SOC2, PMBOK).
 
 ---
 
 ## O que muda no dia a dia
 
 - Menos retrabalho por decisões perdidas ou mal comunicadas.
-- **Contexto explícito** antes de cada ação: todo mundo sabe em qual “camada” está trabalhando.
-- **Padrões replicáveis** para especificar, desenvolver, validar e documentar.
+- **Contexto explícito** antes de cada ação: todo mundo sabe em qual dimensão está trabalhando (produto, engenharia ou compliance).
+- **Workflows faseados retomáveis** para especificar, desenvolver, validar e documentar — com sessões persistentes que permitem pausar e continuar.
 - Documentação e fluxo de trabalho **mais próximos do que o time realmente faz**.
 - Práticas de **configuração e segurança** integradas ao processo (credenciais fora do repositório, templates seguros).
 
@@ -30,8 +33,8 @@ O Onion é um sistema de trabalho que separa **decisão de negócio** e **execu�
 
 ## Como funciona em três passos
 
-1. **Definir a intenção** no contexto certo — negócio (o quê e por quê) ou técnico (como e com qual qualidade).
-2. **Executar com apoio** de comandos padronizados e agentes especializados, sem reinventar o processo a cada sprint.
+1. **Definir a intenção** no contexto certo — produto (descoberta e spec), engenharia (implementação e entrega) ou compliance (governança e conformidade).
+2. **Executar com apoio** de comandos padronizados e agentes especializados, em ciclos faseados retomáveis (`product/collect→feature` e `engineer/plan→pr-update`).
 3. **Validar e registrar** — qualidade, segurança e conhecimento ficam sincronizados para o próximo ciclo.
 
 ---

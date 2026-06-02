@@ -1,6 +1,14 @@
+---
+status: historical
+abandoned-on: 2026-05-18
+replaced-by: docs/plans/onion-saneamento-plan-2026-05.md
+---
+
 # 🧅 Onion v4 Migration Plan
 
-> **Status**: Proposta | **Data**: 2025-12-20 | **Categoria**: Plano de Migração
+> **AVISO**: Este plano foi formalmente abandonado em 2026-05-18. Propunha estrutura `.onion/`, CLI standalone e suporte multi-IDE — todos descartados. Mantido como registro histórico. Plano vigente: [Saneamento Onion 2026-05](onion-saneamento-plan-2026-05.md).
+
+> **Status**: Abandonado | **Data**: 2025-12-20 | **Categoria**: Plano de Migração
 
 ---
 

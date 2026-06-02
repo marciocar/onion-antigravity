@@ -1,4 +1,12 @@
+---
+status: historical
+replaced-by: docs/analysis/onion-review-2026-05.md
+abandoned-on: 2026-05-18
+---
+
 # Sistema Onion - Entendimento Completo do Ciclo de Desenvolvimento
+
+> **AVISO**: Este documento descreve visões estratégicas abandonadas em 2026-05-18 (`.onion/`, CLI standalone, multi-IDE, plano v4.0 FASES 5-9). Mantido como registro histórico do pensamento de 2025-12-20. Para o estado atual do Onion, consultar a [Revisão Analítica de Maio/2026](../../analysis/onion-review-2026-05.md).
 
 > **Versão**: 1.0.0 | **Última atualização**: 2025-12-20 | **Categoria**: Frameworks  
 > Reflexão completa sobre o Ciclo do Onion: KB → Agentes → Comandos → Regras → Gestão de Contexto

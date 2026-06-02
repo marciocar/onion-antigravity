@@ -1,6 +1,14 @@
+---
+status: historical
+abandoned-on: 2026-05-18
+replaced-by: docs/plans/onion-saneamento-plan-2026-05.md
+---
+
 # 🧅 ÉPICO: Migração Sistema Onion v3 → v4
 
-> **Status**: Em Progresso | **Criado**: 2025-12-20 | **ID**: ONION-V4-EPIC-001
+> **AVISO**: Este plano foi formalmente abandonado em 2026-05-18. As FASES 5-9 (CLI standalone, multi-IDE, aprendizado contínuo, Story Points como plugin, polimento GA) não serão executadas. Mantido como registro histórico. Plano vigente: [Saneamento Onion 2026-05](onion-saneamento-plan-2026-05.md).
+
+> **Status**: Abandonado | **Criado**: 2025-12-20 | **ID**: ONION-V4-EPIC-001
 
 ---
 

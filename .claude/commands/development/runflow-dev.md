@@ -1,3 +1,15 @@
+---
+name: runflow-dev
+description: |
+  Desenvolvimento Runflow — comando especializado para criar projetos, agentes, workflows, RAG e integrações com Runflow SDK.
+  Delega para o agente especialista @runflow-specialist.
+model: sonnet
+category: development
+tags: [runflow, sdk, workflows]
+version: "1.0.0"
+updated: "2026-05-18"
+---
+
 # Desenvolvimento Runflow
 
 Comando especializado para desenvolvimento completo com Runflow SDK usando o agente especialista `@runflow-specialist`. Facilita criação de projetos, agentes, workflows, RAG e integrações, sempre orientando próximos passos e fechamento de tarefas.
