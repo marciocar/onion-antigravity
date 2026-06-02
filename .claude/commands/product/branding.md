@@ -1,3 +1,18 @@
+---
+name: branding
+description: |
+  Branding e Posicionamento de Marca.
+  Trabalha identidade e posicionamento via @branding-positioning-specialist,
+  usando docs/business-context/ como base de decisão.
+model: sonnet
+category: product
+tags: [branding, positioning, marketing]
+version: "3.0.0"
+updated: "2026-06-02"
+related_agents:
+  - branding-positioning-specialist
+---
+
 # Comando Branding e Posicionamento de Marca
 
 Comando especializado para trabalhar com Branding e Posicionamento de Marca usando o agente `@branding-positioning-specialist`, com acesso ao contexto de negócio completo em `docs/business-context/` para tomada de decisões fundamentadas.

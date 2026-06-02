@@ -1,11 +1,24 @@
 # 🧅 Sistema Onion - Claude Code Rules
 
 ## 🎯 Contexto do Projeto
-Este é o Sistema Onion — um framework de comandos `.claude/` para uso interno com:
-- ~90 comandos organizados por categoria (`product`, `git`, `common`, `engineer`, `docs`, `meta`, `validate`, `test`, `development`, `quick`) + `onion.md` e `warm-up.md` no root
+
+Este é o **Sistema Onion** — um **framework template em `.claude/`** projetado para ser instalado e aplicado em qualquer projeto (novo, legado ou regulado) para orquestrar o ciclo completo de desenvolvimento com Claude Code.
+
+**Identidade canônica** (decisões de 2026-05-18, consolidadas em [docs/analysis/onion-review-2026-05.md](docs/analysis/onion-review-2026-05.md)):
+
+- Framework template em `.claude/` — **não é produto npm**, não é distribuído publicamente, **não tem CLI standalone**
+- Plataforma única: **Claude Code**
+- Cobre **três dimensões peer** do ciclo: produto, engenharia, compliance/governança
+- **Workflows faseados retomáveis** com sessões persistentes — `product/collect→feature` (descoberta a backlog) e `engineer/plan→pr-update` (planejamento a entrega) são invariantes do framework, não devem ser consolidados
+- `.onion/` (estrutura agnóstica) e plano v4.0 FASES 5-9 (CLI standalone, multi-IDE, aprendizado contínuo) foram **formalmente abandonados em 2026-05-18**
+
+**Inventário atual**:
+
+- ~94 comandos organizados por categoria (`product`, `git`, `common`, `engineer`, `docs`, `meta`, `validate`, `test`, `development`, `quick`, `global`) + `onion.md` e `warm-up.md` no root
 - 49 agentes especializados de IA em 9 categorias (`compliance`, `deployment`, `development`, `git`, `meta`, `product`, `research`, `review`, `testing`)
+- 4 skills em `.claude/skills/` (`onion` — orquestrador; `onion-patterns`; `onion-validation`; `language-standards`)
 - **Task Manager Abstraction** plugável (Jira, ClickUp, Asana, Linear) via `.claude/utils/task-manager/`
-- Workflows automatizados de desenvolvimento (GitFlow + sessions)
+- Workflows automatizados de desenvolvimento (GitFlow + sessions persistentes em `.claude/sessions/`)
 
 ---
 

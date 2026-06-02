@@ -42,536 +42,104 @@ related_agents:
 
 # 🔄 Transformar Documentos Consolidados
 
-Comando para transformar conhecimento consolidado (de reuniões ou documentos) em contexto estruturado e tasks acionáveis.
+Transforma conhecimento consolidado (de reuniões ou documentos) em contexto
+estruturado e tasks acionáveis, preenchendo o gap entre consolidação e criação de tasks.
+
+> **Convenções de comunicação Claude Code, nomenclatura e formatação:** seguir a skill `onion-patterns`.
+> **Frameworks de transformação (prompt de extração, template de validação, templates de output, modos, persistência):** ver KB [`docs/knowledge-base/concepts/consolidated-to-tasks-patterns.md`](../../../docs/knowledge-base/concepts/consolidated-to-tasks-patterns.md).
 
 ## 🎯 Objetivo
 
-Preencher o gap entre **conhecimento consolidado** e **tasks acionáveis**:
-
-1. **Ler documentos consolidados** (output de `/product/consolidate-meetings` ou `/docs/consolidate-documents`)
-2. **Interagir com usuário** de forma padronizada para refinar e priorizar
-3. **Transformar conhecimento** em contexto estruturado
-4. **Gerar contexto** pronto para `/product/collect` ou `/product/task`
-
-## 🔍 Problema que Resolve
-
-**Antes:**
-```
-Consolidar → [Documento rico em conhecimento] → ❓ Gap → Criar Task
-```
-
-**Depois:**
-```
-Consolidar → Transformar → [Contexto estruturado] → Criar Task
-```
+1. **Ler** documentos consolidados (output de `/product/consolidate-meetings` ou `/docs/consolidate-documents`)
+2. **Interagir** com o usuário para refinar e priorizar
+3. **Transformar** o conhecimento em contexto estruturado
+4. **Gerar** contexto pronto para `/product/collect` ou `/product/task`
 
 ## ⚡ Fluxo de Execução
 
-### Fase 1: Detecção e Carregamento
+### Fase 1 — Detecção e Carregamento
 
 ```bash
-# Verificar se é arquivo ou pasta
 if [ -f "$source" ]; then
-  echo "📄 Arquivo consolidado detectado: $source"
-  CONSOLIDATED_FILE="$source"
+  CONSOLIDATED_FILE="$source"            # arquivo único
 elif [ -d "$source" ]; then
-  echo "📁 Pasta detectada: $source"
-  # Buscar arquivos consolidados na pasta
   CONSOLIDATED_FILES=$(find "$source" -name "*consolidation*.md" -o -name "*consolidated*.md")
-  # Se múltiplos, perguntar qual usar
+  # se múltiplos, perguntar qual usar
 else
-  echo "❌ Erro: Source deve ser arquivo ou pasta"
-  exit 1
+  echo "❌ Source deve ser arquivo ou pasta"; exit 1
 fi
 ```
 
-**Validar estrutura do documento:**
-- Verificar se contém seções esperadas (Tarefas, Decisões, Gaps, Insights)
-- Identificar tipo de consolidação (reuniões vs documentos)
-- Extrair metadados (data, participantes, temas)
+Validar estrutura: confirmar seções esperadas (Tarefas, Decisões, Gaps, Insights),
+identificar tipo (reuniões vs documentos) e extrair metadados (data, participantes, temas).
 
-### Fase 2: Análise Automática (Sempre Executada)
+### Fase 2 — Análise Automática (sempre executada)
 
-**CRÍTICO:** Esta fase sempre executa automaticamente, independente do modo.
+Independente do modo, invocar `@product-agent` com o **Framework de Extração Acionável**
+do KB para extrair tarefas, decisões, gaps, insights e dependências em YAML.
+Salvar em `.claude/sessions/consolidated-transform/analysis-<timestamp>.yaml`.
 
-Extrair elementos acionáveis do documento de forma sistemática:
+### Fase 3 — Validação Interativa (modo `interactive`, obrigatória)
 
-```markdown
-@product-agent
+Apresentar a análise usando o **Template de Validação Interativa** do KB e coletar as
+aprovações/ajustes do usuário (IDs aprovados, prioridades, owners, deadlines,
+dependências, quebra em subtasks) por bloco, encerrando com a confirmação final.
 
-Analise o seguinte documento consolidado e extraia TODOS os elementos acionáveis:
+### Fase 4 — Modos de Processamento
 
-**1. Tarefas Identificadas:**
-- Lista COMPLETA de todas as tarefas mencionadas
-- Owner (se disponível, senão marcar como "TBD")
-- Deadline (se disponível, senão marcar como "TBD")
-- Prioridade sugerida (alta/média/baixa baseada em contexto)
-- Dependências identificadas
-- Contexto completo de cada tarefa
+Aplicar o modo solicitado (`interactive` padrão, `auto`, `tasks-only`, `context-only`)
+conforme a tabela de modos e heurísticas do KB.
 
-**2. Decisões que Requerem Ação:**
-- Decisões que precisam ser implementadas (com rationale)
-- Decisões que precisam ser comunicadas (com stakeholders)
-- Decisões que precisam validação (com critérios)
-- Nível de confiança de cada decisão
+### Fase 5 — Gerar Output Final
 
-**3. Gaps e Ambiguidades:**
-- Pontos que precisam esclarecimento (com impacto estimado)
-- Informações faltantes que bloqueiam progresso (com criticidade)
-- Contradições que precisam resolução (com partes envolvidas)
-- Sugestão de priorização baseada em impacto
+Com base nos elementos validados (ou na análise automática no modo `auto`) e no
+`output_format`, gerar os artefatos usando os **Templates de Output** do KB:
 
-**4. Insights Acionáveis:**
-- Oportunidades identificadas (com potencial de valor)
-- Melhorias sugeridas (com esforço estimado)
-- Próximos passos recomendados (com justificativa)
-- Priorização sugerida baseada em valor/esforço
-
-**5. Dependências e Conexões:**
-- Mapeamento de dependências entre elementos
-- Conexões identificadas entre tarefas/decisões/gaps
-- Bloqueadores identificados
-
-**Documento:**
-{{conteudo_do_documento_consolidado}}
-
-**Output Esperado:**
-Estruture a resposta em formato YAML estruturado para facilitar validação posterior.
-```
-
-**Salvar resultado da análise:**
+- **Contexto estruturado** (`context`/`both`) → `context-<ts>.md`
+- **Lista de tasks + comandos prontos** (`tasks`/`both`) → `tasks-<ts>.yaml`, `commands-<ts>.sh`
+- Para cada tarefa aprovada, montar invocação de `/product/collect` ou `/product/task`
+  com contexto completo e referência ao documento de origem.
 
 ```bash
-ANALYSIS_OUTPUT=".claude/sessions/consolidated-transform/analysis-$(date +%Y%m%d-%H%M%S).yaml"
-# Salvar análise completa em arquivo estruturado
-```
-
-### Fase 3: Validação Interativa (Modo Padrão)
-
-**CRÍTICO:** No modo `interactive` (padrão), esta fase é obrigatória.
-
-Apresentar análise ao usuário e validar/refinar:
-
-```markdown
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 ANÁLISE AUTOMÁTICA CONCLUÍDA
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📄 **Documento:** {{nome_arquivo}}
-📅 **Data Consolidação:** {{data}}
-📊 **Tipo:** {{tipo_consolidacao}}
-🔍 **Elementos Extraídos:** {{total_elementos}}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 TAREFAS IDENTIFICADAS ({{total}})
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-{{lista_tarefas_completa_com_detalhes}}
-
-**✅ VALIDAÇÃO NECESSÁRIA:**
-1. ✅/❌ Quais tarefas devem ser criadas como tasks? (selecionar IDs)
-2. 🔄 Ajustar prioridade de alguma tarefa?
-3. 👤 Confirmar/ajustar owners?
-4. 📅 Confirmar/ajustar deadlines?
-5. 🔗 Validar dependências identificadas?
-6. ✂️ Alguma tarefa precisa ser quebrada em subtasks?
-
-**Resposta esperada:**
-- Lista de IDs aprovados: [1, 3, 5, 7]
-- Ajustes: {ID: 3, prioridade: "alta", owner: "João"}
-- Quebrar: {ID: 5, subtasks: ["5.1", "5.2"]}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ DECISÕES QUE REQUEREM AÇÃO ({{total}})
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-{{lista_decisoes_completa}}
-
-**✅ VALIDAÇÃO NECESSÁRIA:**
-1. ✅/❌ Quais decisões precisam tasks de implementação? (selecionar IDs)
-2. 📢 Quais precisam apenas comunicação/documentação? (selecionar IDs)
-3. ✔️ Quais precisam validação antes de implementar? (selecionar IDs)
-4. 🔄 Ajustar nível de confiança de alguma decisão?
-
-**Resposta esperada:**
-- Implementar: [1, 2]
-- Comunicar: [3]
-- Validar: [4]
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ GAPS E AMBIGUIDADES ({{total}})
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-{{lista_gaps_completa}}
-
-**✅ VALIDAÇÃO NECESSÁRIA:**
-1. ✅/❌ Quais gaps bloqueiam progresso e precisam tasks? (selecionar IDs)
-2. ⏭️ Quais podem ser resolvidos em refinamento futuro? (selecionar IDs)
-3. 📅 Algum gap precisa reunião adicional? (selecionar IDs)
-4. 🔄 Ajustar criticidade de algum gap?
-
-**Resposta esperada:**
-- Criar tasks: [1, 3]
-- Refinamento futuro: [2, 4]
-- Reunião necessária: [5]
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💡 INSIGHTS ACIONÁVEIS ({{total}})
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-{{lista_insights_completa}}
-
-**✅ VALIDAÇÃO NECESSÁRIA:**
-1. ✅/❌ Quais insights devem virar features/tasks? (selecionar IDs)
-2. 🎯 Algum insight é oportunidade estratégica? (marcar IDs)
-3. 🔄 Ajustar priorização de insights?
-4. 📝 Algum insight deve ser apenas documentado?
-
-**Resposta esperada:**
-- Criar tasks: [1, 2, 4]
-- Oportunidade estratégica: [1]
-- Apenas documentar: [3]
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔗 DEPENDÊNCIAS IDENTIFICADAS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-{{mapeamento_dependencias}}
-
-**✅ VALIDAÇÃO NECESSÁRIA:**
-1. ✅/❌ Confirmar dependências identificadas?
-2. ➕ Adicionar dependências não identificadas?
-3. 🔄 Ajustar ordem de execução sugerida?
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ CONFIRMAÇÃO FINAL
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**Resumo do que será criado:**
-- Tasks: {{total_tasks_aprovadas}}
-- Decisões para implementar: {{total_decisoes_implementar}}
-- Gaps para resolver: {{total_gaps_tasks}}
-- Insights para explorar: {{total_insights_tasks}}
-
-**Confirma para prosseguir?** (sim/não)
-```
-
-### Fase 4: Modos de Processamento
-
-#### Modo: `interactive` (Padrão)
-
-**Fluxo completo:**
-1. ✅ Análise automática (Fase 2)
-2. ✅ Validação interativa (Fase 3)
-3. ✅ Geração de contexto/tasks (Fase 5)
-
-**Características:**
-- Usuário valida e ajusta análise
-- Máximo controle sobre o que será criado
-- Recomendado para primeira vez ou documentos complexos
-
-#### Modo: `auto`
-
-**Fluxo simplificado:**
-1. ✅ Análise automática (Fase 2)
-2. ⏭️ Validação interativa (PULADA)
-3. ✅ Geração automática de contexto/tasks (Fase 5)
-
-**Características:**
-- Usa análise automática sem validação
-- Aplica heurísticas padrão para priorização
-- Gera output completo automaticamente
-- Recomendado para processamento em lote ou documentos simples
-
-**Heurísticas aplicadas automaticamente:**
-- Tarefas: Todas as tarefas identificadas viram tasks
-- Decisões: Apenas decisões de implementação viram tasks
-- Gaps: Apenas gaps de alta criticidade viram tasks
-- Insights: Apenas insights de alto valor viram tasks
-
-#### Modo: `tasks-only`
-
-**Foco em tarefas:**
-1. ✅ Análise automática (Fase 2) - apenas tarefas
-2. ✅ Validação interativa (Fase 3) - apenas tarefas
-3. ✅ Geração de tasks (Fase 5)
-
-**Características:**
-- Ignora decisões, gaps e insights
-- Foca apenas em tarefas identificadas
-- Mais rápido e direto
-
-#### Modo: `context-only`
-
-**Apenas contexto:**
-1. ✅ Análise automática (Fase 2)
-2. ✅ Validação interativa (Fase 3)
-3. ✅ Geração de contexto estruturado (sem tasks)
-
-**Características:**
-- Não cria tasks
-- Gera documento de contexto para uso futuro
-- Útil para documentação e referência
-- Preserva análise completa
-
-### Fase 5: Gerar Output Final
-
-Após validação (ou análise automática no modo `auto`), gerar outputs finais conforme `output_format`.
-
-Criar documento de contexto padronizado com elementos validados:
-
-```markdown
-# Contexto para Tasks: {{tema}}
-
-**Gerado em:** {{data_atual}}
-**Origem:** {{arquivo_consolidado}}
-**Tipo:** {{tipo_consolidacao}}
-**Análise:** {{timestamp_analise}}
-
-## 📋 Tarefas Aprovadas para Criar
-
-{{lista_tarefas_aprovadas_completa_com_ajustes}}
-
-## ✅ Decisões para Implementar
-
-{{lista_decisoes_acionaveis_aprovadas}}
-
-## ⚠️ Gaps para Resolver
-
-{{lista_gaps_priorizados_aprovados}}
-
-## 💡 Insights para Explorar
-
-{{lista_insights_priorizados_aprovados}}
-
-## 🔗 Dependências Validadas
-
-{{mapeamento_de_dependencias_validado}}
-
-## 📊 Priorização Final
-
-{{matriz_de_prioridade_final}}
-```
-
-### Passo 5.2: Gerar Tasks (se solicitado)
-
-**Se `output_format` incluir `tasks`:**
-
-Para cada tarefa aprovada:
-
-```markdown
-@product-agent
-
-Criar task usando /product/collect ou /product/task:
-
-**Título:** {{titulo_tarefa}}
-**Descrição:** {{descricao_completa_com_contexto}}
-**Prioridade:** {{prioridade}}
-**Owner:** {{owner}}
-**Deadline:** {{deadline}}
-**Dependências:** {{dependencias}}
-**Tags:** {{tags_relevantes}}
-**Contexto Original:** {{referencia_ao_documento_consolidado}}
-```
-
-**Ou gerar lista estruturada para processamento em lote:**
-
-```yaml
-tasks_to_create:
-  - title: "{{titulo}}"
-    description: "{{descricao}}"
-    priority: "{{prioridade}}"
-    owner: "{{owner}}"
-    deadline: "{{deadline}}"
-    dependencies: ["{{dep1}}", "{{dep2}}"]
-    tags: ["{{tag1}}", "{{tag2}}"]
-    source: "{{referencia_consolidado}}"
-    context: "{{contexto_completo}}"
-```
-
-### Passo 5.3: Salvar Outputs
-
-**Salvar todos os outputs gerados:**
-
-```bash
-OUTPUT_DIR=".claude/sessions/consolidated-transform/"
-mkdir -p "$OUTPUT_DIR"
-
-TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-
-# Análise completa (sempre salva)
-ANALYSIS_FILE="${OUTPUT_DIR}analysis-${TIMESTAMP}.yaml"
-
-# Contexto estruturado (se gerado)
-if [ "$output_format" != "tasks" ]; then
-  CONTEXT_FILE="${OUTPUT_DIR}context-${TIMESTAMP}.md"
-fi
-
-# Lista de tasks (se gerada)
-if [ "$output_format" != "context" ]; then
-  TASKS_FILE="${OUTPUT_DIR}tasks-${TIMESTAMP}.yaml"
-fi
-
-# Comandos prontos (se tasks geradas)
-if [ "$output_format" != "context" ]; then
-  COMMANDS_FILE="${OUTPUT_DIR}commands-${TIMESTAMP}.sh"
-fi
+OUTPUT_DIR=".claude/sessions/consolidated-transform/"; mkdir -p "$OUTPUT_DIR"
 ```
 
 ## 📤 Outputs Esperados
 
-### Output: Contexto Estruturado
+- **Contexto estruturado**: tarefas priorizadas, decisões acionáveis, gaps por impacto, insights, dependências e matriz de priorização.
+- **Lista de tasks** (opcional): YAML pronto para criação, com metadados e referência ao original.
+- **Comandos prontos** (opcional): chamadas `/product/collect` e `/product/task` prontas para execução.
 
-Documento markdown com:
-- ✅ Tarefas priorizadas e detalhadas
-- ✅ Decisões que requerem ação
-- ✅ Gaps priorizados por impacto
-- ✅ Insights acionáveis
-- ✅ Mapeamento de dependências
-- ✅ Matriz de priorização
-
-### Output: Lista de Tasks (Opcional)
-
-Arquivo YAML/JSON com:
-- ✅ Tasks prontas para criação
-- ✅ Metadados completos
-- ✅ Referências ao documento original
-- ✅ Contexto preservado
-
-### Output: Comandos Prontos (Opcional)
-
-Lista de comandos prontos para execução:
+## 🚀 Invocação
 
 ```bash
-# Tasks geradas automaticamente
-/product/collect "{{titulo_task_1}}" --priority=high --owner={{owner}}
-/product/collect "{{titulo_task_2}}" --priority=medium
-/product/task "{{titulo_task_3}}" --deadline={{deadline}}
-```
-
-## 🎯 Casos de Uso
-
-### Caso 1: Após Consolidar Reuniões
-
-```bash
-# 1. Consolidar reuniões
-/product/consolidate-meetings "docs/meet/sprint-planning/"
-
-# 2. Transformar em tasks
+# Após consolidar reuniões (interativo)
 /product/transform-consolidated "docs/meet/consolidation-2025-12-02-sprint-planning.md" --mode=interactive
 
-# 3. Criar tasks aprovadas
-# (comandos gerados automaticamente)
-```
-
-### Caso 2: Após Consolidar Documentos
-
-```bash
-# 1. Consolidar documentos
-/docs/consolidate-documents "docs/business-context/"
-
-# 2. Transformar em contexto e tasks
+# Após consolidar documentos (auto, ambos os outputs)
 /product/transform-consolidated "docs/consolidated/business-context/" --mode=auto --output_format=both
 
-# 3. Revisar contexto gerado e criar tasks selecionadas
-```
-
-### Caso 3: Modo Automático para Processamento em Lote
-
-```bash
-# Transformar automaticamente sem interação
+# Lote sem interação, só tasks
 /product/transform-consolidated "docs/consolidated/" --mode=auto --output_format=tasks-only
 
-# Gerar lista de tasks para revisão posterior
-```
-
-### Caso 4: Apenas Contexto para Documentação
-
-```bash
-# Gerar apenas contexto estruturado (sem tasks)
+# Apenas contexto, sem tasks
 /product/transform-consolidated "docs/meet/consolidation-*.md" --mode=context-only
-
-# Usar contexto gerado em refinamentos futuros
 ```
 
-## 🔗 Integração com Outros Comandos
+## ⚙️ Parâmetros
 
-### Fluxo Completo
+- **`source`**: arquivo consolidado `.md`, pasta com consolidações, ou múltiplos arquivos.
+- **`mode`**: `interactive` (padrão) · `auto` · `tasks-only` · `context-only` — ver tabela no KB.
+- **`output_format`**: `tasks` · `context` · `both` (padrão).
 
-```bash
-# 1. Extrair reunião individual
-/product/extract-meeting "reuniao-01.txt"
+## 🔗 Relacionamentos
 
-# 2. Consolidar múltiplas reuniões
-/product/consolidate-meetings "docs/meet/sprint-planning/"
+**Antes:** `/product/consolidate-meetings`, `/docs/consolidate-documents`
+**Depois:** `/product/collect`, `/product/task`, `/product/estimate`, `/product/refine`
 
-# 3. Transformar consolidado em contexto/tasks
-/product/transform-consolidated "docs/meet/consolidation-*.md" --mode=interactive
-
-# 4. Criar tasks aprovadas
-/product/collect "{{task_aprovada_1}}"
-/product/task "{{task_aprovada_2}}"
-
-# 5. Estimar story points (automático nos comandos acima)
-/product/estimate "{{task}}"
-```
-
-### Integração com Task Manager
-
-- ✅ Tasks criadas são automaticamente sincronizadas com Task Manager configurado
-- ✅ Contexto preservado nos comentários das tasks
-- ✅ Referências ao documento consolidado mantidas
-- ✅ Dependências mapeadas entre tasks
-
-## ⚙️ Parâmetros Detalhados
-
-### `source`
-- **Arquivo único**: Caminho para arquivo consolidado (.md)
-- **Pasta**: Caminho para pasta contendo consolidações
-- **Múltiplos arquivos**: Lista separada por espaço
-
-### `mode`
-- **`interactive`** (padrão): Interação guiada com usuário
-- **`auto`**: Transformação automática sem interação
-- **`tasks-only`**: Foca apenas em tarefas
-- **`context-only`**: Gera apenas contexto, sem tasks
-
-### `output_format`
-- **`tasks`**: Gera lista de tasks prontas
-- **`context`**: Gera contexto estruturado
-- **`both`** (padrão): Gera ambos
-
-## 💡 Boas Práticas
-
-1. **Sempre revisar** consolidação antes de transformar
-2. **Usar modo interativo** para primeira vez
-3. **Modo automático** para processamento em lote conhecido
-4. **Preservar contexto** nas tasks criadas
-5. **Validar dependências** antes de criar tasks
-6. **Priorizar gaps** que bloqueiam progresso
-
-## ⚠️ Notas
-
-- Documento consolidado deve seguir estrutura esperada
-- Modo interativo requer confirmação do usuário
-- Tasks geradas seguem padrão do Sistema Onion
-- Contexto preservado para rastreabilidade completa
-- Integração automática com Task Manager configurado
-
-## 🔄 Relacionamentos
-
-**Antes deste comando:**
-- `/product/consolidate-meetings` - Consolida reuniões
-- `/docs/consolidate-documents` - Consolida documentos
-
-**Depois deste comando:**
-- `/product/collect` - Criar tasks de ideias/bugs
-- `/product/task` - Criar tasks estruturadas
-- `/product/estimate` - Estimar story points
-- `/product/refine` - Refinar tasks criadas
+Tasks criadas são sincronizadas automaticamente com o Task Manager configurado,
+preservando o contexto e a referência ao documento consolidado de origem.
 
 ---
 
-**Versão:** 3.0.0  
-**Última atualização:** 2025-12-02
-
+**Versão:** 3.0.0 · **Última atualização:** 2025-12-02

@@ -1,0 +1,312 @@
+---
+title: Meta-spec — Padrões para Comandos do Sistema Onion
+date: 2026-05-18
+version: 1.0.0
+level: L0
+status: active
+gate-keeper: "@metaspec-gate-keeper"
+---
+
+# Meta-spec — Padrões para Comandos do Sistema Onion
+
+## Propósito
+
+Define os padrões imutáveis (L0) que **todos os comandos** em `.claude/commands/` devem seguir. Inclui o conceito **invariante** de workflows faseados retomáveis, mecanismo que distingue o Onion de coleções de comandos avulsos.
+
+Aplica-se ao **Sistema Onion**, não ao projeto-alvo onde o Onion é instalado.
+
+Referências relacionadas:
+
+- [agents.md](./agents.md) — padrões para agentes
+- [architecture.md](./architecture.md) — estrutura de diretórios e dependências
+- [code-standards.md](./code-standards.md) — padrões de código e idioma
+- [integrations.md](./integrations.md) — padrões para integrações
+
+---
+
+## 1. Estrutura obrigatória
+
+Todo comando em `.claude/commands/<categoria>/<nome>.md` deve conter:
+
+### 1.1 Frontmatter YAML
+
+```yaml
+---
+description: <descrição em uma linha — aparece na lista de comandos>
+allowed-tools: [<tools permitidas, ou omitir para herdar contexto>]
+argument-hint: <hint opcional sobre argumentos esperados>
+---
+```
+
+- `description` é obrigatório
+- `allowed-tools` opcional, mas recomendado para comandos que executam ações sensíveis
+- `argument-hint` opcional, melhora UX da invocação
+
+### 1.2 Corpo do comando
+
+Após o frontmatter:
+
+```markdown
+# <Título descritivo do comando>
+
+## Objetivo
+<O que este comando entrega>
+
+## Quando usar
+<Gatilhos, casos de uso típicos>
+
+## Etapas
+<Passo a passo executável>
+
+## Saída esperada
+<Artefatos, mudanças, output ao usuário>
+
+## Exemplos
+<Invocações reais>
+```
+
+Comandos curtos (< 50 linhas) podem omitir seções não aplicáveis, mas **devem manter frontmatter + título + propósito**.
+
+### 1.3 Convenção de `allowed-tools` (escopo mínimo)
+
+Comandos que executam **ações sensíveis** (git, escrita de arquivos, operações
+de Task Manager) devem declarar `allowed-tools` escopado ao mínimo necessário,
+no formato de regras de permissão do Claude Code:
+
+```yaml
+allowed-tools: Bash(git *) Bash(gh *) Read Edit Write Grep Glob
+```
+
+Diretrizes:
+
+- Escopar pelo **uso real observado** — restritivo demais quebra o comando.
+- Para Bash, prefira prefixos específicos (`Bash(git *)`) a `Bash(*)`.
+- Detecção de provider via `.env`: `Bash(cat .env*)`.
+- Ferramentas MCP do provider ativo são herdadas do agente delegado
+  (`@clickup-specialist`, etc.) — o comando não precisa enumerá-las.
+- Comandos puramente informativos (READMEs, ajuda) podem omitir.
+
+Comandos sensíveis canônicos que **devem** declarar `allowed-tools`:
+`engineer/pr`, `engineer/start`, `engineer/work`, `product/task`,
+`git/fast-commit`.
+
+> Automação a nível de evento (hooks) vive em `.claude/settings.json`, não no
+> frontmatter — ver `architecture.md` e `integrations.md`.
+
+---
+
+## 2. Categorias válidas
+
+Comandos devem residir em uma das categorias abaixo. Categorias com asterisco representam **as três dimensões peer do ciclo Onion**.
+
+| Categoria | Função | Volume típico |
+|---|---|---|
+| `product/` (*) | Discovery, especificação, decomposição de tarefas, branding, reuniões | 20+ |
+| `engineer/` (*) | Planejamento e implementação faseada de features | 10+ |
+| `docs/` | Geração e validação de documentação (incluindo `/docs:build-compliance-docs` da dimensão compliance) | 10+ |
+| `git/` | GitFlow, feature/release/hotfix, code review | 10+ |
+| `meta/` | Criação de comandos/agentes/skills/KBs, integração | 8+ |
+| `common/` | Templates e prompts compartilhados | 8+ |
+| `validate/` | Validação de testes, QA, workflows colaborativos | 4+ |
+| `test/` | Estratégias de teste (unit, integration, e2e) | 3 |
+| `development/` | Comandos de desenvolvimento específicos | 1+ |
+| `quick/` | Análises pontuais rápidas | 1+ |
+| `global/` | Comandos transversais | 1+ |
+| (root) | `onion.md` e `warm-up.md` — pontos de entrada | 2 |
+
+Categorias podem ter subdiretórios quando agrupam variantes (ex: `git/feature/`, `git/hotfix/`, `git/release/`, `validate/test-strategy/`, `validate/qa-points/`).
+
+---
+
+## 3. Workflows faseados — INVARIANTE DO FRAMEWORK
+
+**Princípio**: o Onion implementa workflows faseados como **mecanismo central**. Múltiplos comandos cobrindo fases distintas de um mesmo fluxo, com estado retomável persistido em `.claude/sessions/`, são **valor de design**, não duplicação.
+
+### 3.1 Workflows canônicos
+
+Os **dois workflows abaixo são invariantes** do framework. Devem ser preservados intactos. Qualquer proposta de fusão deve ser rejeitada por `@metaspec-gate-keeper`.
+
+**Workflow de Engenharia** (6 fases):
+
+```
+engineer/plan → engineer/start → engineer/work → engineer/pre-pr → engineer/pr → engineer/pr-update
+```
+
+- `plan` — analisa requisitos e cria plano estruturado
+- `start` — cria sessão de desenvolvimento e analisa tasks
+- `work` — retoma sessão e identifica próxima fase
+- `pre-pr` — valida padrões e qualidade antes do PR
+- `pr` — cria Pull Request com GitFlow e sync
+- `pr-update` — atualiza PR existente
+
+**Workflow de Produto** (6 fases):
+
+```
+product/collect → product/refine → product/spec → product/task → product/estimate → product/feature
+```
+
+- `collect` — coleta ideias de features ou bugs
+- `refine` — refina via perguntas de esclarecimento
+- `spec` — cria especificação a partir de requisitos
+- `task` — decompõe em tasks/subtasks/action items
+- `estimate` — aplica framework de story points
+- `feature` — cria task no gerenciador configurado
+
+### 3.2 Regras para workflows faseados
+
+1. Cada fase deve ter **input claro** (estado da sessão ou argumentos), **output claro** (próximo estado da sessão) e ser **invocável isoladamente** quando o estado permite
+2. Estado entre fases é persistido em `.claude/sessions/<feature>/`
+3. Fases nomeadas explicitamente, sem ambiguidade de ordem
+4. Novos workflows similares devem seguir o mesmo padrão (sessões persistentes, fases nomeadas, retomável)
+5. **Proibido fundir fases** de workflow ativo sem justificativa formal aprovada via PR específico para esta meta-spec
+
+### 3.3 Padrão para identificar workflow faseado
+
+Características de um comando que faz parte de workflow faseado:
+
+- Vive em categoria que representa dimensão do ciclo (`product/`, `engineer/`)
+- Lê ou escreve estado em `.claude/sessions/`
+- Tem nome que sugere fase explícita (verbo de ação temporal: `start`, `work`, `pre-pr`, `pr-update`)
+- Documenta a posição no ciclo no corpo do comando
+
+---
+
+## 4. Convenção de naming
+
+- **Slug** (nome do arquivo): kebab-case (`pre-pr.md`, `build-tech-docs.md`)
+- **Path completo**: `.claude/commands/<categoria>/<slug>.md` ou `.claude/commands/<categoria>/<subcategoria>/<slug>.md`
+- **Invocação**: usuário invoca com `/<categoria>:<slug>` ou `/<categoria>/<subcategoria>:<slug>`
+
+### 4.1 Política de duplicação de nomes entre categorias
+
+Os nomes abaixo aparecem em múltiplas categorias por razões funcionais legítimas. Esta política torna a regra explícita.
+
+| Nome | Categorias | Categoria canônica | Variantes em outras categorias |
+|---|---|---|---|
+| `README` | `product/`, `git/`, `common/`, `docs/` | Específico por categoria (não há canônico) | Cada README descreve a categoria que o contém |
+| `warm-up` | `product/`, `engineer/`, root (`warm-up.md`) | root (`/warm-up`) | `product/warm-up`, `engineer/warm-up` são specializations contextuais |
+| `start` | `engineer/`, `git/feature/`, `git/hotfix/`, `git/release/` | `engineer/start` (sessão de desenvolvimento) | `git/feature/start`, `git/hotfix/start`, `git/release/start` são fluxos GitFlow específicos |
+| `finish` | `git/feature/`, `git/hotfix/`, `git/release/` | Específico por subcategoria GitFlow | Sempre invocar com path completo |
+| `help` | `git/`, `docs/` | Específico por categoria | Ajuda contextual da categoria |
+| `estimate` | `product/`, `validate/qa-points/` | `product/estimate` (story points de feature) | `validate/qa-points/estimate` é QA story points |
+| `plan` | `engineer/`, `product/light-arch` (similar) | `engineer/plan` (planejamento de implementação) | `product/light-arch` é design de arquitetura leve |
+| `check` | `product/`, `product/task-check` | `product/check` (verificação contra meta-specs) | `product/task-check` é verificação de task |
+
+**Regra geral**:
+
+- Quando houver canônico, novos comandos com nome curto devem usar o canônico ou nome explícito
+- Quando não houver canônico, sempre invocar com path completo (`/<categoria>:<slug>`)
+- Renomes para resolver ambiguidade devem usar aliases temporários para não quebrar invocações existentes
+
+---
+
+## 5. Limites de tamanho
+
+| Limite | Linhas | Tratamento |
+|---|---|---|
+| Recomendado | até 500 | OK |
+| Soft warning | 500 – 800 | Considerar modularização |
+| Hard limit | > 800 | Refatoração obrigatória antes de merge |
+
+Comandos que excederem 800 linhas devem extrair partes para:
+
+- Templates em `.claude/commands/common/templates/`
+- Prompts em `.claude/commands/common/prompts/`
+- Knowledge bases em `docs/knowledge-base/`
+- Sub-comandos referenciados
+
+### 5.1 Isenções (não são comandos invocáveis)
+
+O limite acima aplica-se a **comandos invocáveis** (`/categoria/nome`). São
+**isentos** por natureza, seguindo guidance própria:
+
+- **Fragmentos de template** em `.claude/commands/common/templates/` — são
+  estruturas de referência (ex.: `business_context_template.md`,
+  `technical_context_template.md`), auto-registrados como skills
+  `common:templates:*` e referenciados por múltiplos agentes/comandos. Tamanho é
+  inerente ao template; **não relocar** sem atualizar o registro de skill e
+  todas as referências.
+- **Fragmentos de prompt** em `.claude/commands/common/prompts/` — skills
+  `common:prompts:*`.
+- **READMEs de categoria** (`<categoria>/README.md`) — são índices; devem ser
+  enxutos (apontar para comandos/KB), mas não contam como comando.
+
+---
+
+## 6. Modularização
+
+Comandos podem reaproveitar:
+
+- **Templates** em `.claude/commands/common/templates/` (estruturas reutilizáveis)
+- **Prompts** em `.claude/commands/common/prompts/` (instruções compartilhadas)
+- **Skills** em `.claude/skills/` (cérebro de orquestração)
+- **Agentes** em `.claude/agents/<categoria>/` (delegação especializada)
+
+Comando que duplica >50 linhas de outro comando deve refatorar para template ou prompt compartilhado.
+
+---
+
+## 7. Exemplos de conformidade
+
+### Exemplo conforme (workflow faseado)
+
+Arquivo: `.claude/commands/engineer/start.md`
+
+- Frontmatter com `description`
+- Vive em `engineer/` (dimensão de engenharia)
+- Faz parte do workflow canônico
+- Persiste estado em `.claude/sessions/`
+- Nome reflete fase explícita
+
+**Veredito**: `@metaspec-gate-keeper` aprova.
+
+### Exemplo conforme (comando atômico)
+
+Arquivo: `.claude/commands/meta/setup-integration.md`
+
+- Frontmatter com `description` e `allowed-tools`
+- Vive em `meta/` (categoria válida)
+- Não faz parte de workflow faseado — função atômica clara
+- Tamanho dentro do limite
+
+**Veredito**: aprovado.
+
+### Exemplo quase-conforme
+
+Arquivo hipotético: `.claude/commands/validate/test-strategy/analyze.md` (1.134 linhas reais)
+
+- Frontmatter correto
+- Categoria válida
+- Tamanho acima de soft warning (500), acima de hard limit (800)
+
+**Veredito**: requer refatoração antes de próximo merge tocando este arquivo.
+
+### Exemplo não-conforme
+
+Arquivo hipotético: `.claude/commands/misc/MyCommand.md`
+
+- Categoria `misc/` inválida
+- Filename PascalCase em vez de kebab-case
+- Sem frontmatter
+
+**Veredito**: rejeitado.
+
+---
+
+## 8. Proibições explícitas
+
+- **Proibido** fundir comandos de workflow faseado canônico (engineer/* ou product/*) sem PR específico para esta meta-spec
+- **Proibido** criar categoria fora da lista válida
+- **Proibido** criar comando sem frontmatter
+- **Proibido** comando com `name` em formato diferente de kebab-case
+
+---
+
+## 9. Versionamento e mudanças
+
+Mudanças nesta spec exigem:
+
+1. PR específico para `docs/meta-specs/commands.md`
+2. Atualização do campo `version` no frontmatter
+3. Validação por `@metaspec-gate-keeper` em comandos existentes
+4. Especificamente para mudança em workflows canônicos (Seção 3.1): aprovação registrada em commit message com link para issue de discussão

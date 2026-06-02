@@ -18,12 +18,17 @@ As **Knowledge Bases** são documentos estruturados que servem como fonte de ver
 
 ## 📊 Estatísticas
 
-- **24 arquivos** de knowledge bases
-- **13 conceitos** fundamentais
-- **7 frameworks** e metodologias
-- **2 ferramentas** documentadas
+- **31 arquivos** de knowledge bases
+- **14 conceitos** fundamentais
+- **11 frameworks** e metodologias
+- **3 ferramentas** documentadas
 - **1 plataforma** documentada
-- **1 provedor** de serviços documentado
+- **1 categoria patterns** (padrões de implementação — ex.: SDAAL)
+- **1 categoria architectures** (C4/ADR)
+- **1 categoria meta** (criação de comandos/agentes)
+
+> Categorias `patterns/`, `architectures/` e `meta/` criadas em 2026-06-02 ao
+> extrair conteúdo de referência dos outliers de tamanho (T1.5).
 
 ---
 
@@ -31,11 +36,13 @@ As **Knowledge Bases** são documentos estruturados que servem como fonte de ver
 
 ```
 docs/knowledge-base/
-├── concepts/          # 13 arquivos - Conceitos fundamentais
-├── frameworks/        # 7 arquivos - Frameworks e metodologias
-├── tools/             # 2 arquivos - Ferramentas e recursos
+├── concepts/          # 14 arquivos - Conceitos fundamentais
+├── frameworks/        # 11 arquivos - Frameworks e metodologias
+├── tools/             # 3 arquivos - Ferramentas e recursos
 ├── platforms/         # 1 arquivo - Plataformas e tecnologias
-└── providers/         # 1 arquivo - Provedores de serviços
+├── patterns/          # 1 arquivo - Padrões de implementação (SDAAL examples)
+├── architectures/     # 1 arquivo - C4 + ADR patterns
+└── meta/              # 1 arquivo - Padrões de criação de comandos
 ```
 
 ---

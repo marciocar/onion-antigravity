@@ -33,3 +33,5 @@ node_modules/
 .claude/sessions/
 .history/
 .tmp/
+# Claude Code local overrides (não versionar)
+.claude/settings.local.json

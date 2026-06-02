@@ -1,0 +1,14 @@
+{
+  "_comment": "Template de registro de MCP servers do Sistema Onion. Copie para .mcp.json no projeto-alvo e ajuste ao provider ativo (TASK_MANAGER_PROVIDER no .env). NUNCA cole tokens aqui — use interpolação ${VAR} resolvida do ambiente/.env. Asana, Linear e Atlassian/Jira normalmente entram como conectores hospedados (claude.ai) e não precisam de entrada stdio aqui.",
+  "mcpServers": {
+    "ClickUp": {
+      "_when": "TASK_MANAGER_PROVIDER=clickup",
+      "command": "npx",
+      "args": ["-y", "<clickup-mcp-server-package>"],
+      "env": {
+        "CLICKUP_API_TOKEN": "${CLICKUP_API_TOKEN}",
+        "CLICKUP_WORKSPACE_ID": "${CLICKUP_WORKSPACE_ID}"
+      }
+    }
+  }
+}

@@ -6,6 +6,7 @@ description: >
   classes, arquivos, commits, branches) e comentários/docs em português
   brasileiro (comments, JSDoc, READMEs, mensagens ao usuário, respostas do
   assistente). Ative mesmo sem o usuário mencionar "idioma" ou "padrão".
+allowed-tools: Read Grep Glob
 ---
 
 ## Regras Fundamentais

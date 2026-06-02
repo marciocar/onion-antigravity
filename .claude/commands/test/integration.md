@@ -58,37 +58,27 @@ related_agents:
 
 # 🔗 Test Integration
 
-Gera e executa testes de integração automaticamente com detecção inteligente de framework, foco em Grey-box testing (API contract testing, boundary testing, fuzzing) seguindo o Framework de Testes.
+Orquestra geração e execução de testes de integração com detecção inteligente de framework, perspectiva **Grey-box** (dev testando outro dev).
+
+> **Teoria e padrões Grey-box** (White/Grey/Black-box, contract testing, boundary, fuzzing, métricas de integração): ver `docs/knowledge-base/frameworks/framework_testes.md` — seções "Diferenças White/Black/Grey-box", "Padrões Grey-box (Cross-Testing)" e "Técnicas Grey-box". Este comando não duplica essa teoria; apenas a aplica.
 
 ## 🎯 Objetivo
 
-Automatizar o ciclo completo de testes de integração (Grey-box perspective):
-- **Auto-detecção** de framework de integração (Supertest, Pact, Postman, Wiremock)
+Automatizar o ciclo completo de testes de integração (Grey-box):
+- **Auto-detecção** de framework (Supertest, Pact, Postman, Wiremock)
 - **Análise de API/service** para identificar endpoints e contratos
-- **Geração automática** de testes de integração seguindo padrões do projeto
-- **Suporte a contract testing** (validação de schemas e contratos)
-- **Suporte a boundary testing** (timeouts, erros, limites)
-- **Suporte a fuzzing** (dados malformados e edge cases)
-- **Execução inteligente** com mocks de serviços externos
+- **Geração** de testes seguindo padrões do projeto
+- **Contract testing** (schemas), **boundary** (timeouts, erros, limites) e **fuzzing** (dados malformados)
+- **Execução** com mocks de serviços externos
 
 ## ⚡ Fluxo de Execução
 
 ### Passo 1: Validar Endpoint/Service
 
-```bash
-# Validar formato
-if [[ -z "{{api-endpoint}}" ]]; then
-  echo "❌ ERRO: Endpoint ou serviço é obrigatório"
-  exit 1
-fi
-```
-
-**Validações:**
 ```markdown
 SE api-endpoint vazio:
   ❌ ERRO: Endpoint ou serviço é obrigatório
   💡 Exemplos: "/api/users", "UserService", "payment-gateway"
-
 SE formato inválido:
   ⚠️ AVISO: Endpoint deve ser caminho de API ou nome de serviço
 ```
@@ -196,116 +186,40 @@ SE não existe:
 3. **Configurar mocks:** Para dependências externas (Wiremock, Nock, MSW)
 4. **Criar arquivo:** `write {{test-file-path}}`
 
-**Exemplo estrutura (Supertest + Jest):**
+**Esqueleto Supertest + Jest** (3 blocos `describe`, padrão AAA):
 ```typescript
 import request from 'supertest';
 import app from '../src/app';
 
 describe('API Integration: {{api-endpoint}}', () => {
-  beforeEach(() => {
-    // Setup mocks para serviços externos
-  });
+  beforeEach(() => { /* setup mocks de serviços externos */ });
 
-  describe('Contract Testing', () => {
-    test('should return valid schema for GET /api/users', async () => {
-      const response = await request(app)
-        .get('/api/users')
-        .expect(200);
-      
-      expect(response.body).toMatchSchema({
-        users: expect.arrayContaining([
-          expect.objectContaining({
-            id: expect.any(String),
-            name: expect.any(String),
-            email: expect.any(String)
-          })
-        ])
-      });
+  describe('Contract Testing', () => {     // valida schema/tipos da resposta
+    test('GET retorna schema válido', async () => {
+      const res = await request(app).get('/api/users').expect(200);
+      expect(res.body).toMatchSchema({ /* ... */ });
     });
   });
 
-  describe('Boundary Testing', () => {
-    test('should handle timeout from external service', async () => {
-      // Mock timeout
+  describe('Boundary Testing', () => {      // timeout, erro e resposta inválida do externo
+    test('trata timeout do serviço externo', async () => {
       mockExternalService.timeout();
-      
-      const response = await request(app)
-        .get('/api/users')
-        .expect(500);
-      
-      expect(response.body.error).toBe('Service timeout');
-    });
-
-    test('should handle invalid response from external service', async () => {
-      mockExternalService.returnsInvalidData();
-      
-      const response = await request(app)
-        .get('/api/users')
-        .expect(500);
+      const res = await request(app).get('/api/users').expect(500);
+      expect(res.body.error).toBe('Service timeout');
     });
   });
 
-  describe('Fuzzing Tests', () => {
-    test('should handle malformed JSON gracefully', async () => {
-      const malformedInputs = [
-        '{"name": incomplete',
-        '{"name": null, "email": ""}',
-        '{"name": "' + 'x'.repeat(10000) + '"}',
-      ];
-      
-      for (const input of malformedInputs) {
-        const response = await request(app)
-          .post('/api/users')
-          .send(input)
-          .expect(400);
-        
-        expect(response.body.error).toBeDefined();
+  describe('Fuzzing Tests', () => {          // dados malformados → 400, sem travar
+    test('trata JSON malformado', async () => {
+      for (const input of ['{"name": incompleto', '{"name": "'+'x'.repeat(10000)+'"}']) {
+        await request(app).post('/api/users').send(input).expect(400);
       }
     });
   });
 });
 ```
 
-**Exemplo estrutura (Pact):**
-```typescript
-import { Pact } from '@pact-foundation/pact';
-
-describe('Pact Contract: UserService', () => {
-  const provider = new Pact({
-    consumer: 'Frontend',
-    provider: 'UserService',
-  });
-
-  beforeAll(() => provider.setup());
-  afterAll(() => provider.finalize());
-
-  test('should return user list', async () => {
-    await provider.addInteraction({
-      state: 'users exist',
-      uponReceiving: 'a request for users',
-      withRequest: {
-        method: 'GET',
-        path: '/api/users',
-      },
-      willRespondWith: {
-        status: 200,
-        body: {
-          users: Matchers.arrayContaining([
-            Matchers.like({
-              id: Matchers.string('123'),
-              name: Matchers.string('John'),
-            }),
-          ]),
-        },
-      },
-    });
-
-    // Execute test
-    const response = await fetch('/api/users');
-    expect(response.status).toBe(200);
-  });
-});
-```
+> Para Pact, contract testing detalhado e fuzzing, reutilize os padrões prontos em `docs/knowledge-base/frameworks/framework_testes.md` (seção "Padrões Grey-box (Cross-Testing)" e "Técnicas Grey-box").
 
 **Validação:** ✅ Arquivo gerado: {{test-file-path}}, [N] testes (contract: X, boundary: Y, fuzzing: Z)
 
@@ -331,55 +245,17 @@ describe('Pact Contract: UserService', () => {
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ✅ TESTES DE INTEGRAÇÃO - {{api-endpoint}}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔍 Detecção: framework [..] · config [..] · runner [jest|vitest|mocha] · mock [wiremock|nock|msw]
+📊 API/Service: tipo [REST|GraphQL|Service] · endpoints [N] · contratos [Sim/Não] · deps externas [lista]
+📝 Arquivo: [✅ Existente|✅ Gerado|❌] {{test-file-path}} → contract [N] · boundary [N] · fuzzing [N]
+🧪 Execução: [✅|❌|⚠️] [X/Y] passaram · contratos [X/Y] · tempo [X]s
 
-🔍 Detecção:
-∟ Framework: [supertest|pact|postman|wiremock|jest|vitest]
-∟ Config: [caminho do arquivo de config]
-∟ Test runner: [jest|vitest|mocha]
-∟ Mock strategy: [wiremock|nock|msw|manual]
-
-📊 Análise de API/Service:
-∟ Endpoint/Service: {{api-endpoint}}
-∟ Tipo: [REST API|GraphQL|Service|Microservice]
-∟ Endpoints encontrados: [N]
-∟ Contratos encontrados: [Sim/Não]
-∟ Dependências externas: [lista]
-∟ Mock strategy recomendada: [wiremock|nock|msw]
-
-📝 Arquivo de Teste:
-∟ Status: [✅ Existente | ✅ Gerado | ❌ Não encontrado]
-∟ Caminho: {{test-file-path}}
-∟ Testes: [N] casos de teste
-  ├─ Contract tests: [N]
-  ├─ Boundary tests: [N]
-  └─ Fuzzing tests: [N]
-
-🧪 Execução:
-∟ Comando: [comando executado]
-∟ Status: [✅ Passou | ❌ Falhou | ⚠️ Parcial]
-∟ Testes executados: [X/Y] passaram
-∟ Contratos validados: [X/Y]
-∟ Tempo: [X]s
-
-📊 Resultados Detalhados:
-∟ Contract Tests: [X/Y] ✅
-  └─ Schemas validados: [lista]
-  └─ Contratos verificados: [lista]
-∟ Boundary Tests: [X/Y] ✅
-  └─ Timeouts testados: [N]
-  └─ Erros tratados: [N]
-∟ Fuzzing Tests: [X/Y] ✅
-  └─ Inputs malformados: [N]
-  └─ Edge cases: [N]
-
+📊 Resultados:
+∟ Contract [X/Y] ✅  — schemas/contratos validados: [lista]
+∟ Boundary [X/Y] ✅  — timeouts [N] · erros tratados [N]
+∟ Fuzzing  [X/Y] ✅  — inputs malformados [N] · edge cases [N]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🚀 Próximos Passos:
-1. Revisar testes gerados e adicionar casos específicos
-2. Executar novamente: /test/integration {{api-endpoint}} --run
-3. Adicionar contract tests: /test/integration {{api-endpoint}} --contract
-4. Integrar no pipeline: /validate/test-strategy/create
-
+🚀 Próximos: revisar/expandir casos · re-executar `--run` · `--contract` · /validate/test-strategy/create
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -437,37 +313,16 @@ describe('Pact Contract: UserService', () => {
 
 ## ⚠️ Validações e Regras
 
-### Validações Obrigatórias
+**Validações obrigatórias:**
+- `api-endpoint` vazio → ❌ ERRO (obrigatório)
+- Nenhum framework detectado E `--framework` ausente → ❌ ERRO (💡 instale ou use `--framework`)
+- `--run` E arquivo inexistente E `--generate` ausente → ❌ ERRO (💡 use `--generate`)
 
-1. **Endpoint/Service deve ser fornecido:**
-   ```markdown
-   SE api-endpoint vazio:
-     ❌ ERRO: Endpoint ou serviço é obrigatório
-   ```
-
-2. **Framework deve ser detectável ou fornecido:**
-   ```markdown
-   SE nenhum framework detectado E --framework não fornecido:
-     ❌ ERRO: Não foi possível detectar framework de integração
-     💡 Instale um framework ou use --framework [nome]
-   ```
-
-3. **Arquivo de teste deve existir para execução:**
-   ```markdown
-   SE --run fornecido E arquivo de teste não existe E --generate não fornecido:
-     ❌ ERRO: Arquivo de teste não encontrado
-     💡 Use --generate para criar automaticamente
-   ```
-
-### Regras de Negócio
-
-1. **Auto-detecção tem prioridade** sobre --framework, exceto se --framework fornecido
-2. **Geração segue padrões** do projeto (analisa testes existentes)
-3. **Contract testing** valida schemas, tipos e estruturas de resposta
-4. **Boundary testing** foca em timeouts, erros e limites de integração
-5. **Fuzzing** testa robustez com dados malformados e edge cases
-6. **Mock externo é default** (true) para isolamento, use `--mock-external false` para testes reais
-7. **Testes gerados** seguem perspectiva Grey-box (dev testando outro dev)
+**Regras de negócio:**
+- `--framework` sobrescreve a auto-detecção; senão, auto-detecção tem prioridade
+- Geração segue padrões do projeto e a perspectiva Grey-box (dev testando outro dev)
+- Mock externo é default (`true`) para isolamento; `--mock-external false` testa serviços reais
+- Significado de contract / boundary / fuzzing: ver KB Framework de Testes (referenciada no topo)
 
 ## 🔧 Suporte por Framework
 
@@ -481,24 +336,15 @@ describe('Pact Contract: UserService', () => {
 
 ## 📚 Referências
 
-- **Agente de Testes:** @test-engineer, @test-agent
-- **Framework de Testes:** `docs/knowledge-base/frameworks/framework_testes.md`
-- **Grey-box Testing:** Seção "Padrões Grey-box" do framework
-- **API Contract Testing:** Seção "Teste de Contrato de API"
-- **Supertest Docs:** https://github.com/visionmedia/supertest
-- **Pact Docs:** https://docs.pact.io
-- **Wiremock Docs:** https://wiremock.org
+- **Framework de Testes (teoria/padrões Grey-box):** `docs/knowledge-base/frameworks/framework_testes.md`
+- **Agentes:** @test-engineer, @test-agent
+- **Docs:** [Supertest](https://github.com/visionmedia/supertest) · [Pact](https://docs.pact.io) · [Wiremock](https://wiremock.org)
 
 ## ⚠️ Notas Importantes
 
-- **Auto-detecção inteligente:** Analisa configurações e padrões do projeto
-- **Geração conservadora:** Cria testes básicos, desenvolvedor deve expandir
-- **Perspectiva Grey-box:** Foco em integração entre componentes (dev testando outro dev)
-- **Contract testing:** Valida contratos entre serviços (100% coverage conforme framework)
-- **Boundary testing:** Testa fronteiras de integração (timeouts, erros, limites)
-- **Fuzzing opcional:** Use `--fuzz` para testes de robustez
-- **Mock por padrão:** Isola testes de serviços externos, use `--mock-external false` para testes reais
-- **Integração com pipeline:** Testes gerados seguem padrões do projeto
+- **Geração conservadora:** cria testes básicos; o desenvolvedor expande
+- **Contract testing:** mira 100% de coverage de contratos (conforme métricas Grey-box da KB)
+- **Fuzzing:** opcional via `--fuzz`; testes gerados seguem padrões do projeto
 
 ---
 

@@ -4,6 +4,7 @@ description: |
   Adiciona todas as mudanças e faz commit rápido.
   Use para commits típicos no fluxo do Sistema Onion.
 model: sonnet
+allowed-tools: Bash(git *)
 category: git
 tags: [git, commit, fast]
 version: "3.0.0"

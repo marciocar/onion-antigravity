@@ -1,6 +1,6 @@
 # 📚 Índice Central de Documentação
 
-> **Última atualização**: 2026-05-15 | **Gerado por**: `/docs:build-index` | **Revisado**: auditoria manual
+> **Última atualização**: 2026-05-18 | **Gerado por**: `/docs:build-index` | **Revisado**: auditoria manual
 
 Bem-vindo ao índice central de documentação do projeto. Este documento serve como hub de navegação para toda a documentação disponível.
 
@@ -12,7 +12,7 @@ Este projeto é o **Sistema Onion** — um framework de comandos `.claude/` para
 
 - 🤖 **94 comandos** Claude Code em 11 categorias
 - 🎯 **49 agentes de IA especializados** em 9 categorias
-- 🧩 **1 skill** em `.claude/skills/` (`onion` — cérebro do sistema)
+- 🧩 **4 skills** em `.claude/skills/` (`onion` — cérebro do sistema; `onion-patterns`; `onion-validation`; `language-standards`)
 - 📚 **Knowledge Bases estruturadas** para consumo por IA
 - 🧅 **Skill + Comando `/onion`** — ponto de entrada inteligente com ativação automática
 - 🔗 **Task Manager Abstraction** plugável (Jira, ClickUp, Asana, Linear)
@@ -46,7 +46,7 @@ Este projeto é o **Sistema Onion** — um framework de comandos `.claude/` para
   - 3 em `test/` (unit, integration, e2e)
   - 1 em `development/`, 1 em `quick/`, 1 em `global/`
   - 2 no root: `onion.md`, `warm-up.md`
-- **1 skill** em `.claude/skills/onion/` (ativação automática)
+- **4 skills** em `.claude/skills/` (`onion`, `onion-patterns`, `onion-validation`, `language-standards`)
 - **49 agentes** IA distribuídos em:
   - 20 em `development/` (frontend, backend, infra, integrações)
   - 8 em `product/` (gestão e narrativa)
@@ -60,7 +60,7 @@ Este projeto é o **Sistema Onion** — um framework de comandos `.claude/` para
 - **64 arquivos** de documentação markdown
 - **94 comandos** em 11 categorias + root
 - **49 agentes** especializados em 9 categorias
-- **1 skill** (`.claude/skills/`)
+- **4 skills** (`.claude/skills/`)
 
 ---
 
@@ -226,27 +226,44 @@ Knowledge Bases estruturadas para consumo por IA e referência técnica:
 
 ## 🏗️ Meta Especificações
 
-Especificações de nível mais alto que servem como "constituição" do Sistema Onion:
+Especificações de nível mais alto que servem como "constituição" do Sistema Onion. **As 5 meta-specs L0 foram criadas em 2026-05-18** como parte do saneamento e ativam a validação via `@metaspec-gate-keeper`:
 
 - **[Índice de Meta Specs](meta-specs/index.md)** - Visão geral das meta especificações
-
-**Propósito:**
-- Definir princípios arquiteturais
-- Estabelecer padrões de código
-- Convenções de nomenclatura
-- Regras de integração
+- **[agents.md](meta-specs/agents.md)** ✨ NOVO - Padrões obrigatórios para agentes (YAML, categorias, naming, limites)
+- **[commands.md](meta-specs/commands.md)** ✨ NOVO - Padrões para comandos + **workflows faseados como invariante**
+- **[architecture.md](meta-specs/architecture.md)** ✨ NOVO - Estrutura de diretórios, framework instalável, dependências
+- **[code-standards.md](meta-specs/code-standards.md)** ✨ NOVO - Idioma, formatação, naming, estilo
+- **[integrations.md](meta-specs/integrations.md)** ✨ NOVO - Task Manager Abstraction como referência canônica, padrão de adapter, MCPs
 
 **Localização:** `docs/meta-specs/`
+
+---
+
+## 🚀 Aplicação em Projetos-alvo
+
+Guias de aplicação do Onion em projetos novos, legados ou regulados:
+
+- **[Guias de Aplicação — README](applying/README.md)** ✨ NOVO - Visão geral e árvore de decisão
+- **[Onion em Projeto Novo (Greenfield)](applying/applying-greenfield.md)** ✨ NOVO - Passo a passo desde `git init`
+- **[Onion em Projeto Legado](applying/applying-legacy.md)** ✨ NOVO - Engenharia reversa + migração gradual
+- **[Onion em Projeto Regulado](applying/applying-regulated.md)** ✨ NOVO - ISO 27001, ISO 22301, SOC2, PMBOK
 
 ---
 
 ## 📊 Análises e Planos
 
 ### Análises
+- **[Revisão Analítica do Sistema Onion — Maio/2026](analysis/onion-review-2026-05.md)** ✨ NOVO - Análise crítica completa sob a lente "framework template instalável"; documenta abandono de `.onion/`, plano v4.0 e `packages/onion-cli/`
+- **[Retrospectiva T2.6 — Validação das Meta-specs](analysis/metaspec-validation-2026-05-18.md)** ✨ NOVO - Validação das 5 meta-specs contra artefatos reais
+- **[Retrospectiva P1 — Saneamento Estrutural](analysis/p1-saneamento-retrospectiva-2026-05-18.md)** ✨ NOVO - Decisões registradas das tarefas T1.1-T1.5
+- **[Baseline de Verificação e Validação — Junho/2026](analysis/onion-vv-baseline-2026-06.md)** ✨ NOVO - Estado "antes" (tamanhos + conformidade de plataforma) do plano de V&V
+- **[Retrospectiva T3.2 — Validação de build-*-docs](analysis/t32-pilot-retrospectiva-2026-06.md)** ✨ NOVO - Auto-piloto que validou os comandos de geração de docs; resolve T3.6
 - **[Análise de Alternativas Unleash](analysis/unleash-alternatives-analysis.md)** - Análise comparativa
 
 ### Planos de Execução
-- Arquivos de planejamento em `docs/plans/`
+- **[Plano de Saneamento Onion 2026-05](plans/onion-saneamento-plan-2026-05.md)** ✨ NOVO - Roadmap executável das 19 recomendações da análise de maio/2026 (status: aprovado, em execução)
+- **[Onion v4 Epic](plans/onion-v4-epic.md)** ⚠️ HISTÓRICO - Plano abandonado em 2026-05-18
+- **[Onion v4 Migration Plan](plans/onion-v4-migration-plan.md)** ⚠️ HISTÓRICO - Plano abandonado em 2026-05-18
 
 ---
 

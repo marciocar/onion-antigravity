@@ -288,6 +288,8 @@ Ou simplesmente diga **"prosseguir com sugestões"** para usar minhas recomenda�
 
 ### FASE 3: DESIGN INTELIGENTE DO COMANDO
 
+> **OBRIGATÓRIO:** antes de projetar, **leia o catálogo de padrões** em `docs/knowledge-base/meta/command-creation-patterns.md` para obter o template da categoria escolhida, os anti-patterns a evitar, as best practices e o template rápido adequado à complexidade.
+
 Após o diálogo, construa o comando seguindo esta estrutura:
 
 #### 3.1. Definição de Identidade
@@ -904,424 +906,49 @@ Após criar o comando, **SEMPRE** documente:
 
 ## 🎯 Categorias de Comandos e Padrões
 
-### 📁 meta/ - Meta-Operações
-
-**Propósito:** Comandos que manipulam o próprio sistema de comandos e agentes
-
-**Padrões:**
-- Geralmente invocam agentes meta (`@agent-creator-specialist`, `@command-creator-specialist`)
-- Complexidade média a alta
-- Requerem diálogo com usuário
-- Geram artefatos (.md files)
-
-**Exemplos:**
-- `/meta/create-agent` - Criar novo agente
-- `/meta/create-command` - Criar novo comando
-- `/meta/update-docs` - Atualizar documentação do sistema
-
-**Template:**
-```markdown
-# Meta [Operação]
-
-Comando meta que [ação] do sistema.
-
-## Execução
-
-**Agente:** @[meta-agent]
-
-**Instruções:**
-```
-[Tarefa meta com parâmetros específicos]
-```
-```
-
----
-
-### 🔧 engineer/ - Engineering Workflows
-
-**Propósito:** Comandos para workflows de desenvolvimento (start, work, pr, etc.)
-
-**Padrões:**
-- Integram com ClickUp MCP (tasks)
-- Gerenciam sessions (.claude/sessions/)
-- Coordenam múltiplos agentes
-- Workflows complexos e iterativos
-
-**Exemplos:**
-- `/engineer/start` - Iniciar desenvolvimento
-- `/engineer/work` - Trabalhar em feature
-- `/engineer/pr` - Criar pull request
-- `/engineer/docs` - Gerar documentação
-
-**Template:**
-```markdown
-# Engineer [Operação]
-
-Comando de engenharia para [propósito].
-
-## Configuração
-
-### Validar Branch
-```bash
-CURRENT_BRANCH=$(git branch --show-current)
-[validações]
-```
-
-### Verificar Task ClickUp
-```bash
-TASK_ID=$(clickup_get_task_id_from_session)
-[validações]
-```
-
-## Execução
-
-### Step 1: Análise
-**Agente:** @research-agent
-[instruções]
-
-### Step 2: Implementação
-**Agente:** @[dev-agent]
-[instruções]
-
-### Step 3: Validação
-**Agente:** @code-reviewer
-[instruções]
-```
-
----
-
-### 📋 product/ - Product Management
-
-**Propósito:** Comandos para gestão de produto e criação de tasks
-
-**Padrões:**
-- Focam em ClickUp MCP
-- Criam/atualizam tasks, checklists, subtasks
-- Invocam `@product-agent` ou `@task-specialist`
-- Workflows de decomposição e especificação
-
-**Exemplos:**
-- `/product/task` - Criar task com decomposição
-- `/product/spec` - Especificar funcionalidade
-- `/product/feature` - Planejar feature completa
-- `/product/refine` - Refinar requisitos
-
-**Template:**
-```markdown
-# Product [Operação]
-
-Comando de gestão de produto para [propósito].
-
-## Análise
-
-**Questões a esclarecer:**
-- [Pergunta 1]
-- [Pergunta 2]
-
-## Execução
-
-### Step 1: Decomposição
-**Agente:** @task-specialist
-```
-Decomponha [funcionalidade] em:
-- Tasks principais
-- Subtasks
-- Checklists
-```
-
-### Step 2: Criação no ClickUp
-```bash
-# Criar task principal
-TASK_ID=$(clickup_create_task "$TASK_NAME" "$LIST_ID")
-
-# Criar subtasks
-[lógica de criação]
-```
-```
-
----
-
-### 🌿 git/ - Git Flow Operations
-
-**Propósito:** Comandos para operações Git Flow (features, releases, hotfixes)
-
-**Padrões:**
-- Invocam `@gitflow-specialist`
-- Validam estado do repositório
-- Operações de branch management
-- Integram com ClickUp (opcional)
-
-**Exemplos:**
-- `/git/init` - Inicializar Git Flow
-- `/git/feature/start` - Iniciar feature branch
-- `/git/feature/finish` - Finalizar feature
-- `/git/hotfix/start` - Iniciar hotfix
-
-**Template:**
-```markdown
-# Git [Operação]
-
-Comando Git Flow para [propósito].
-
-## Configuração
-
-### Validar Repositório
-```bash
-# Verificar se é repositório Git
-[validações]
-```
-
-## Execução
-
-**Agente:** @gitflow-specialist
-
-**Instruções:**
-```
-Execute [operação Git Flow]:
-- Branch: [nome]
-- Base: [base]
-- Validações: [lista]
-```
-
-## Validações
-
-- [ ] Branch criada corretamente
-- [ ] Sem conflitos
-- [ ] Working directory limpo
-```
-
----
-
-### 📜 compliance/ - Compliance & Audit
-
-**Propósito:** Comandos para geração de documentação de conformidade
-
-**Padrões:**
-- Invocam agentes de compliance específicos
-- Geram documentação estruturada
-- Seguem frameworks (ISO, SOC2, etc.)
-- Output em docs/compliance-context/
-
-**Exemplos:**
-- `/compliance/audit/iso27001` - Gerar docs ISO 27001
-- `/compliance/audit/soc2` - Gerar docs SOC2
-- `/compliance/generate/policies` - Gerar políticas
-
-**Template:**
-```markdown
-# Compliance [Operação]
-
-Comando de conformidade para [framework/padrão].
-
-## Execução
-
-**Agente:** @[compliance-agent]
-
-**Instruções:**
-```
-Gere documentação de [framework]:
-- Standard: [ISO/SOC2/etc]
-- Escopo: [descrição]
-- Output: docs/compliance-context/[categoria]/
-```
-
-## Validações
-
-- [ ] Documentos gerados corretamente
-- [ ] Formato audit-ready
-- [ ] Cross-references completos
-```
-
----
-
-### 📚 docs/ - Documentation Generation
-
-**Propósito:** Comandos para geração e atualização de documentação
-
-**Padrões:**
-- Invocam agentes de documentação
-- Geram markdown estruturado
-- Atualizam índices e referências
-- Output em docs/
-
-**Exemplos:**
-- `/docs/generate/api` - Gerar docs de API
-- `/docs/update/index` - Atualizar INDEX.md
-- `/docs/diagram/c4` - Gerar diagramas C4
-
-**Template:**
-```markdown
-# Docs [Operação]
-
-Comando de documentação para [propósito].
-
-## Execução
-
-**Agente:** @[docs-agent]
-
-**Instruções:**
-```
-Gere/atualize documentação:
-- Tipo: [API/Arquitetura/etc]
-- Formato: [Markdown/Diagram]
-- Output: [caminho]
-```
-```
+Cada categoria (`meta`, `engineer`, `product`, `git`, `compliance`, `docs`) tem propósito, padrões de integração e template de comando próprios. Ao criar um comando, **identifique a categoria** e aplique o template correspondente.
+
+- **meta/** — manipula o próprio sistema; invoca agentes meta; gera artefatos `.md`.
+- **engineer/** — workflows de dev; integra ClickUp + sessions; orquestra múltiplos agentes.
+- **product/** — gestão de produto; foco em ClickUp; invoca `@product-agent` / `@task-specialist`.
+- **git/** — operações Git Flow; invoca `@gitflow-specialist`; valida estado do repositório.
+- **compliance/** — docs de conformidade; segue frameworks (ISO, SOC2); output em `docs/compliance-context/`.
+- **docs/** — geração de documentação; invoca agentes de docs; output em `docs/`.
+
+➡️ **Templates completos por categoria** (com exemplos e estrutura de comando): `docs/knowledge-base/meta/command-creation-patterns.md` — seção "Categorias de Comandos e Padrões". **LEIA o KB** antes de instanciar o comando.
 
 ---
 
 ## 🚫 Anti-Patterns (O Que Evitar)
 
-### ❌ Anti-Pattern 1: Comando Genérico Demais
+Evite os 7 anti-patterns recorrentes ao criar comandos:
 
-```markdown
-# RUIM
-# Do Stuff
+1. **Comando genérico demais** — propósito vago, sem workflow.
+2. **Duplicação de funcionalidades** — refazer comando existente (ex: `/engineer/start`).
+3. **Confusão Terminal vs Claude Code Command** — comandos rodam no chat, não no terminal.
+4. **Instruções vagas para agentes** — sem contexto, parâmetros ou critérios.
+5. **Falta de validações** — bash sem checagens nem tratamento de erro.
+6. **Ausência de exemplos** — usuário não sabe como invocar.
+7. **Workflow não-acionável** — steps que não são executáveis.
 
-Faz várias coisas úteis.
-```
-
-**Por quê:** Não tem workflow claro, propósito vago
-**Correto:** Definir workflow específico e acionável
-
-### ❌ Anti-Pattern 2: Duplicação de Funcionalidades
-
-```markdown
-# RUIM - já existe /engineer/start
-# Start Development
-
-Inicia desenvolvimento de feature...
-```
-
-**Por quê:** Duplica comando existente
-**Correto:** Estender comando existente ou criar sub-comando especializado
-
-### ❌ Anti-Pattern 3: Confusão Terminal vs Claude Code Command
-
-```markdown
-# RUIM
-## Uso
-
-No terminal:
-```bash
-$ /engineer/work
-```
-```
-
-**Por quê:** Claude Code Commands NÃO são executados no terminal
-**Correto:** Sempre especificar "No chat da Claude Code"
-
-### ❌ Anti-Pattern 4: Instruções Vagas para Agentes
-
-```markdown
-# RUIM
-**Agente:** @code-reviewer
-
-**Instruções:**
-```
-Revise o código
-```
-```
-
-**Por quê:** Falta contexto e especificidade
-**Correto:** Instruções detalhadas com parâmetros claros
-
-### ❌ Anti-Pattern 5: Falta de Validações
-
-```markdown
-# RUIM
-## Execução
-
-[comandos bash sem verificações]
-```
-
-**Por quê:** Erros não são tratados
-**Correto:** Validações entre steps, tratamento de erros
-
-### ❌ Anti-Pattern 6: Ausência de Exemplos
-
-**Por quê:** Usuários não sabem como invocar
-**Correto:** Mínimo 2 exemplos práticos
-
-### ❌ Anti-Pattern 7: Workflow Não-Acionável
-
-```markdown
-# RUIM
-## Execução
-
-Faça análise e implemente solução.
-```
-
-**Por quê:** Instruções não são executáveis
-**Correto:** Steps específicos com ações claras
+➡️ **Exemplos detalhados de cada anti-pattern e correção**: `docs/knowledge-base/meta/command-creation-patterns.md` — seção "Anti-Patterns".
 
 ---
 
 ## 💡 Best Practices
 
-### ✅ 1. Commands Discovery First
+Princípios mandatórios na criação de comandos:
 
-**SEMPRE** começe descobrindo comandos existentes:
-- Listar por categoria
-- Ler comandos similares
-- Identificar padrões
-- Validar não-duplicação
+1. **Commands Discovery First** — descubra comandos existentes antes de criar.
+2. **Dialogue Before Creating** — confirme workflow, categoria e integrações com o usuário.
+3. **Clear Agent Instructions** — contexto, parâmetros, formato de resposta e critérios.
+4. **Integration by Design** — defina agentes, serviços e comandos relacionados.
+5. **Executable Workflows** — steps claros, validações e tratamento de erros.
+6. **Examples Are Essential** — mínimo 2 exemplos práticos.
+7. **Quality Checklist Mandatory** — valide antes de finalizar.
+8. **Claude Code Commands Clarity** — sempre deixar claro que rodam no chat.
 
-### ✅ 2. Dialogue Before Creating
-
-**SEMPRE** dialogue com usuário:
-- Confirme workflow proposto
-- Valide categoria
-- Esclareça integrações
-- Obtenha aprovação
-
-### ✅ 3. Clear Agent Instructions
-
-Instruções para agentes devem:
-- Ter contexto completo
-- Especificar parâmetros
-- Definir formato de resposta
-- Incluir critérios de sucesso
-
-### ✅ 4. Integration by Design
-
-**TODO** comando deve saber:
-- Quais agentes invocar
-- Quais serviços integrar (ClickUp, Git)
-- Quais comandos são relacionados
-- Quando delegar vs. executar
-
-### ✅ 5. Executable Workflows
-
-**WORKFLOWS** devem ser acionáveis:
-- Steps sequenciais e claros
-- Validações entre steps
-- Tratamento de erros
-- Checkpoints de confirmação
-
-### ✅ 6. Examples Are Essential
-
-**EXEMPLOS** são obrigatórios:
-- Mínimo 2 exemplos práticos
-- Cobrir casos comuns e avançados
-- Mostrar input + workflow + output
-- Demonstrar invocação correta
-
-### ✅ 7. Quality Checklist Mandatory
-
-**VALIDAÇÃO** não é opcional:
-- Checklist completo antes de finalizar
-- Teste de invocação no chat Claude Code
-- Documentação de integração
-- Aprovação de qualidade
-
-### ✅ 8. Claude Code Commands Clarity
-
-**SEMPRE** deixar claro:
-- Comandos são executados no chat
-- NÃO são comandos de terminal
-- Usar formato `/categoria/comando`
-- Incluir exemplos de invocação
+➡️ **Detalhamento de cada best practice**: `docs/knowledge-base/meta/command-creation-patterns.md` — seção "Best Practices".
 
 ---
 
@@ -1377,105 +1004,13 @@ graph TD
 
 ## 🎨 Templates Rápidos por Tipo
 
-### Template 1: Comando Simples (Delegação a Agente)
+Três templates prontos cobrem os níveis de complexidade ao instanciar um comando:
 
-```markdown
-# [Título do Comando]
+- **Template 1 — Simples:** delegação direta a um agente (`## Execução` → `**Agente:**` + instruções).
+- **Template 2 — Médio:** workflow com configuração bash + steps + agente + validações.
+- **Template 3 — Complexo:** orquestração de múltiplos agentes + integração ClickUp + documentação.
 
-[Descrição simples]
-
-## Quando Usar
-
-✅ Use quando: [situação]
-❌ NÃO use quando: [situação - usar outro comando]
-
-## Execução
-
-**Agente:** @[nome-agente]
-
-**Instruções:**
-```
-[Tarefa específica com parâmetros]
-```
-
-## Próximos Passos
-
-- `/comando-relacionado` - [quando usar]
-```
-
-### Template 2: Comando Médio (Workflow + Agente)
-
-```markdown
-# [Título do Comando]
-
-[Descrição]
-
-## Configuração
-
-```bash
-# Validações iniciais
-[código]
-```
-
-## Execução
-
-### Step 1: Setup
-[ações iniciais]
-
-### Step 2: Processamento
-**Agente:** @[agente]
-```
-[instruções]
-```
-
-### Step 3: Finalização
-[ações finais]
-
-## Validações
-
-- [ ] [Checkpoint 1]
-- [ ] [Checkpoint 2]
-```
-
-### Template 3: Comando Complexo (Orquestração)
-
-```markdown
-# [Título do Comando]
-
-[Descrição completa]
-
-## Análise
-
-**Questões:**
-- [Pergunta 1]
-- [Pergunta 2]
-
-## Execução
-
-### Step 1: Análise
-**Agente:** @research-agent
-[instruções]
-
-### Step 2: Design
-**Agente:** @architect-agent
-[instruções]
-
-### Step 3: Implementação
-**Agente:** @dev-agent
-[instruções]
-
-### Step 4: Validação
-**Agente:** @reviewer-agent
-[instruções]
-
-## Integração ClickUp
-
-[lógica de integração]
-
-## Documentação
-
-[o que documentar]
-```
+➡️ **Templates completos prontos para copiar**: `docs/knowledge-base/meta/command-creation-patterns.md` — seção "Templates Rápidos por Tipo". **LEIA o KB** e escolha o template conforme a complexidade definida na FASE 2.
 
 ---
 
@@ -1489,6 +1024,7 @@ graph TD
 **Comandos Existentes:** `.claude/commands/` (60+ comandos)
 **Agentes Disponíveis:** `.claude/agents/` (24+ agentes)
 **Templates:** `.claude/commands/common/templates/`
+**Catálogo de Padrões (KB):** `docs/knowledge-base/meta/command-creation-patterns.md` — templates por categoria, anti-patterns, best practices e templates rápidos. **LEIA antes de projetar/implementar o comando.**
 
 **Padrão de Nome:** `/categoria/comando` ou `/categoria/sub/comando`
 **Extensão:** `.md`

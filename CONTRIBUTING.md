@@ -1,418 +1,175 @@
-# Contributing to Onion System
+# Contribuindo com o Sistema Onion 🧅
 
-First off, thank you for considering contributing to Onion! 🧅
+Obrigado por considerar contribuir com o Onion!
 
-This document provides guidelines for contributing to the Onion v4.0 Multi-Context Development Orchestrator.
+O Onion é um **framework template em `.claude/`** — instalável em qualquer
+projeto (novo, legado ou regulado) para orquestrar produto, engenharia e
+compliance com Claude Code. **Não é produto npm, não é distribuído publicamente
+e não tem CLI standalone.** Plataforma única: **Claude Code**.
 
----
-
-## 📋 Table of Contents
-
-- [Code of Conduct](#code-of-conduct)
-- [Getting Started](#getting-started)
-- [Development Setup](#development-setup)
-- [How to Contribute](#how-to-contribute)
-- [Pull Request Process](#pull-request-process)
-- [Coding Standards](#coding-standards)
-- [Testing Guidelines](#testing-guidelines)
-- [Documentation](#documentation)
-- [Community](#community)
+Por isso, contribuir aqui é **escrever Markdown + YAML** (comandos, agentes,
+skills, knowledge bases e documentação) — não código JavaScript/Node.
 
 ---
 
-## 📜 Code of Conduct
+## 📋 Índice
 
-This project adheres to a Code of Conduct. By participating, you are expected to uphold this code.
-
-### Our Standards
-
-- **Be Respectful**: Treat everyone with respect
-- **Be Collaborative**: Work together constructively
-- **Be Inclusive**: Welcome diverse perspectives
-- **Be Professional**: Maintain professionalism in all interactions
+- [Código de Conduta](#-código-de-conduta)
+- [Pré-requisitos](#-pré-requisitos)
+- [Estrutura do projeto](#-estrutura-do-projeto)
+- [Tipos de contribuição](#-tipos-de-contribuição)
+- [Padrões (meta-specs)](#-padrões-meta-specs)
+- [Fluxo de Pull Request](#-fluxo-de-pull-request)
+- [Idioma e commits](#-idioma-e-commits)
+- [Validação](#-validação)
 
 ---
 
-## 🚀 Getting Started
+## 📜 Código de Conduta
 
-### Prerequisites
+Seja respeitoso, colaborativo, inclusivo e profissional em todas as interações.
 
-- Node.js >= 16.0.0
-- pnpm (recommended) or npm
-- Git
-- Claude Code (recommended for testing)
+---
 
-### Quick Start
+## 🚀 Pré-requisitos
+
+- **Git**
+- **Claude Code** (plataforma única do framework)
+
+Não há toolchain de build: o Onion é interpretado em runtime pelo Claude Code a
+partir de `.claude/` (Markdown + YAML). Não há `package.json`, Node ou pnpm.
 
 ```bash
-# 1. Fork and clone the repository
+# 1. Fork e clone
 git clone https://github.com/your-username/onion-claude.git
 cd onion-claude
 
-# 2. Open in Claude Code (or another supported IDE)
-#    O Sistema Onion vive em .claude/ — comandos e agentes carregam automaticamente.
+# 2. Abra no Claude Code — comandos, agentes e skills carregam automaticamente.
+#    Para começar: /warm-up e depois /onion
 ```
 
 ---
 
-## 🛠️ Development Setup
-
-### Project Structure
+## 🛠️ Estrutura do projeto
 
 ```
 onion-claude/
-├── .claude/                # Sistema Onion operacional (comandos, agentes, regras)
-│   ├── commands/           # Comandos organizados por categoria
+├── .claude/                # Sistema Onion operacional
+│   ├── commands/           # Comandos por categoria (Markdown + frontmatter)
 │   ├── agents/             # Agentes especializados por domínio
-│   ├── rules/              # Regras e convenções
-│   └── utils/              # Utilitários (incl. task-manager abstraction)
-├── docs/                   # Documentação
-│   ├── meta-specs/         # Spec as Code (L0 — constituição)
-│   ├── knowledge-base/           # Knowledge bases estruturadas
+│   ├── skills/             # Skills (cérebro reutilizável)
+│   ├── utils/              # Utilitários (incl. task-manager abstraction)
+│   └── settings.json       # Hooks + permissions (versionado)
+├── docs/                   # Documentação (Spec as Code)
+│   ├── meta-specs/         # L0 — "constituição" do framework
+│   ├── knowledge-base/     # Knowledge bases estruturadas
+│   ├── business-context/   # Gerado por /docs:build-business-docs
+│   ├── technical-context/  # Gerado por /docs:build-tech-docs
 │   └── onion/              # Guias e referências
 └── CLAUDE.md               # Project rules carregados pelo Claude Code
 ```
 
 ---
 
-## 🤝 How to Contribute
+## 🤝 Tipos de contribuição
 
-### Types of Contributions
-
-We welcome the following types of contributions:
-
-#### 🐛 Bug Reports
-- Use GitHub Issues
-- Include: version, command executed, error message, expected behavior
-- Provide minimal reproduction steps
-
-#### ✨ Feature Requests
-- Use GitHub Discussions
-- Describe the problem you're solving
-- Explain your proposed solution
-- Consider backward compatibility
-
-#### 📚 Documentation
-- Fix typos
-- Improve clarity
-- Add examples
-- Translate to other languages
-
-#### 💻 Code Contributions
-- Bug fixes
-- New features
-- Performance improvements
-- Test coverage improvements
+- **🐛 Bugs** — abra uma issue com: comando/agente envolvido, o que aconteceu,
+  comportamento esperado, passos de reprodução.
+- **✨ Novos comandos/agentes/skills** — use os criadores do próprio framework:
+  `/meta:create-command`, `/meta:create-agent`, `/meta:create-skill`. Eles já
+  aplicam os padrões das meta-specs.
+- **📚 Documentação e knowledge bases** — correções, clareza, exemplos,
+  `/meta:create-knowledge-base`.
+- **🔌 Integrações (Task Manager)** — novos adapters seguindo o padrão SDAAL em
+  `.claude/utils/task-manager/` (ver `docs/meta-specs/integrations.md`).
 
 ---
 
-## 🔀 Pull Request Process
+## 📏 Padrões (meta-specs)
 
-### 1. Create a Feature Branch
+As meta-specs L0 em `docs/meta-specs/` são a **fonte canônica** de padrões.
+Consulte antes de criar/alterar artefatos:
+
+| Você vai mexer em… | Consulte |
+|---|---|
+| Agente | [`agents.md`](docs/meta-specs/agents.md) — YAML obrigatório, categorias, limites de tamanho |
+| Comando | [`commands.md`](docs/meta-specs/commands.md) — frontmatter, `allowed-tools` (§1.3), workflows faseados, limites (§5) |
+| Arquitetura/estrutura | [`architecture.md`](docs/meta-specs/architecture.md) — framework instalável, dependências |
+| Idioma/estilo/naming | [`code-standards.md`](docs/meta-specs/code-standards.md) |
+| Integração externa | [`integrations.md`](docs/meta-specs/integrations.md) — adapters, `.env`, `.mcp.json` |
+
+Pontos-chave:
+
+- **Tamanho**: agente ≤1.200 linhas (hard >1.500); comando ≤500 (hard >800).
+  Excedeu? Extraia conteúdo de referência para `docs/knowledge-base/` e mantenha
+  o artefato como orquestrador enxuto.
+- **`allowed-tools`** em comandos sensíveis (git/escrita/Task Manager) — escopo
+  mínimo (ver `commands.md §1.3`).
+- **Frontmatter YAML obrigatório** em comandos (`description`) e agentes
+  (`name`, `description`, `tools`, `model`).
+- **Sem assunções sobre o projeto-alvo**: nada de path absoluto; o framework é
+  instalável em qualquer repo.
+
+---
+
+## 🔀 Fluxo de Pull Request
+
+1. **Branch** a partir de `main` (GitFlow): `feature/...` ou `fix/...`
+   (ou use `/git:feature:start`).
+2. **Mude** seguindo as meta-specs; atualize docs/índices afetados.
+3. **Valide** localmente (ver abaixo).
+4. **Commit** com Conventional Commits **em pt-BR** (ver próxima seção).
+5. **Abra o PR** com título claro, descrição do quê/porquê, issues relacionadas
+   e breaking changes (se houver).
+
+---
+
+## 🌍 Idioma e commits
+
+Convenção do Onion (ver `code-standards.md`):
+
+- **Código, nomes de arquivo, slugs, branches, variáveis**: inglês.
+- **Comentários, documentação, mensagens ao usuário**: português brasileiro.
+- **Mensagens de commit**: português brasileiro, seguindo
+  [Conventional Commits](https://www.conventionalcommits.org/).
 
 ```bash
-# From main branch
-git checkout -b feature/your-feature-name
-
-# Or for bug fixes
-git checkout -b fix/bug-description
+git commit -m "feat(product): adiciona comando de priorização de backlog"
+git commit -m "fix(task-manager): corrige detecção de provider ausente no .env"
+git commit -m "docs(meta-specs): esclarece convenção de allowed-tools"
 ```
 
-### 2. Make Your Changes
-
-- Follow [Coding Standards](#coding-standards)
-- Add tests for new features
-- Update documentation as needed
-- Keep commits atomic and descriptive
-
-### 3. Commit Your Changes
-
-We follow [Conventional Commits](https://www.conventionalcommits.org/):
-
-```bash
-# Feature
-git commit -m "feat(cli): add support for Windsurf IDE"
-
-# Bug fix
-git commit -m "fix(migrator): correct symlink paths on Windows"
-
-# Documentation
-git commit -m "docs(readme): update installation instructions"
-
-# Tests
-git commit -m "test(core): add validator tests for context names"
-
-# Refactoring
-git commit -m "refactor(generator): extract method for IDE loader generation"
-```
-
-**Commit message format**:
-```
-<type>(<scope>): <subject>
-
-[optional body]
-
-[optional footer]
-```
-
-**Types**:
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation
-- `test`: Tests
-- `refactor`: Code refactoring
-- `style`: Formatting
-- `chore`: Maintenance
-- `perf`: Performance
-
-### 4. Push and Create PR
-
-```bash
-git push origin feature/your-feature-name
-```
-
-Then create a Pull Request on GitHub with:
-- **Clear title** following conventional commits
-- **Description** of what changed and why
-- **Related issues** (e.g., "Fixes #123")
-- **Screenshots** (if UI changes)
-- **Breaking changes** (if any)
-
-### 5. PR Review Process
-
-- All PRs require at least 1 approval
-- CI must pass (tests, linting)
-- Address review comments
-- Keep PR scope focused (single responsibility)
+Tipos: `feat`, `fix`, `docs`, `refactor`, `chore`, `test`, `style`, `perf`.
 
 ---
 
-## 📏 Coding Standards
+## 🧪 Validação
 
-### JavaScript/Node.js
+Antes de abrir o PR:
 
-#### ES6 Modules
-```javascript
-// ✅ Good
-import fs from 'fs-extra';
-export function myFunction() { }
+- `/validate/workflow` — completude de workflows.
+- Skills `onion-validation` e `onion-patterns` — conformidade de artefatos
+  (YAML, categorias, limites de tamanho, naming).
+- `@metaspec-gate-keeper` — validação de conformidade arquitetural contra as
+  5 meta-specs.
 
-// ❌ Bad
-const fs = require('fs-extra');
-module.exports = { myFunction };
-```
+Checklist:
 
-#### Naming Conventions
-```javascript
-// ✅ Good
-const userName = 'John';
-function getUserById(id) { }
-class UserProfile { }
-
-// ❌ Bad
-const user_name = 'John';
-function get_user_by_id(id) { }
-class user_profile { }
-```
-
-#### Function Size
-- Keep functions < 50 lines
-- Single responsibility principle
-- Extract complex logic to separate functions
-
-#### Comments
-```javascript
-/**
- * Brief description of function
- * 
- * @param {string} userId - User ID
- * @returns {Promise<User>} User object
- */
-async function getUser(userId) {
-  // Implementation comment (in Portuguese for Onion project)
-  // Busca usuário no banco de dados
-}
-```
-
-### Onion-Specific Standards
-
-#### Command Files (Markdown)
-```yaml
----
-name: command-name
-description: Brief description
-model: sonnet
-category: business|technical|core
-tags: [tag1, tag2]
-version: "4.0.0"
-updated: "YYYY-MM-DD"
-level: starter|intermediate|advanced
-context: business|technical|core
----
-```
-
-#### Agent Files (Markdown)
-```yaml
----
-name: agent-name
-description: Agent specialization
-model: sonnet
-category: business|technical|meta
-tags: [tag1, tag2]
-expertise: [area1, area2]
-version: "4.0.0"
-updated: "YYYY-MM-DD"
-context: business|technical|core
----
-```
+- [ ] Segue as meta-specs aplicáveis.
+- [ ] Frontmatter YAML correto.
+- [ ] Dentro dos limites de tamanho (ou refatorado com extração para KB).
+- [ ] Documentação/índices atualizados (`/docs:build-index` se necessário).
+- [ ] Commits em pt-BR, Conventional Commits.
 
 ---
 
-## 🧪 Testing Guidelines
+## 🔗 Links úteis
 
-### Test Structure
-
-```javascript
-describe('Module Name', () => {
-  beforeEach(() => {
-    // Setup
-  });
-
-  afterEach(() => {
-    // Cleanup
-  });
-
-  test('should do something specific', () => {
-    // Arrange
-    const input = 'test';
-    
-    // Act
-    const result = myFunction(input);
-    
-    // Assert
-    expect(result).toBe('expected');
-  });
-});
-```
-
-### Coverage Goals
-
-- **Core modules**: 90%+ coverage
-- **Commands**: 70%+ coverage
-- **Utilities**: 80%+ coverage
-
-### Test Types
-
-1. **Unit Tests**: Test individual functions
-2. **Integration Tests**: Test module interactions
-3. **E2E Tests**: Test complete workflows (future)
+- [Identidade e visão geral (README)](README.md)
+- [Índice da documentação](docs/INDEX.md)
+- [Meta-specs (constituição)](docs/meta-specs/index.md)
+- [Guias de aplicação](docs/applying/) — greenfield, legado, regulado
 
 ---
 
-## 📚 Documentation
-
-### What to Document
-
-- **New features**: How to use, examples
-- **Breaking changes**: Migration guide
-- **Complex logic**: Inline comments
-- **APIs**: JSDoc for all public functions
-
-### Documentation Locations
-
-- `docs/` - User-facing documentation (incluindo `meta-specs/`, `business-context/`, `technical-context/`, `knowledge-base/`, `onion/`)
-- `README.md` - Project overview
-- `.claude/sessions/` - Development sessions
-- Inline JSDoc - Code documentation
-
-### Documentation Style
-
-- **Language**: English for code, Portuguese for comments/docs (Onion convention)
-- **Format**: Markdown
-- **Examples**: Always include practical examples
-- **Code blocks**: Use syntax highlighting
-
----
-
-## 🌍 Community
-
-### Communication Channels
-
-- **GitHub Issues**: Bug reports, feature requests
-- **GitHub Discussions**: Questions, ideas, general discussion
-- **Discord**: Real-time chat (coming soon)
-
-### Getting Help
-
-- Check existing issues and discussions first
-- Provide detailed information when asking questions
-- Be patient and respectful
-
-### Recognition
-
-Contributors will be recognized in:
-- `CONTRIBUTORS.md` file
-- Release notes
-- Project documentation
-
----
-
-## 🏆 Recognition Levels
-
-### 🥉 Contributor
-- 1+ merged PR
-
-### 🥈 Regular Contributor
-- 5+ merged PRs
-- Consistent quality contributions
-
-### 🥇 Core Contributor
-- 20+ merged PRs
-- Significant feature contributions
-- Help with code reviews
-
----
-
-## 📝 Checklist for Contributors
-
-Before submitting a PR, ensure:
-
-- [ ] Code follows project standards
-- [ ] Tests added/updated (if applicable)
-- [ ] All tests pass locally
-- [ ] Documentation updated (if applicable)
-- [ ] Commit messages follow conventional commits
-- [ ] PR description is clear and complete
-- [ ] No breaking changes (or documented if yes)
-
----
-
-## 🔗 Useful Links
-
-- [Onion v4 Epic](docs/plans/onion-v4-epic.md)
-- [Release Notes](docs/onion/RELEASE-NOTES-v4.0-beta.md)
-- [Level System Guide](docs/onion/levels-system.md)
-- [Índice da Documentação](docs/INDEX.md)
-
----
-
-## ❓ Questions?
-
-If you have questions about contributing:
-
-1. Check existing documentation
-2. Search GitHub Issues
-3. Ask in GitHub Discussions
-4. Join our Discord (coming soon)
-
----
-
-**Thank you for contributing to Onion! 🧅🚀**
-
-Your contributions help make development more efficient and enjoyable for everyone.
-
----
-
-**Last updated**: 2025-12-20  
-**Version**: 1.0.0
-
+**Obrigado por contribuir com o Onion! 🧅**

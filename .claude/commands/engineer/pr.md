@@ -2,6 +2,7 @@
 name: pr
 description: Criar Pull Request com integração GitFlow e sync automático.
 model: sonnet
+allowed-tools: Bash(git *) Bash(gh *) Read Edit Write Grep Glob
 category: engineer
 tags: [pr, gitflow, workflow]
 version: "3.0.0"

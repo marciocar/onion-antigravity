@@ -60,7 +60,12 @@ related_agents:
 
 # 🧮 Estimativa de QA Story Points
 
-Calcula QA Story Points usando a fórmula exata do Framework de Testes (`docs/knowledge-base/frameworks/framework_testes.md`), incluindo análise contextual inteligente, breakdown por perspectiva e sugestões de técnicas.
+Calcula QA Story Points usando a fórmula exata do Framework de Testes, com análise contextual inteligente, breakdown por perspectiva e sugestões de técnicas.
+
+> **Base de conhecimento (carregue antes de calcular):**
+> - **Conceito canônico** — `docs/knowledge-base/frameworks/framework_testes.md`, seção "QA Story Points - Sistema de Estimativa" (3 dimensões, fórmula, escala de conversão para horas, padrões White/Grey/Black-box).
+> - **Tabelas determinísticas de cálculo, keywords, distribuição por tipo e técnicas** — `docs/knowledge-base/frameworks/qa-story-points.md`.
+> - **Operacionalização para auditoria** (validação de discrepância, distribuição por complexidade) — `docs/knowledge-base/frameworks/test-strategy-scoring.md`.
 
 ## 🎯 Objetivo
 
@@ -73,346 +78,59 @@ Fornecer estimativas precisas de esforço de teste através de:
 
 ## ⚡ Fluxo de Execução
 
-### Passo 1: Carregar Framework de Testes (OBRIGATÓRIO)
+### Passo 1: Carregar referências (OBRIGATÓRIO)
 
-**CRÍTICO:** Sempre ler o framework antes de qualquer cálculo:
+Ler antes de qualquer cálculo:
 
 ```bash
-# Ler framework completo
-read_file docs/knowledge-base/frameworks/framework_testes.md
+read_file docs/knowledge-base/frameworks/framework_testes.md       # conceito + fórmula + conversão p/ horas
+read_file docs/knowledge-base/frameworks/qa-story-points.md        # tabelas de cálculo, keywords, técnicas
 ```
 
-**Extrair e armazenar em memória:**
-- Seção "QA Story Points - Sistema de Estimativa" (linhas ~217-330)
-- Fórmula exata: `QA Points = Complexidade Base + Ajuste de Risco + Ajuste de Tipo`
-- Escalas de complexidade, risco e tipo
-- Distribuições por perspectiva (White/Grey/Black-box)
-- Técnicas por tipo de teste
+SE `framework_testes.md` não encontrado:
+> ❌ ERRO: Framework de testes não encontrado. 💡 Verifique se o arquivo existe e tente novamente.
 
-**Validar leitura:**
-```markdown
-SE arquivo não encontrado:
-  ❌ ERRO: Framework de testes não encontrado em docs/knowledge-base/frameworks/framework_testes.md
-  💡 Verifique se o arquivo existe e tente novamente
-```
+### Passo 2: Análise contextual da descrição
 
-### Passo 2: Análise Contextual da Descrição
-
-#### 2.1. Detecção de Keywords
-
-**Analisar descrição para detectar indicadores:**
-
-```markdown
-## 🔍 Análise de Keywords
-
-**Complexidade:**
-- "multiple APIs" → +1 complexity
-- "third-party integration" → +1 complexity
-- "new technology" → +1 complexity
-- "legacy system" → +1 complexity + 1 risk
-
-**Risco:**
-- "payment", "gateway", "financial" → +2 risk
-- "third-party service" → +1 risk
-- "critical user flow" → +2 risk
-- "security", "auth", "authentication" → +2 risk
-- "data", "personal", "LGPD" → +2 risk
-
-**Tipo de Teste (Inferência):**
-- "API", "endpoint", "contract" → integration/api
-- "form", "button", "UI", "interface" → ui
-- "login", "checkout", "user journey", "flow" → e2e
-- "load", "stress", "performance" → performance
-- "security", "vulnerability", "penetration" → security
-- "manual", "exploratory" → manual
-```
-
-#### 2.2. Inferência de Parâmetros
-
-**SE parâmetros não fornecidos, inferir da descrição:**
-
-```markdown
-## 📊 Inferência Automática
-
-**Complexidade:**
-- SE keywords de complexidade detectadas:
-  - 1 keyword → medium
-  - 2+ keywords → complex
-- SE nenhuma keyword → medium (default)
-
-**Risco:**
-- SE keywords de risco crítico detectadas → critical
-- SE keywords de risco alto detectadas → high
-- SE keywords de risco médio detectadas → medium
-- SE nenhuma keyword → medium (default)
-
-**Tipo:**
-- SE keywords de tipo detectadas → usar tipo inferido
-- SE nenhuma keyword → integration (default)
-```
+1. **Detectar keywords** de complexidade, risco e tipo — usar o "Mapa de Detecção de Keywords" (`qa-story-points.md` §2).
+2. **Inferir parâmetros** não fornecidos a partir das keywords; aplicar os defaults da §2 quando nenhuma keyword for detectada.
 
 ### Passo 3: Cálculo de QA Story Points
 
-#### 3.1. Aplicar Fórmula Exata
+Aplicar a fórmula `QA Points = Complexidade Base + Ajuste de Risco + Ajuste de Tipo` usando os **valores determinísticos** da `qa-story-points.md` §1 (sem desvios). Somar ajustes contextuais de keywords (ex.: `third-party integration` +1 complexity; `legacy system` +1 complexity +1 risk).
 
-**CRÍTICO:** Usar valores exatos do framework, sem desvios:
+Converter o total para horas pela escala do framework (`framework_testes.md`), aplicando os fatores de ajuste quando relevantes.
 
-```markdown
-## 🧮 Cálculo QA Story Points
+**Exemplo:** medium (4) + context (+1) + high risk (+3) + integration (+2) = **10 QA Story Points** ≈ 14-18h.
 
-**Fórmula:** QA Points = Complexidade Base + Ajuste de Risco + Ajuste de Tipo
+### Passo 4: Breakdown multi-perspectiva (SE `--breakdown`)
 
-### Complexidade Base (escolher valor médio do range):
-- simple: 1-2 pontos → usar 1.5 (arredondar para 2)
-- medium: 3-5 pontos → usar 4
-- complex: 5-8 pontos → usar 6.5 (arredondar para 7)
-- epic: 8-13 pontos → usar 10.5 (arredondar para 11)
+Distribuir o total pelos percentuais White/Grey/Black-box do tipo de teste (`qa-story-points.md` §3). Reportar pontos, horas e percentual por perspectiva.
 
-### Ajuste de Risco (escolher valor médio do range):
-- low: +0 pontos
-- medium: +1-2 pontos → usar +1.5 (arredondar para +2)
-- high: +2-3 pontos → usar +2.5 (arredondar para +3)
-- critical: +3-5 pontos → usar +4
+### Passo 5: Sugestões de técnicas (SE `--suggest-techniques`)
 
-### Ajuste de Tipo (escolher valor médio do range):
-- unit: +0-1 pontos → usar +0.5 (arredondar para +1)
-- integration: +1-2 pontos → usar +1.5 (arredondar para +2)
-- ui: +2-3 pontos → usar +2.5 (arredondar para +3)
-- api: +1-2 pontos → usar +1.5 (arredondar para +2)
-- e2e: +3-4 pontos → usar +3.5 (arredondar para +4)
-- performance: +2-4 pontos → usar +3
-- security: +3-5 pontos → usar +4
-- manual: +1-3 pontos → usar +2
+Listar as técnicas do tipo de teste a partir de `qa-story-points.md` §4 (detalhe técnico no framework). Não inventar técnicas fora do framework.
 
-### Ajuste Contextual (opcional):
-- SE keywords detectadas → aplicar ajustes adicionais
-- "third-party integration" → +1 complexity
-- "legacy system" → +1 complexity + 1 risk
+### Passo 6: Integração com Task Manager (SE `--task-id`)
+
+1. **Detectar provedor:** usar `{{task-manager}}` se explícito; senão inferir pelo formato do task-id (`CU-` → clickup, `PROJ-` → jira) ou por `TASK_MANAGER_PROVIDER` no `.env`. Se nada detectado → continuar apenas com output local.
+2. **Buscar a task** pelo adapter apropriado e validar que existe; ler story points atuais.
+3. **Atualizar (SE `--update`):** gravar o custom field "QA Story Points" (ou "Story Points") via MCP do provedor:
+   - ClickUp: `mcp_ClickUp_clickup_get_task` para obter o ID do custom field, depois `mcp_ClickUp_clickup_update_task` com `custom_fields: [{ id, value: totalPoints }]`; comentar a análise com `mcp_ClickUp_clickup_create_task_comment`.
+   - Asana/Jira: usar as tools `mcp_asana_*` / API Jira com custom field equivalente, seguindo o mesmo padrão.
+   - Se o custom field não existir: comentar a estimativa e sugerir criar o campo.
+
+**Template de comentário (Unicode):**
+
 ```
-
-#### 3.2. Calcular Total
-
-```markdown
-## 📊 Resultado do Cálculo
-
-**Exemplo:**
-- Complexidade Base: medium = 4 pontos
-- Context Adjustment: +1 ponto (third-party integration)
-- Risk Adjustment: high = +3 pontos
-- Type Adjustment: integration = +2 pontos
-- **Total: 10 QA Story Points**
-
-**Estimativa de Esforço:**
-- 10 pontos = 14-18 horas (baseado na escala do framework)
-```
-
-### Passo 4: Breakdown Multi-Perspectiva
-
-**SE `--breakdown` fornecido:**
-
-```markdown
-## 🎭 Multi-Perspective Breakdown
-
-**Distribuição por tipo de teste (do framework):**
-
-### Unit Tests:
-- White-box: 70%
-- Grey-box: 20%
-- Black-box: 10%
-
-### Integration Tests:
-- White-box: 30%
-- Grey-box: 60%
-- Black-box: 10%
-
-### UI Tests:
-- White-box: 20%
-- Grey-box: 30%
-- Black-box: 50%
-
-### API Tests:
-- White-box: 40%
-- Grey-box: 50%
-- Black-box: 10%
-
-### E2E Tests:
-- White-box: 10%
-- Grey-box: 30%
-- Black-box: 60%
-
-### Performance Tests:
-- White-box: 30%
-- Grey-box: 40%
-- Black-box: 30%
-
-### Security Tests:
-- White-box: 25%
-- Grey-box: 35%
-- Black-box: 40%
-
-**Cálculo:**
-- Total QA Points: [X]
-- White-box: [X * %] pontos | [horas] horas | [%]%
-- Grey-box: [X * %] pontos | [horas] horas | [%]%
-- Black-box: [X * %] pontos | [horas] horas | [%]%
-```
-
-### Passo 5: Sugestões de Técnicas
-
-**SE `--suggest-techniques` fornecido:**
-
-```markdown
-## 💡 Técnicas Sugeridas (do framework)
-
-### Por Tipo de Teste:
-
-**Unit:**
-- TDD (Test-Driven Development)
-- Mutation Testing
-- Code Coverage Analysis
-- Behavior-Driven Testing
-
-**Integration:**
-- Contract Testing (Pact)
-- API Mocking (Wiremock)
-- Database Testing
-- Fuzzing de API
-
-**UI:**
-- Page Object Model
-- Visual Testing
-- Accessibility Testing
-- Cross-browser Testing
-
-**API:**
-- Schema Validation
-- Error Handling Testing
-- Rate Limiting Testing
-- Contract Testing
-
-**E2E:**
-- User Journey Mapping
-- Browser Testing (Cypress, Selenium)
-- Acceptance Testing
-
-**Performance:**
-- Load Testing
-- Stress Testing
-- Profiling
-- Performance Monitoring
-
-**Security:**
-- Penetration Testing
-- OWASP Guidelines
-- Vulnerability Scanning
-- Security Audit
-
-**Manual:**
-- Exploratory Testing
-- Usability Testing
-- Session-Based Testing
-```
-
-### Passo 6: Integração com Task Manager
-
-**SE `--task-id` fornecido:**
-
-#### 6.1. Detectar Provedor
-
-```bash
-# EXECUTAR PRIMEIRO: Ler .env para detectar provedor
-read_file .env
-```
-
-**Lógica de detecção:**
-```markdown
-**1. SE {{task-manager}} fornecido explicitamente:**
-   usar {{task-manager}} diretamente
-
-**2. SE formato do task-id detectável:**
-   - CU-xxxxx → clickup
-   - PROJ-xxx → jira (se configurado)
-   - Outros → verificar .env
-
-**3. SE TASK_MANAGER_PROVIDER no .env:**
-   usar valor do .env
-
-**4. SE nenhum detectado:**
-   ⚠️ AVISO: Task manager não detectado
-   Continuar apenas com output local
-```
-
-#### 6.2. Buscar Task Existente
-
-```markdown
-## 🔍 Buscando Task
-
-**Task ID:** {{task-id}}
-**Provedor:** {{task-manager}}
-
-**Ações:**
-1. Buscar task usando adapter apropriado
-2. Validar que task existe
-3. Ler story points atuais (se existir)
-```
-
-#### 6.3. Atualizar Story Points (SE `--update` fornecido)
-
-**CRÍTICO:** Usar ferramentas MCP diretamente:
-
-```markdown
-## 📊 Atualizando Story Points
-
-**Para ClickUp:**
-1. Buscar task para obter custom field ID:
-   ```bash
-   mcp_ClickUp_clickup_get_task({
-     task_id: taskId,
-     workspace_id: workspaceId
-   })
-   ```
-
-2. Extrair custom field ID de "Story Points" ou "QA Story Points" da resposta
-
-3. Atualizar task com custom field:
-   ```bash
-   mcp_ClickUp_clickup_update_task({
-     task_id: taskId,
-     workspace_id: workspaceId,
-     custom_fields: [{
-       id: "custom_field_id",  // ID obtido do passo 2
-       value: totalPoints
-     }]
-   })
-   ```
-
-4. Adicionar comentário com análise completa usando `mcp_ClickUp_clickup_create_task_comment`
-
-**Para Asana:**
-- Usar `mcp_asana_*` tools apropriados
-- Custom field "QA Story Points"
-- Seguir padrão similar ao ClickUp
-
-**Para Jira:**
-- Usar API Jira ou adapter apropriado
-- Custom field "Story Points"
-- Pode usar `issue.fields.customfield_XXXXX` para atualizar
-
-**Nota:** Se custom field não existir, criar comentário com estimativa e sugerir criação do custom field.
-```
-
-**Template de Comentário:**
-
-```markdown
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🧮 QA STORY POINTS ESTIMATION
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 📅 Timestamp: [data/hora]
 
 📋 TASK ANALYSIS:
 ∟ Description: "{{task-description}}"
-∟ Detected Keywords: [lista de keywords]
+∟ Detected Keywords: [keywords]
 ∟ Context Factors: [ajustes contextuais]
 
 🧮 FORMULA BREAKDOWN:
@@ -425,87 +143,20 @@ read_file .env
 ⏱️ ESTIMATED EFFORT: {{hours_range}} hours
 
 🎭 MULTI-PERSPECTIVE BREAKDOWN:
-∟ White-box: {{white_points}} points | {{white_hours}} hours | {{white_percent}}%
-∟ Grey-box: {{grey_points}} points | {{grey_hours}} hours | {{grey_percent}}%
-∟ Black-box: {{black_points}} points | {{black_hours}} hours | {{black_percent}}%
+∟ White-box: {{white_points}} pts | {{white_hours}}h | {{white_percent}}%
+∟ Grey-box: {{grey_points}} pts | {{grey_hours}}h | {{grey_percent}}%
+∟ Black-box: {{black_points}} pts | {{black_hours}}h | {{black_percent}}%
 
 💡 SUGGESTED TECHNIQUES:
-{{lista de técnicas sugeridas}}
-
+{{lista de técnicas}}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ Calculation complete! {{total_points}} QA Story Points estimated.
+✅ {{total_points}} QA Story Points estimated.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ## 📤 Output Esperado
 
-### Formato Completo
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🧮 QA STORY POINTS CALCULATION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📋 TASK ANALYSIS:
-
-Description: "{{task-description}}"
-
-✓ Detected Keywords: [lista de keywords]
-✓ Context Factors: [ajustes contextuais aplicados]
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🧮 FORMULA BREAKDOWN:
-
-Base Complexity: {{complexity}} = {{base_points}} points
-+ Context Adjustment: {{context_adjustment}} points
-+ Risk Adjustment: {{risk}} = {{risk_points}} points
-+ Type Adjustment: {{type}} = {{type_points}} points
-
-= **Total: {{total_points}} QA Story Points**
-
-⏱️ ESTIMATED EFFORT: {{hours_range}} hours
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🎭 MULTI-PERSPECTIVE BREAKDOWN:
-
-🔬 White-box ({{white_points}} points | {{white_hours}} hours | {{white_percent}}%):
-   - [técnicas white-box]
-   - [responsabilidades]
-
-🔗 Grey-box ({{grey_points}} points | {{grey_hours}} hours | {{grey_percent}}%):
-   - [técnicas grey-box]
-   - [responsabilidades]
-
-📱 Black-box ({{black_points}} points | {{black_hours}} hours | {{black_percent}}%):
-   - [técnicas black-box]
-   - [responsabilidades]
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-💡 SUGGESTED TECHNIQUES:
-
-🔬 White-box:
-   - [técnica 1]
-   - [técnica 2]
-
-🔗 Grey-box:
-   - [técnica 1]
-   - [técnica 2]
-
-📱 Black-box:
-   - [técnica 1]
-   - [técnica 2]
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-✅ Calculation complete! {{total_points}} QA Story Points estimated.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-### Formato Resumido (sem flags)
+**Resumido (sem flags):**
 
 ```
 🧮 QA STORY POINTS: {{total_points}} pontos
@@ -513,148 +164,38 @@ Base Complexity: {{complexity}} = {{base_points}} points
 📊 Type: {{type}} | Complexity: {{complexity}} | Risk: {{risk}}
 ```
 
+**Completo (com `--breakdown` / `--suggest-techniques`):** seguir a estrutura do template de comentário acima (Task Analysis → Formula Breakdown → Effort → Multi-Perspective → Suggested Techniques), com as técnicas/responsabilidades agrupadas por perspectiva.
+
 ## 📋 Exemplos de Uso
 
-### Exemplo 1: Estimativa Básica
-
 ```bash
+# Básico — detecta payment (high risk) + API (integration): medium(4)+high(+3)+integration(+2)=9 pts (~12-16h)
 /qa-points/estimate "API integration tests for payment gateway"
-```
 
-**Output esperado:**
-- Detecta: payment (high risk), API (integration type)
-- Calcula: medium (4) + high risk (+3) + integration (+2) = 9 pontos
-- Esforço: 12-16 horas
+# Com breakdown e técnicas — total 10 pts, distribuição por perspectiva + técnicas
+/qa-points/estimate "API tests for payment gateway with third-party service" medium high integration --breakdown --suggest-techniques
 
-### Exemplo 2: Com Breakdown e Técnicas
-
-```bash
-/qa-points/estimate "API integration tests for payment gateway with third-party service" medium high integration --breakdown --suggest-techniques
-```
-
-**Output esperado:**
-- Total: 10 QA Story Points
-- Breakdown detalhado por perspectiva
-- Técnicas sugeridas para cada perspectiva
-
-### Exemplo 3: Com Atualização no Task Manager
-
-```bash
+# Com atualização — simple(2)+low(+0)+ui(+3)=5 pts; grava custom field + comentário em CU-456
 /qa-points/estimate "Login form validation" simple low ui --task-id CU-456 --update
-```
 
-**Output esperado:**
-- Calcula: simple (2) + low risk (+0) + ui (+3) = 5 pontos
-- Atualiza task CU-456 no ClickUp com:
-  - Custom field "QA Story Points" = 5
-  - Comentário com análise completa
-
-### Exemplo 4: Inferência Automática
-
-```bash
+# Inferência automática — e2e + complex + high risk: complex(7)+high(+3)+e2e(+4)=14 pts → alerta >13 (quebrar)
 /qa-points/estimate "E2E testing for checkout flow with payment integration"
 ```
 
-**Output esperado:**
-- Infere: e2e type, complex complexity (checkout + payment), high risk (payment)
-- Calcula: complex (7) + high risk (+3) + e2e (+4) = 14 pontos
-- Alerta: >13 pontos, pode precisar quebra
-
 ## ⚠️ Regras e Validações
 
-### Validações Obrigatórias
-
-1. **Descrição não vazia:**
-   ```markdown
-   SE task-description vazio:
-     ❌ ERRO: Descrição da tarefa é obrigatória
-     💡 Sugestão: Forneça detalhes suficientes para análise
-   ```
-
-2. **Valores válidos:**
-   ```markdown
-   SE complexity fornecido E não está em [simple, medium, complex, epic]:
-     ⚠️ AVISO: Complexidade inválida, usando auto-detect
-   
-   SE risk fornecido E não está em [low, medium, high, critical]:
-     ⚠️ AVISO: Risco inválido, usando auto-detect
-   
-   SE type fornecido E não está em [unit, integration, ui, api, e2e, performance, security, manual]:
-     ⚠️ AVISO: Tipo inválido, usando auto-detect
-   ```
-
-3. **Task ID válido (se fornecido):**
-   ```markdown
-   SE task-id fornecido E formato inválido:
-     ⚠️ AVISO: Formato de task-id inválido
-     Continuar sem atualização
-   ```
-
-### Anti-Patterns Detectados
-
-1. **Épicos de teste (>13 pontos):**
-   ```markdown
-   SE total_points > 13:
-     ⚠️ ALERTA: Estimativa > 13 pontos (épico)
-     💡 Recomendação: Considerar quebra em múltiplas tasks de teste
-   ```
-
-2. **Inconsistências detectadas:**
-   ```markdown
-   SE type=unit E risk=critical:
-     ⚠️ AVISO: Unit tests geralmente não têm risco crítico
-     Verificar se tipo está correto
-   
-   SE type=manual E complexity=epic:
-     ⚠️ AVISO: Testes manuais épicos podem ser muito demorados
-     Considerar automação ou quebra
-   ```
+- **Descrição obrigatória:** vazia → ❌ ERRO pedindo detalhes.
+- **Valores válidos e anti-patterns:** ver `qa-story-points.md` §5 (valores aceitos por parâmetro, alerta de épico >13 pts, inconsistências como `unit+critical` e `manual+epic`).
+- **Task-id inválido:** ⚠️ AVISO, continuar sem atualização.
+- **Fórmula exata:** sempre usar os valores das KBs, sem desvios; técnicas sempre do framework.
+- **Atualização automática:** usar `--update` apenas quando confiante na estimativa; requer integração configurada via `/meta/setup-integration`.
 
 ## 🔗 Integração com Outros Comandos
 
-### Com `/validate/test-strategy/create`
-```markdown
-Após estimar, criar estratégia completa:
-/validate/test-strategy/create "{{task-description}}" --qa-points={{estimated_points}}
-```
-
-### Com `/product/task`
-```markdown
-Criar task com estimativa QA:
-/product/task "{{task-description}}" --qa-points={{estimated_points}}
-```
-
-### Com `/product/estimate`
-```markdown
-Comparar estimativa dev vs QA:
-/product/estimate "{{task-description}}"
-/qa-points/estimate "{{task-description}}"
-```
-
-## 📚 Base de Conhecimento
-
-O comando utiliza o framework completo de testes disponível em:
-- `docs/knowledge-base/frameworks/framework_testes.md`
-
-**Conteúdo incluído:**
-- Fórmula exata de QA Story Points (linhas ~217-330)
-- Escalas de complexidade, risco e tipo
-- Distribuições por perspectiva (White/Grey/Black-box)
-- Técnicas específicas por tipo de teste
-- Métricas de qualidade
-
-## ⚠️ Notas Importantes
-
-- **Fórmula exata:** Sempre usar valores do framework, sem desvios
-- **Análise contextual:** Keywords detectadas podem ajustar valores
-- **Breakdown opcional:** Usar `--breakdown` para ver distribuição por perspectiva
-- **Técnicas sugeridas:** Baseadas no framework, não inventadas
-- **Task manager:** Requer configuração prévia via `/meta/setup-integration`
-- **Atualização automática:** Usar `--update` apenas quando confiante na estimativa
+- `/validate/test-strategy/create "{{task-description}}" --qa-points={{estimated_points}}` — estratégia completa após estimar.
+- `/product/task "{{task-description}}" --qa-points={{estimated_points}}` — criar task com a estimativa QA.
+- `/product/estimate` — comparar estimativa dev vs QA.
 
 ---
 
-**Versão:** 1.0.0  
-**Última atualização:** 2025-12-03  
-**Mantido por:** Sistema Onion
-
+**Versão:** 1.0.0 · **Última atualização:** 2025-12-03 · **Mantido por:** Sistema Onion
