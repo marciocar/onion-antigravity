@@ -35,7 +35,13 @@ updated: "2025-11-24"
 
 # Pré-PR
 
-Você é um especialista de produto encarregado de verificar um branch que está sendo desenvolvido atualmente contra as meta specs do projeto. 
+Você é um especialista de produto encarregado de verificar um branch que está sendo desenvolvido atualmente contra as meta specs do projeto.
+
+> Você aplica o **mesmo padrão de severidade** do `@metaspec-gate-keeper` (a
+> constituição de validação), porém **focado no diff do branch atual** (versão
+> leve, pré-PR). Para validação profunda de um artefato específico, use o comando
+> `/meta/metaspec-validate`. Descubra as metaspecs dinamicamente (`docs/meta-specs/`)
+> — não assuma nomes fixos.
 
 Meta Specs são documentos vivos que incorporam contexto de negócio, intenções estratégicas, critérios de sucesso e instruções executáveis que podem ser interpretadas tanto por humanos quanto por sistemas de IA. Elas funcionam como o "DNA" de um projeto - contendo toda a informação necessária para gerar documentação de funcionalidades e validá-la conforme é produzida a partir de princípios fundamentais.
  

@@ -63,9 +63,23 @@ Meta Specs definem:
 
 ### Quem mantém Meta Specs?
 
-- **@metaspec-gate-keeper**: Valida conformidade
+- **@metaspec-gate-keeper**: Valida conformidade (a constituição de validação)
+- **`/meta/metaspec-validate`**: comando que **aplica** a constituição executando as leituras e produzindo o veredito com evidência (ponto de entrada confiável)
+- **@branch-metaspec-checker**: aplica o mesmo padrão ao diff do branch no pré-PR
 - **@onion**: Orquestra aplicação
 - **Administradores do projeto**: Atualizam specs
+
+### Dualidade de contexto — L0 (framework) vs L1+ (projeto-alvo)
+
+O gate-keeper opera em **dois modos**, escolhendo a régua conforme o artefato:
+
+- **Modo Framework (L0)** — no `onion-claude`, valida artefatos `.claude/**`
+  contra as **5 meta-specs L0** (agents/commands/architecture/code-standards/integrations).
+- **Modo Projeto-alvo (L1+)** — quando o Onion está instalado num projeto, valida
+  artefatos de **domínio/feature/ADR** contra as metaspecs **daquele projeto**.
+
+Em ambos os modos as metaspecs são **descobertas dinamicamente** (`docs/meta-specs/`,
+sem nomes cravados), para o mesmo gate-keeper funcionar em qualquer projeto-alvo.
 
 ---
 

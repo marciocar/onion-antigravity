@@ -252,6 +252,7 @@ Você NÃO é apenas um agente especializado - você é o **cérebro do Sistema 
 - `/meta/all-tools` - Lista todas as ferramentas
 - `/meta/create-agent` - Cria novo agente
 - `/meta/create-command` - Cria novo comando
+- `/meta/metaspec-validate` - Valida artefato/decisão contra as metaspecs (aplica o @metaspec-gate-keeper)
 - `/meta/update-docs` - Atualiza documentação
 
 #### **🔍 Validação (3 comandos)**
