@@ -89,7 +89,7 @@ docs/
 │   ├── getting-started.md      # Configuração inicial
 │   ├── testing-validation-system.md  # Sistema de testes e validação
 │   ├── tools-reference.md      # Referência de ferramentas
-│   ├── claude-code-commands-architecture.md  # Arquitetura de comandos
+│   ├── workflows-architecture.md  # Arquitetura de Workflows
 │   ├── end-to-end-validation-tests.md  # Testes de validação E2E
 │   ├── sistema-engenharia-reversa-guia-uso.md  # Engenharia reversa
 │   ├── levels-system.md        # Sistema de níveis progressivos
@@ -126,7 +126,7 @@ docs/
 │   ├── providers/              # Provedores de serviços (1 arquivo)
 │   │   └── microsoft-graph-teams-api-guia-completo.md
 │   └── tools/                  # Ferramentas e recursos (2 arquivos)
-│       ├── claude-code-commands-best-practices-2025.md
+│       ├── workflows-best-practices-2025.md
 │       └── whisper.md          # Knowledge base do Whisper
 │
 ├── meta-specs/                 # Meta Especificações (constituição L0)
@@ -173,7 +173,7 @@ docs/
 #### Referências Técnicas
 - **[Exemplos Práticos](onion/practical-examples.md)** - Casos de uso reais com exemplos
 - **[Referência de Ferramentas](onion/tools-reference.md)** - Todas as ferramentas disponíveis
-- **[Arquitetura de Comandos](onion/claude-code-commands-architecture.md)** - Estrutura interna dos comandos
+- **[Arquitetura de Workflows](onion/workflows-architecture.md)** - Estrutura interna dos comandos
 
 #### Documentação Avançada
 - **[Testes de Validação E2E](onion/end-to-end-validation-tests.md)** - Testes end-to-end do sistema
@@ -235,7 +235,7 @@ Knowledge Bases estruturadas para consumo por IA e referência técnica:
 - **Microsoft Graph Teams API** - Guia completo de integração
 
 ### Ferramentas (2 arquivos)
-- **Claude Code Commands Best Practices 2025** - Boas práticas de comandos Claude Code
+- **Antigravity Workflows Best Practices 2025** - Boas práticas de comandos Claude Code
 - **Whisper** - Sistema de transcrição de áudio (OpenAI)
 
 **Localização:** `docs/knowledge-base/`
@@ -360,7 +360,7 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
 ### 🏗️ Para Arquitetos
 
 **Comece com:**
-1. [Arquitetura de Comandos](onion/claude-code-commands-architecture.md)
+1. [Arquitetura de Workflows](onion/workflows-architecture.md)
 2. [Meta Especificações](meta-specs/index.md)
 4. [Release Notes v4.0](onion/RELEASE-NOTES-v4.0-beta.md) - Arquitetura Multi-Context ✨ NOVO
 

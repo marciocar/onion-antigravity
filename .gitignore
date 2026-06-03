@@ -1,6 +1,4 @@
-# Histórico do Claude Code
-.history/
-.claude/sessions/*
+
 # Arquivos temporários
 *.tmp
 *.temp
@@ -30,8 +28,5 @@ node_modules/
 *~
 .vscode/
 .idea/
-.claude/sessions/
 .history/
 .tmp/
-# Claude Code local overrides (não versionar)
-.claude/settings.local.json
