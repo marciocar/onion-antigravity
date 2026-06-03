@@ -1,3 +1,5 @@
+> ⚠️ **Documento histórico.** Plano do CLI npm e da estrutura `.onion/`, ambos **formalmente abandonados em 2026-05-18** (sem CLI standalone, sem produto npm). O Sistema Onion migrou para o **Google Antigravity** (`.agents/`) em 2026-06 — ver [ADR-001](../analysis/onion-antigravity-migration-adr-2026-06.md). Mantido apenas como registro histórico.
+
 # Sistema Onion - Plano de Implementação CLI + Wizard
 
 > **Versão**: 1.0.0 | **Última atualização**: 2025-12-20  

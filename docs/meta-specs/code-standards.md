@@ -1,17 +1,18 @@
 ---
 title: Meta-spec — Padrões de Código e Idioma do Sistema Onion
-date: 2026-05-18
-version: 1.0.0
+date: 2026-06-03
+version: 2.0.0
 level: L0
 status: active
 gate-keeper: "@metaspec-gate-keeper"
+changelog: "v2.0.0 — migração de plataforma Claude Code → Google Antigravity; atualiza referências de path (.claude/ → .agents/), CLAUDE.md → AGENTS.md/rules e sintaxe de invocação de workflows"
 ---
 
 # Meta-spec — Padrões de Código e Idioma do Sistema Onion
 
 ## Propósito
 
-Define padrões de **idioma**, **formatação** e **convenções textuais** aplicáveis a todos os artefatos do Sistema Onion. Esta spec consolida diretrizes que estavam dispersas em CLAUDE.md, READMEs e mensagens informais.
+Define padrões de **idioma**, **formatação** e **convenções textuais** aplicáveis a todos os artefatos do Sistema Onion. Esta spec consolida diretrizes que estavam dispersas em `.agents/AGENTS.md`, `.agents/rules/`, READMEs e mensagens informais.
 
 Aplica-se ao **Sistema Onion**, não ao projeto-alvo onde o Onion é instalado.
 
@@ -20,7 +21,7 @@ Referências relacionadas:
 - [agents.md](./agents.md), [commands.md](./commands.md)
 - [architecture.md](./architecture.md), [integrations.md](./integrations.md)
 
-Skill que automatiza aplicação: `.claude/skills/language-standards/` (quando ativa).
+Aplicação always-on: a rule `.agents/rules/language-standards.md` (carregada como system instruction no Antigravity).
 
 ---
 
@@ -36,7 +37,7 @@ Skill que automatiza aplicação: `.claude/skills/language-standards/` (quando a
 | Nomes de arquivos | **inglês** | `task-manager-abstraction.md`, `react-developer.md` |
 | Commits e branches | **inglês** | `feat: add jira adapter retry logic`, `chore/onion-saneamento` |
 | Logs e debugging | **inglês** | `Error: provider not configured` |
-| YAML frontmatter (campos) | **inglês** | `name:`, `description:`, `tools:` |
+| YAML frontmatter (campos) | **inglês** | `description:` (workflows), `name:` (skills) |
 | YAML frontmatter (valores narrativos) | pt-BR aceito | `description: "Especialista em..."` |
 
 ### 1.1 Justificativa
@@ -49,7 +50,7 @@ Skill que automatiza aplicação: `.claude/skills/language-standards/` (quando a
 
 - Citações diretas de fontes externas podem manter idioma original (geralmente inglês)
 - Termos técnicos sem tradução consolidada (ex: "Pull Request", "feature flag", "commit") podem ser usados em pt-BR
-- Nomes próprios de tecnologias mantêm grafia oficial (Claude Code, GitHub, Jira)
+- Nomes próprios de tecnologias mantêm grafia oficial (Google Antigravity, GitHub, Jira)
 
 ---
 
@@ -108,14 +109,15 @@ status: <active | historical | draft>
 
 ### 3.1 Filenames
 
-- **kebab-case** para tudo em `.claude/` e `docs/` (`task-manager-abstraction.md`)
+- **kebab-case** para tudo em `.agents/` e `docs/` (`task-manager-abstraction.md`)
 - Sufixos descritivos quando útil (`-2025`, `-v4`, `-historical`)
 - Não usar espaços, underscores ou PascalCase
 - Extensão `.md` para documentos, `.json` para configs estruturadas, `.yml` apenas em workflows CI
 
 ### 3.2 Slugs em YAML
 
-- `name:` em agentes — kebab-case sem prefixo
+- `name:` em skills (`.agents/skills/<nome>/SKILL.md`) — kebab-case sem prefixo, igual ao nome do diretório
+- handle de persona em `.agents/AGENTS.md` — kebab-case com `@` na invocação (`@product-agent`)
 - `description:` — uma frase, sem terminar com ponto final obrigatório
 
 ### 3.3 Branches Git

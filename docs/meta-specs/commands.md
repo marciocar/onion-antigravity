@@ -1,23 +1,26 @@
 ---
-title: Meta-spec — Padrões para Comandos do Sistema Onion
-date: 2026-05-18
-version: 1.0.0
+title: Meta-spec — Padrões para Workflows do Sistema Onion
+date: 2026-06-03
+version: 2.0.0
 level: L0
 status: active
 gate-keeper: "@metaspec-gate-keeper"
+changelog: "v2.0.0 — migração de plataforma Claude Code → Google Antigravity; comandos (.claude/commands/) → workflows (.agents/workflows/); invocação /cat/cmd → /cat-cmd; frontmatter reduzido a description; limites 500/800 → workflow ≤400 linhas"
 ---
 
-# Meta-spec — Padrões para Comandos do Sistema Onion
+# Meta-spec — Padrões para Workflows do Sistema Onion
 
 ## Propósito
 
-Define os padrões imutáveis (L0) que **todos os comandos** em `.claude/commands/` devem seguir. Inclui o conceito **invariante** de workflows faseados retomáveis, mecanismo que distingue o Onion de coleções de comandos avulsos.
+Define os padrões imutáveis (L0) que **todos os workflows** em `.agents/workflows/` devem seguir. Inclui o conceito **invariante** de workflows faseados retomáveis, mecanismo que distingue o Onion de coleções de prompts avulsos.
+
+No Google Antigravity, os artefatos `/`-invocáveis do Onion são **workflows** (saved prompts) em `.agents/workflows/`, em estrutura flat com prefixo de categoria no nome do arquivo. Esta é a evolução dos antigos "comandos" do Claude Code (`.claude/commands/`).
 
 Aplica-se ao **Sistema Onion**, não ao projeto-alvo onde o Onion é instalado.
 
 Referências relacionadas:
 
-- [agents.md](./agents.md) — padrões para agentes
+- [agents.md](./agents.md) — padrões para personas/subagents
 - [architecture.md](./architecture.md) — estrutura de diretórios e dependências
 - [code-standards.md](./code-standards.md) — padrões de código e idioma
 - [integrations.md](./integrations.md) — padrões para integrações
@@ -26,31 +29,31 @@ Referências relacionadas:
 
 ## 1. Estrutura obrigatória
 
-Todo comando em `.claude/commands/<categoria>/<nome>.md` deve conter:
+Todo workflow vive em `.agents/workflows/<categoria>-<nome>.md` (flat, com prefixo de categoria) e deve conter:
 
-### 1.1 Frontmatter YAML
+### 1.1 Frontmatter
+
+O schema de frontmatter de workflow do Antigravity usa **apenas** o campo `description`:
 
 ```yaml
 ---
-description: <descrição em uma linha — aparece na lista de comandos>
-allowed-tools: [<tools permitidas, ou omitir para herdar contexto>]
-argument-hint: <hint opcional sobre argumentos esperados>
+description: <descrição em uma linha — aparece na lista de workflows ao digitar />
 ---
 ```
 
-- `description` é obrigatório
-- `allowed-tools` opcional, mas recomendado para comandos que executam ações sensíveis
-- `argument-hint` opcional, melhora UX da invocação
+- `description` é **obrigatório** e único campo normativo do frontmatter
+- O schema rico do Claude Code (`allowed-tools`, `argument-hint`, `category`, `tags`, `version`, `model`, `parameters`) **não se aplica** — escopo de tools, hints de argumento e contexto devem virar **prosa no corpo** do workflow
+- Automação a nível de evento (hooks) **não** vai no frontmatter — vive em `.agents/hooks.json` (ver §1.3 e [integrations.md](./integrations.md))
 
-### 1.2 Corpo do comando
+### 1.2 Corpo do workflow
 
 Após o frontmatter:
 
 ```markdown
-# <Título descritivo do comando>
+# <Título descritivo do workflow>
 
 ## Objetivo
-<O que este comando entrega>
+<O que este workflow entrega>
 
 ## Quando usar
 <Gatilhos, casos de uso típicos>
@@ -65,62 +68,47 @@ Após o frontmatter:
 <Invocações reais>
 ```
 
-Comandos curtos (< 50 linhas) podem omitir seções não aplicáveis, mas **devem manter frontmatter + título + propósito**.
+Workflows curtos (< 50 linhas) podem omitir seções não aplicáveis, mas **devem manter frontmatter `description` + título + objetivo**.
 
-### 1.3 Convenção de `allowed-tools` (escopo mínimo)
+Quando o workflow executa **ações sensíveis** (git, escrita de arquivos, operações de Task Manager), deve descrever **em prosa** no corpo o escopo de operação esperado e o uso real de ferramentas — não há mais campo `allowed-tools`. Permissões efetivas (Allow/Deny/Ask) são configuradas no IDE do Antigravity e documentadas no getting-started.
 
-Comandos que executam **ações sensíveis** (git, escrita de arquivos, operações
-de Task Manager) devem declarar `allowed-tools` escopado ao mínimo necessário,
-no formato de regras de permissão do Claude Code:
+### 1.3 Hooks de ciclo de vida
 
-```yaml
-allowed-tools: Bash(git *) Bash(gh *) Read Edit Write Grep Glob
-```
+Automação por evento vive em `.agents/hooks.json` (não no workflow). O Antigravity suporta:
 
-Diretrizes:
+- `PreToolUse` / `PostToolUse` — antes/depois de uma ferramenta executar (ex: lint/validação pós-escrita)
+- `PreInvocation` / `PostInvocation` — antes/depois de invocar um workflow/persona (ex: detecção de provider de Task Manager via `.env`)
 
-- Escopar pelo **uso real observado** — restritivo demais quebra o comando.
-- Para Bash, prefira prefixos específicos (`Bash(git *)`) a `Bash(*)`.
-- Detecção de provider via `.env`: `Bash(cat .env*)`.
-- Ferramentas MCP do provider ativo são herdadas do agente delegado
-  (`@clickup-specialist`, etc.) — o comando não precisa enumerá-las.
-- Comandos puramente informativos (READMEs, ajuda) podem omitir.
-
-Comandos sensíveis canônicos que **devem** declarar `allowed-tools`:
-`engineer/pr`, `engineer/start`, `engineer/work`, `product/task`,
-`git/fast-commit`.
-
-> Automação a nível de evento (hooks) vive em `.claude/settings.json`, não no
-> frontmatter — ver `architecture.md` e `integrations.md`.
+Workflows não devem reimplementar lógica que pertence a um hook. Referência: [integrations.md](./integrations.md) e [architecture.md](./architecture.md).
 
 ---
 
 ## 2. Categorias válidas
 
-Comandos devem residir em uma das categorias abaixo. Categorias com asterisco representam **as três dimensões peer do ciclo Onion**.
+Workflows são flat, mas o **prefixo de categoria** no nome do arquivo classifica o workflow. Categorias com asterisco representam **as três dimensões peer do ciclo Onion**.
 
-| Categoria | Função | Volume típico |
+| Prefixo de categoria | Função | Volume típico |
 |---|---|---|
-| `product/` (*) | Discovery, especificação, decomposição de tarefas, branding, reuniões | 20+ |
-| `engineer/` (*) | Planejamento e implementação faseada de features | 10+ |
-| `docs/` | Geração e validação de documentação (incluindo `/docs:build-compliance-docs` da dimensão compliance) | 10+ |
-| `git/` | GitFlow, feature/release/hotfix, code review | 10+ |
-| `meta/` | Criação de comandos/agentes/skills/KBs, integração | 8+ |
-| `common/` | Templates e prompts compartilhados | 8+ |
-| `validate/` | Validação de testes, QA, workflows colaborativos | 4+ |
-| `test/` | Estratégias de teste (unit, integration, e2e) | 3 |
-| `development/` | Comandos de desenvolvimento específicos | 1+ |
-| `quick/` | Análises pontuais rápidas | 1+ |
-| `global/` | Comandos transversais | 1+ |
+| `product-` (*) | Discovery, especificação, decomposição de tarefas, branding, reuniões | 20+ |
+| `engineer-` (*) | Planejamento e implementação faseada de features | 10+ |
+| `docs-` | Geração e validação de documentação (incluindo `/docs-build-compliance-docs` da dimensão compliance) | 10+ |
+| `git-` | GitFlow, feature/release/hotfix, code review | 10+ |
+| `meta-` | Criação de workflows/personas/skills/KBs, integração | 8+ |
+| `validate-` | Validação de testes, QA, workflows colaborativos | 4+ |
+| `test-` | Estratégias de teste (unit, integration, e2e) | 3 |
+| `development-` | Workflows de desenvolvimento específicos | 1+ |
+| `quick-` | Análises pontuais rápidas | 1+ |
 | (root) | `onion.md` e `warm-up.md` — pontos de entrada | 2 |
 
-Categorias podem ter subdiretórios quando agrupam variantes (ex: `git/feature/`, `git/hotfix/`, `git/release/`, `validate/test-strategy/`, `validate/qa-points/`).
+> Os antigos "comandos comuns" (`common/templates/`, `common/prompts/`) e READMEs de categoria **não são workflows** — viram docs/includes e não vivem em `.agents/workflows/` (ver [ADR-001](../analysis/onion-antigravity-migration-adr-2026-06.md)).
+
+Subcategorias do Claude Code (ex: `git/feature/start`) são **achatadas** no nome com hífen: `git-feature-start.md`.
 
 ---
 
 ## 3. Workflows faseados — INVARIANTE DO FRAMEWORK
 
-**Princípio**: o Onion implementa workflows faseados como **mecanismo central**. Múltiplos comandos cobrindo fases distintas de um mesmo fluxo, com estado retomável persistido em `.claude/sessions/`, são **valor de design**, não duplicação.
+**Princípio**: o Onion implementa workflows faseados como **mecanismo central**. Múltiplos workflows cobrindo fases distintas de um mesmo fluxo, com estado retomável persistido em **Artifacts do Antigravity** (task lists, implementation plans, walkthroughs) e/ou em `docs/sessions/<feature>/`, são **valor de design**, não duplicação.
 
 ### 3.1 Workflows canônicos
 
@@ -129,7 +117,7 @@ Os **dois workflows abaixo são invariantes** do framework. Devem ser preservado
 **Workflow de Engenharia** (6 fases):
 
 ```
-engineer/plan → engineer/start → engineer/work → engineer/pre-pr → engineer/pr → engineer/pr-update
+engineer-plan → engineer-start → engineer-work → engineer-pre-pr → engineer-pr → engineer-pr-update
 ```
 
 - `plan` — analisa requisitos e cria plano estruturado
@@ -142,7 +130,7 @@ engineer/plan → engineer/start → engineer/work → engineer/pre-pr → engin
 **Workflow de Produto** (6 fases):
 
 ```
-product/collect → product/refine → product/spec → product/task → product/estimate → product/feature
+product-collect → product-refine → product-spec → product-task → product-estimate → product-feature
 ```
 
 - `collect` — coleta ideias de features ou bugs
@@ -154,49 +142,48 @@ product/collect → product/refine → product/spec → product/task → product
 
 ### 3.2 Regras para workflows faseados
 
-1. Cada fase deve ter **input claro** (estado da sessão ou argumentos), **output claro** (próximo estado da sessão) e ser **invocável isoladamente** quando o estado permite
-2. Estado entre fases é persistido em `.claude/sessions/<feature>/`
+1. Cada fase deve ter **input claro** (estado do artifact/sessão ou argumentos), **output claro** (próximo estado) e ser **invocável isoladamente** quando o estado permite
+2. Estado entre fases é persistido em **Artifacts do Antigravity** e/ou `docs/sessions/<feature>/`
 3. Fases nomeadas explicitamente, sem ambiguidade de ordem
-4. Novos workflows similares devem seguir o mesmo padrão (sessões persistentes, fases nomeadas, retomável)
+4. Novos workflows similares devem seguir o mesmo padrão (estado persistente, fases nomeadas, retomável)
 5. **Proibido fundir fases** de workflow ativo sem justificativa formal aprovada via PR específico para esta meta-spec
 
 ### 3.3 Padrão para identificar workflow faseado
 
-Características de um comando que faz parte de workflow faseado:
+Características de um workflow que faz parte de fluxo faseado:
 
-- Vive em categoria que representa dimensão do ciclo (`product/`, `engineer/`)
-- Lê ou escreve estado em `.claude/sessions/`
+- Tem prefixo de categoria que representa dimensão do ciclo (`product-`, `engineer-`)
+- Lê ou escreve estado em Artifacts do Antigravity e/ou `docs/sessions/`
 - Tem nome que sugere fase explícita (verbo de ação temporal: `start`, `work`, `pre-pr`, `pr-update`)
-- Documenta a posição no ciclo no corpo do comando
+- Documenta a posição no ciclo no corpo do workflow
 
 ---
 
 ## 4. Convenção de naming
 
-- **Slug** (nome do arquivo): kebab-case (`pre-pr.md`, `build-tech-docs.md`)
-- **Path completo**: `.claude/commands/<categoria>/<slug>.md` ou `.claude/commands/<categoria>/<subcategoria>/<slug>.md`
-- **Invocação**: usuário invoca com `/<categoria>:<slug>` ou `/<categoria>/<subcategoria>:<slug>`
+- **Filename**: `<categoria>-<nome>.md`, kebab-case (`engineer-pre-pr.md`, `docs-build-tech-docs.md`)
+- **Path completo**: `.agents/workflows/<categoria>-<nome>.md` (sempre flat — sem subdiretórios)
+- **Invocação**: usuário invoca com `/<categoria>-<nome>`; subcategorias achatam com hífen → `/<categoria>-<sub>-<nome>` (ex: `/git-feature-start`)
 
 ### 4.1 Política de duplicação de nomes entre categorias
 
-Os nomes abaixo aparecem em múltiplas categorias por razões funcionais legítimas. Esta política torna a regra explícita.
+O prefixo de categoria obrigatório no nome flat **resolve por construção** a maior parte das colisões que existiam no Claude Code (vários `start`/`finish`/`help`/`warm-up`). Mesmo assim, esta política torna a régua explícita.
 
-| Nome | Categorias | Categoria canônica | Variantes em outras categorias |
+| Nome base | Categorias | Workflow canônico | Variantes (sempre com prefixo) |
 |---|---|---|---|
-| `README` | `product/`, `git/`, `common/`, `docs/` | Específico por categoria (não há canônico) | Cada README descreve a categoria que o contém |
-| `warm-up` | `product/`, `engineer/`, root (`warm-up.md`) | root (`/warm-up`) | `product/warm-up`, `engineer/warm-up` são specializations contextuais |
-| `start` | `engineer/`, `git/feature/`, `git/hotfix/`, `git/release/` | `engineer/start` (sessão de desenvolvimento) | `git/feature/start`, `git/hotfix/start`, `git/release/start` são fluxos GitFlow específicos |
-| `finish` | `git/feature/`, `git/hotfix/`, `git/release/` | Específico por subcategoria GitFlow | Sempre invocar com path completo |
-| `help` | `git/`, `docs/` | Específico por categoria | Ajuda contextual da categoria |
-| `estimate` | `product/`, `validate/qa-points/` | `product/estimate` (story points de feature) | `validate/qa-points/estimate` é QA story points |
-| `plan` | `engineer/`, `product/light-arch` (similar) | `engineer/plan` (planejamento de implementação) | `product/light-arch` é design de arquitetura leve |
-| `check` | `product/`, `product/task-check` | `product/check` (verificação contra meta-specs) | `product/task-check` é verificação de task |
+| `warm-up` | `product-`, `engineer-`, root (`warm-up.md`) | root (`/warm-up`) | `/product-warm-up`, `/engineer-warm-up` são specializations contextuais |
+| `start` | `engineer-`, `git-feature-`, `git-hotfix-`, `git-release-` | `/engineer-start` (sessão de desenvolvimento) | `/git-feature-start`, `/git-hotfix-start`, `/git-release-start` são fluxos GitFlow específicos |
+| `finish` | `git-feature-`, `git-hotfix-`, `git-release-` | Específico por subcategoria GitFlow | Sempre invocar com prefixo completo |
+| `help` | `git-`, `docs-` | Específico por categoria | Ajuda contextual da categoria |
+| `estimate` | `product-`, `validate-qa-points-` | `/product-estimate` (story points de feature) | `/validate-qa-points-estimate` é QA story points |
+| `plan` | `engineer-`, `product-light-arch` (similar) | `/engineer-plan` (planejamento de implementação) | `/product-light-arch` é design de arquitetura leve |
+| `check` | `product-`, `product-task-check` | `/product-check` (verificação contra meta-specs) | `/product-task-check` é verificação de task |
 
 **Regra geral**:
 
-- Quando houver canônico, novos comandos com nome curto devem usar o canônico ou nome explícito
-- Quando não houver canônico, sempre invocar com path completo (`/<categoria>:<slug>`)
-- Renomes para resolver ambiguidade devem usar aliases temporários para não quebrar invocações existentes
+- O prefixo de categoria no nome do arquivo é **obrigatório** e garante unicidade do slug de invocação
+- Quando há canônico para um nome base curto, novos workflows devem usar o canônico ou nome explícito com prefixo
+- Renomes para resolver ambiguidade devem manter aliases temporários para não quebrar invocações existentes
 
 ---
 
@@ -204,45 +191,35 @@ Os nomes abaixo aparecem em múltiplas categorias por razões funcionais legíti
 
 | Limite | Linhas | Tratamento |
 |---|---|---|
-| Recomendado | até 500 | OK |
-| Soft warning | 500 – 800 | Considerar modularização |
-| Hard limit | > 800 | Refatoração obrigatória antes de merge |
+| Recomendado | até 400 | OK |
+| Acima do limite | > 400 | Refatoração obrigatória antes de merge — extrair conteúdo |
 
-Comandos que excederem 800 linhas devem extrair partes para:
+Workflows que excederem 400 linhas devem extrair partes para:
 
-- Templates em `.claude/commands/common/templates/`
-- Prompts em `.claude/commands/common/prompts/`
+- Skills em `.agents/skills/` (cérebro de orquestração reutilizável, ≤ 500 linhas)
 - Knowledge bases em `docs/knowledge-base/`
-- Sub-comandos referenciados
+- Includes/fragmentos de documentação em `docs/`
+- Sub-workflows referenciados
 
-### 5.1 Isenções (não são comandos invocáveis)
+### 5.1 Isenções (não são workflows invocáveis)
 
-O limite acima aplica-se a **comandos invocáveis** (`/categoria/nome`). São
-**isentos** por natureza, seguindo guidance própria:
+O limite acima aplica-se a **workflows invocáveis** (`/<categoria>-<nome>`). São **isentos** por natureza:
 
-- **Fragmentos de template** em `.claude/commands/common/templates/` — são
-  estruturas de referência (ex.: `business_context_template.md`,
-  `technical_context_template.md`), auto-registrados como skills
-  `common:templates:*` e referenciados por múltiplos agentes/comandos. Tamanho é
-  inerente ao template; **não relocar** sem atualizar o registro de skill e
-  todas as referências.
-- **Fragmentos de prompt** em `.claude/commands/common/prompts/` — skills
-  `common:prompts:*`.
-- **READMEs de categoria** (`<categoria>/README.md`) — são índices; devem ser
-  enxutos (apontar para comandos/KB), mas não contam como comando.
+- **Fragmentos de template e prompt** (antigos `common/templates/`, `common/prompts/`) — migraram para `docs/` como includes/referência; tamanho é inerente ao template e não contam como workflow.
+- **READMEs / índices** de categoria — são índices e não contam como workflow.
 
 ---
 
 ## 6. Modularização
 
-Comandos podem reaproveitar:
+Workflows podem reaproveitar:
 
-- **Templates** em `.claude/commands/common/templates/` (estruturas reutilizáveis)
-- **Prompts** em `.claude/commands/common/prompts/` (instruções compartilhadas)
-- **Skills** em `.claude/skills/` (cérebro de orquestração)
-- **Agentes** em `.claude/agents/<categoria>/` (delegação especializada)
+- **Skills** em `.agents/skills/` (cérebro de orquestração)
+- **Personas/subagents** declaradas em `.agents/AGENTS.md` (delegação especializada)
+- **Referência** em `docs/reference/` (ex: Task Manager Abstraction)
+- **Knowledge bases** em `docs/knowledge-base/`
 
-Comando que duplica >50 linhas de outro comando deve refatorar para template ou prompt compartilhado.
+Workflow que duplica >50 linhas de outro workflow deve refatorar para skill ou fragmento de documentação compartilhado.
 
 ---
 
@@ -250,44 +227,45 @@ Comando que duplica >50 linhas de outro comando deve refatorar para template ou 
 
 ### Exemplo conforme (workflow faseado)
 
-Arquivo: `.claude/commands/engineer/start.md`
+Arquivo: `.agents/workflows/engineer-start.md`
 
 - Frontmatter com `description`
-- Vive em `engineer/` (dimensão de engenharia)
+- Prefixo `engineer-` (dimensão de engenharia)
 - Faz parte do workflow canônico
-- Persiste estado em `.claude/sessions/`
+- Persiste estado em Artifact / `docs/sessions/`
 - Nome reflete fase explícita
 
 **Veredito**: `@metaspec-gate-keeper` aprova.
 
-### Exemplo conforme (comando atômico)
+### Exemplo conforme (workflow atômico)
 
-Arquivo: `.claude/commands/meta/setup-integration.md`
+Arquivo: `.agents/workflows/meta-setup-integration.md`
 
-- Frontmatter com `description` e `allowed-tools`
-- Vive em `meta/` (categoria válida)
+- Frontmatter com `description`
+- Prefixo `meta-` (categoria válida)
 - Não faz parte de workflow faseado — função atômica clara
-- Tamanho dentro do limite
+- Tamanho dentro do limite (≤ 400)
+- Escopo de operação descrito em prosa no corpo
 
 **Veredito**: aprovado.
 
 ### Exemplo quase-conforme
 
-Arquivo hipotético: `.claude/commands/validate/test-strategy/analyze.md` (1.134 linhas reais)
+Arquivo hipotético: `.agents/workflows/validate-test-strategy-analyze.md` (520 linhas)
 
 - Frontmatter correto
-- Categoria válida
-- Tamanho acima de soft warning (500), acima de hard limit (800)
+- Prefixo de categoria válido
+- Tamanho acima do limite (400)
 
-**Veredito**: requer refatoração antes de próximo merge tocando este arquivo.
+**Veredito**: requer refatoração antes de próximo merge tocando este arquivo (extrair skill/KB).
 
 ### Exemplo não-conforme
 
-Arquivo hipotético: `.claude/commands/misc/MyCommand.md`
+Arquivo hipotético: `.agents/workflows/MyCommand.md`
 
-- Categoria `misc/` inválida
+- Sem prefixo de categoria válido
 - Filename PascalCase em vez de kebab-case
-- Sem frontmatter
+- Frontmatter com `allowed-tools`/`category` (schema do Claude Code, removido)
 
 **Veredito**: rejeitado.
 
@@ -295,10 +273,11 @@ Arquivo hipotético: `.claude/commands/misc/MyCommand.md`
 
 ## 8. Proibições explícitas
 
-- **Proibido** fundir comandos de workflow faseado canônico (engineer/* ou product/*) sem PR específico para esta meta-spec
-- **Proibido** criar categoria fora da lista válida
-- **Proibido** criar comando sem frontmatter
-- **Proibido** comando com `name` em formato diferente de kebab-case
+- **Proibido** fundir workflows de fluxo faseado canônico (`engineer-*` ou `product-*`) sem PR específico para esta meta-spec
+- **Proibido** criar workflow com prefixo de categoria fora da lista válida
+- **Proibido** criar workflow sem frontmatter `description`
+- **Proibido** usar schema de frontmatter do Claude Code (`allowed-tools`, `category`, `tags`, `version`, `model`, `parameters`)
+- **Proibido** filename em formato diferente de kebab-case ou com subdiretórios em `.agents/workflows/`
 
 ---
 
@@ -308,5 +287,5 @@ Mudanças nesta spec exigem:
 
 1. PR específico para `docs/meta-specs/commands.md`
 2. Atualização do campo `version` no frontmatter
-3. Validação por `@metaspec-gate-keeper` em comandos existentes
+3. Validação por `@metaspec-gate-keeper` em workflows existentes
 4. Especificamente para mudança em workflows canônicos (Seção 3.1): aprovação registrada em commit message com link para issue de discussão

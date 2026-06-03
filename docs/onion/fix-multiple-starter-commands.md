@@ -1,3 +1,5 @@
+> ⚠️ **Documento histórico.** Refere-se ao CLI/wizard e à estrutura `.onion/` / `.claude/commands/`, **abandonados em 2026-05-18**. O Sistema Onion migrou para o **Google Antigravity** (`.agents/workflows/`) em 2026-06 — ver [ADR-001](../analysis/onion-antigravity-migration-adr-2026-06.md). Mantido apenas como registro histórico.
+
 # 🎯 Correção - Múltiplos Comandos Starter
 
 ## ❌ Problema Identificado

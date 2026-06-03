@@ -2,12 +2,12 @@
 
 ## 🚨 **Problem Identified**
 
-Durante o desenvolvimento do projeto "Refatorar Comandos Git para Padrão Claude Code Commands Oficial", foi identificada uma **falha arquitetural crítica** no Sistema Onion:
+Durante o desenvolvimento do projeto de refatoração dos workflows Git para o padrão de workflows do Antigravity, foi identificada uma **falha arquitetural crítica** no Sistema Onion:
 
 ### **Issue Summary:**
 - **Problem**: Status das subtasks do ClickUp não eram atualizados automaticamente quando fases eram completadas no development
 - **Impact**: Descorrelação entre progresso real (plan.md) e tracking (ClickUp subtasks)  
-- **Root Cause**: Falta de integração automática entre `/engineer/work` e ClickUp MCP para subtasks
+- **Root Cause**: Falta de integração automática entre `/engineer-work` e ClickUp MCP para subtasks
 
 ### **Manifestation:**
 ```diff
@@ -18,7 +18,7 @@ Durante o desenvolvimento do projeto "Refatorar Comandos Git para Padrão Claude
 
 ## 🔧 **Fixes Implemented**
 
-### **1. Updated `/engineer/work.md`**
+### **1. Updated `/engineer-work.md`**
 ```diff
 + **SUBTASK STATUS UPDATE** - Atualiza status da subtask correspondente para "done"
 + ### **🔗 CRITICAL: Phase→Subtask Mapping**
@@ -28,14 +28,14 @@ Durante o desenvolvimento do projeto "Refatorar Comandos Git para Padrão Claude
 + 3. **Documentar conclusão** com timestamp e métricas da fase
 ```
 
-### **2. Updated `/engineer/start.md`**
+### **2. Updated `/engineer-start.md`**
 ```diff
 + 3. **🆕 PHASE-SUBTASK MAPPING**: Cria mapeamento automático fase→subtask no context.md
 + ### **🗺️ OBRIGATÓRIO: Criar Phase-Subtask Mapping**
 + Quando subtasks existem, o sistema deve **automaticamente**:
 + 1. **Detectar subtasks** da task principal via ClickUp MCP
 + 2. **Correlacionar com fases** do plan.md (por ordem ou nome)
-+ 3. **Salvar mapeamento** no context.md para uso pelo `/engineer/work`
++ 3. **Salvar mapeamento** no context.md para uso pelo `/engineer-work`
 + 4. **Validar correlação** e alertar se houver mismatch
 ```
 
@@ -48,7 +48,7 @@ Durante o desenvolvimento do projeto "Refatorar Comandos Git para Padrão Claude
 + - **Phase 5**: "Integration Testing + Cleanup" → Main Task (86ac55kr8) ✅
 ```
 
-### **4. New Command: `/engineer/validate-phase-sync`**
+### **4. New Command: `/engineer-validate-phase-sync`**
 **Purpose**: Validation and correction tool for phase-subtask synchronization
 
 **Features**:
@@ -61,10 +61,10 @@ Durante o desenvolvimento do projeto "Refatorar Comandos Git para Padrão Claude
 ## 🎯 **Implementation Strategy**
 
 ### **Automatic Workflow (Future Tasks)**
-1. **`/product/task`** creates main task + subtasks
-2. **`/engineer/start`** automatically creates Phase-Subtask mapping in context.md
-3. **`/engineer/work`** reads mapping and updates subtask status when phases complete
-4. **`/engineer/validate-phase-sync`** provides validation/correction as backup
+1. **`/product-task`** creates main task + subtasks
+2. **`/engineer-start`** automatically creates Phase-Subtask mapping in context.md
+3. **`/engineer-work`** reads mapping and updates subtask status when phases complete
+4. **`/engineer-validate-phase-sync`** provides validation/correction as backup
 
 ### **Manual Correction (Current Task)**
 1. ✅ Retroactively updated all subtask statuses to "done"
@@ -91,15 +91,15 @@ Durante o desenvolvimento do projeto "Refatorar Comandos Git para Padrão Claude
 ### **Enhanced Commands:**
 ```mermaid
 graph TD
-    A[/product/task] --> B[Create Subtasks]
-    B --> C[/engineer/start]
+    A[/product-task] --> B[Create Subtasks]
+    B --> C[/engineer-start]
     C --> D[Create Phase Mapping]
-    D --> E[/engineer/work Phase N]
+    D --> E[/engineer-work Phase N]
     E --> F[Complete Phase]
     F --> G[Update Subtask Status]
     G --> H[Add Completion Comment]
     H --> I[Next Phase or Done]
-    I --> J[/engineer/validate-phase-sync]
+    I --> J[/engineer-validate-phase-sync]
     J --> K[Validate Integrity]
 ```
 

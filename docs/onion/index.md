@@ -1,6 +1,6 @@
 # 📚 Índice - Sistema Onion
 
-> **Última atualização**: 2026-05-15 | **Gerado por**: `/docs:build-index onion` | **Revisado**: auditoria manual
+> **Última atualização**: 2026-05-15 | **Gerado por**: `/docs-build-index onion` | **Revisado**: auditoria manual
 
 Bem-vindo ao índice da documentação do **Sistema Onion**. Este documento organiza os 26 arquivos de documentação operacional do sistema em `docs/onion/`.
 
@@ -8,12 +8,12 @@ Bem-vindo ao índice da documentação do **Sistema Onion**. Este documento orga
 
 ## 🎯 Visão Geral
 
-O **Sistema Onion** é um framework de comandos `.claude/` para uso interno com:
-- 🤖 **94 comandos** Claude Code em 11 categorias
-- 🎯 **49 agentes de IA especializados** em 9 categorias
-- 🧩 **1 skill** em `.claude/skills/` (`onion` — ativação automática)
+O **Sistema Onion** é um framework instalável em `.agents/` para o **Google Antigravity**, com:
+- 🤖 **78 workflows** em `.agents/workflows/` (flat + prefixo de categoria)
+- 🎯 **Personas e subagents** em `.agents/AGENTS.md` (consolidados de 49 agentes especializados)
+- 🧩 **2 skills** em `.agents/skills/` (`onion`, `onion-validation`) + **4 rules** always-on em `.agents/rules/`
 - 📚 **Knowledge Bases estruturadas** para consumo por IA
-- 🧅 **Skill + Comando `/onion`** — ponto de entrada inteligente
+- 🧅 **Skill + workflow `/onion`** — ponto de entrada inteligente
 - 🔗 **Task Manager Abstraction** plugável (Jira, ClickUp, Asana, Linear)
 - 🏗️ **Spec as Code Multi-Context** — business, technical e meta-specs
 
@@ -22,9 +22,9 @@ O **Sistema Onion** é um framework de comandos `.claude/` para uso interno com:
 ## 📊 Estatísticas
 
 - **26 arquivos** em `docs/onion/`
-- **94 comandos** Claude Code em `.claude/commands/`
-- **49 agentes** IA em `.claude/agents/`
-- **1 skill** em `.claude/skills/`
+- **78 workflows** em `.agents/workflows/`
+- **Personas e subagents** em `.agents/AGENTS.md`
+- **2 skills** (`onion`, `onion-validation`) + **4 rules** em `.agents/`
 
 ---
 
@@ -34,14 +34,14 @@ O **Sistema Onion** é um framework de comandos `.claude/` para uso interno com:
 
 **Comece aqui se você é novo no Sistema Onion:**
 
-1. **[Guia de Comandos](commands-guide.md)** - Documentação dos comandos disponíveis
-   - 94 comandos em 11 categorias
-   - Exemplos de uso e workflows
+1. **[Guia de Workflows](commands-guide.md)** - Documentação dos workflows disponíveis
+   - 78 workflows (flat + prefixo de categoria)
+   - Exemplos de uso e fluxos
    - Integrações com Task Managers
 
-2. **[Referência de Agentes](agents-reference.md)** - Lista e descrição dos agentes especializados
-   - 49 agentes em 9 categorias
-   - Quando usar cada agente
+2. **[Referência de Personas](agents-reference.md)** - Lista e descrição das personas/subagents
+   - Personas e subagents (consolidados de 49 agentes especializados)
+   - Quando usar cada persona
    - Capacidades e especializações
 
 3. **[Fluxos de Engenharia](engineering-flows.md)** - Workflows detalhados para desenvolvimento
@@ -74,7 +74,7 @@ O **Sistema Onion** é um framework de comandos `.claude/` para uso interno com:
    - Instalação passo a passo
    - Verificação de instalação
 
-3. **Task Manager Abstraction** — configure provider (Jira/ClickUp/Asana/Linear) via `.env` e `/meta:setup-integration`. Adapters técnicos em [`.claude/utils/task-manager/adapters/`](../../.claude/utils/task-manager/adapters/).
+3. **Task Manager Abstraction** — configure provider (Jira/ClickUp/Asana/Linear) via `.env` e `/meta-setup-integration`. Adapters técnicos em [`docs/reference/task-manager/adapters/`](../reference/task-manager/adapters/).
 
 ### 🔧 Referências Técnicas
 
@@ -223,13 +223,13 @@ O **Sistema Onion** é um framework de comandos `.claude/` para uso interno com:
 - Explore: [Agents Reference](agents-reference.md) - Seção Testing
 
 #### 🏗️ Arquitetos
-- Comece com: [Claude Code Commands Architecture](claude-code-commands-architecture.md)
+- Comece com: [Arquitetura de Workflows do Antigravity](claude-code-commands-architecture.md)
 - Explore: [Engineering Flows](engineering-flows.md)
 
 #### 🔧 Administradores
 - Comece com: [Installation](INSTALLATION.md)
 - Aprenda: [Getting Started](getting-started.md)
-- Configure Task Manager: `/meta:setup-integration` (adapters em `.claude/utils/task-manager/adapters/`)
+- Configure Task Manager: `/meta-setup-integration` (adapters em `docs/reference/task-manager/adapters/`)
 
 ---
 
@@ -250,7 +250,7 @@ O **Sistema Onion** é um framework de comandos `.claude/` para uso interno com:
 ### Configuração
 - [Installation](INSTALLATION.md)
 - [Getting Started](getting-started.md)
-- [Adapters de Task Manager](../../.claude/utils/task-manager/adapters/)
+- [Adapters de Task Manager](../reference/task-manager/adapters/)
 
 ---
 
@@ -288,12 +288,12 @@ O **Sistema Onion** é um framework de comandos `.claude/` para uso interno com:
 
 ## 🔄 Manutenção
 
-Este índice é gerado automaticamente pelo comando `/docs:build-index onion`.
+Este índice é gerado automaticamente pelo comando `/docs-build-index onion`.
 
 **Para atualizar:**
 ```bash
-/docs:build-index onion        # Reconstruir este índice
-/docs:build-index              # Reconstruir índice principal
+/docs-build-index onion        # Reconstruir este índice
+/docs-build-index              # Reconstruir índice principal
 ```
 
 ---

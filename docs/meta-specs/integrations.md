@@ -1,10 +1,11 @@
 ---
 title: Meta-spec — Padrões de Integração do Sistema Onion
-date: 2026-05-18
-version: 1.0.0
+date: 2026-06-03
+version: 2.0.0
 level: L0
 status: active
 gate-keeper: "@metaspec-gate-keeper"
+changelog: "v2.0.0 — migração de plataforma Claude Code → Google Antigravity; adapter docs (.claude/utils/task-manager/) → docs/reference/task-manager/; MCP config → ~/.gemini/config/mcp_config.json (serverUrl, sem timeout top-level); hooks em .agents/hooks.json"
 ---
 
 # Meta-spec — Padrões de Integração do Sistema Onion
@@ -20,16 +21,16 @@ Referências relacionadas:
 - [agents.md](./agents.md), [commands.md](./commands.md)
 - [architecture.md](./architecture.md), [code-standards.md](./code-standards.md)
 
-Referência técnica: [.claude/utils/task-manager/](../../.claude/utils/task-manager/).
+Referência técnica: [docs/reference/task-manager/](../reference/task-manager/).
 
 ---
 
 ## 1. Task Manager Abstraction como referência canônica
 
-A Task Manager Abstraction é o padrão **SDAAL** (Specification-Driven AI Abstraction Layer) implementado de referência. Estrutura:
+A Task Manager Abstraction é o padrão **SDAAL** (Specification-Driven AI Abstraction Layer) implementado de referência. A documentação da abstração vive em `docs/reference/task-manager/` (consumida por workflows e personas); os servidores MCP reais são configurados em `~/.gemini/config/mcp_config.json`. Estrutura:
 
 ```
-.claude/utils/task-manager/
+docs/reference/task-manager/
 ├── factory.md           # Instancia o adapter via TASK_MANAGER_PROVIDER
 ├── interface.md         # Contrato ITaskManager
 ├── types.md             # Tipos e DTOs
@@ -50,7 +51,7 @@ Toda nova integração (ex: novo Task Manager, novo serviço de comunicação) d
 Para cada integração com sistema externo:
 
 ```
-.claude/utils/<dominio>/
+docs/reference/<dominio>/
 ├── factory.md           # Roteamento por variável de ambiente
 ├── interface.md         # Contrato comum (operações independentes de provider)
 ├── types.md             # Tipos compartilhados
@@ -118,18 +119,18 @@ Cada adapter deve documentar em sua seção:
 
 ### 3.3 Fallback gracioso
 
-Quando o usuário invoca um comando que requer integração mas a variável obrigatória está ausente:
+Quando o usuário invoca um workflow que requer integração mas a variável obrigatória está ausente:
 
 1. **Não inventar** valor nem assumir provider alternativo
 2. Reportar em pt-BR qual variável falta
-3. Sugerir comando para configurar: `/meta:setup-integration`
+3. Sugerir workflow para configurar: `/meta-setup-integration`
 4. Continuar offline quando possível (ex: `@task-specialist` decompõe localmente sem persistir)
 
 Exemplo de mensagem:
 
 ```
 Não foi possível conectar ao Jira: variável JIRA_API_TOKEN está vazia.
-Para configurar, execute: /meta:setup-integration
+Para configurar, execute: /meta-setup-integration
 Para operar offline, defina TASK_MANAGER_PROVIDER=none no .env.
 ```
 
@@ -143,42 +144,46 @@ Para operar offline, defina TASK_MANAGER_PROVIDER=none no .env.
 
 ## 4. MCPs (Model Context Protocol) suportados
 
-### 4.1 MCPs declarados em agentes
+### 4.1 Como personas/workflows acessam MCP
 
-Quando um agente depende de MCP, declarar nas `tools`:
-
-```yaml
-tools:
-  - read_file
-  - mcp_ClickUp_clickup_create_task
-  - mcp_ClickUp_clickup_update_task
-```
+No Antigravity, MCPs **não são declarados em frontmatter** de persona ou workflow. O acesso é resolvido pela configuração global do Antigravity em `~/.gemini/config/mcp_config.json`. A persona/workflow documenta em prosa quais providers/MCPs espera (ex: ClickUp MCP para `@clickup-specialist`).
 
 ### 4.2 MCPs comuns no framework atual
 
 | MCP | Provedor | Usado por |
 |---|---|---|
-| `ClickUp_*` | ClickUp MCP | `@clickup-specialist`, comandos `/product/*` quando provider é ClickUp |
-| `claude_ai_Asana__*` | Anthropic-managed | Provider Asana |
-| `claude_ai_Linear__*` | Anthropic-managed | Provider Linear |
-| `claude_ai_Atlassian__*` | Anthropic-managed | Provider Jira |
-| `claude_ai_Slack__*` | Anthropic-managed | Notificações (opcional) |
-| `claude_ai_Notion__*` | Anthropic-managed | Documentação externa (opcional) |
+| `ClickUp_*` | ClickUp MCP | `@clickup-specialist`, workflows `/product-*` quando provider é ClickUp |
+| `Asana__*` | Conector hospedado | Provider Asana |
+| `Linear__*` | Conector hospedado | Provider Linear |
+| `Atlassian__*` | Conector hospedado | Provider Jira |
+| `Slack__*` | Conector hospedado | Notificações (opcional) |
+| `Notion__*` | Conector hospedado | Documentação externa (opcional) |
 
 ### 4.3 Configuração
 
-- **MCP servers stdio** (ex.: ClickUp) são declarados em `.mcp.json` na raiz do
-  projeto. O framework versiona um template **`.mcp.json.example`** — o
-  projeto-alvo copia para `.mcp.json` e ajusta ao provider ativo.
-- **NUNCA** colar tokens no `.mcp.json`: usar interpolação `${VAR}` resolvida do
-  `.env`/ambiente.
-- MCPs **Anthropic-managed** (Asana, Linear, Atlassian/Jira) entram como
-  conectores hospedados (claude.ai) e normalmente **não** precisam de entrada
-  stdio no `.mcp.json`.
-- Aprovação/habilitação de MCP servers via `enableAllProjectMcpServers` /
-  `enabledMcpjsonServers` em `.claude/settings.json`.
-- `/meta:setup-integration` guia a configuração de `.env` + `.mcp.json` quando
-  aplicável.
+- **MCP servers** são declarados em `~/.gemini/config/mcp_config.json` (config global do usuário no Antigravity), no formato:
+
+  ```json
+  {
+    "mcpServers": {
+      "clickup": {
+        "command": "npx",
+        "args": ["-y", "@clickup/mcp-server"],
+        "env": { "CLICKUP_API_TOKEN": "${CLICKUP_API_TOKEN}" }
+      },
+      "exemplo-remoto": {
+        "serverUrl": "https://mcp.exemplo.com/sse"
+      }
+    }
+  }
+  ```
+
+- Servidores **remotos** usam o campo `serverUrl` (não `httpUrl`), e **não há** campo `timeout` no nível top-level da config.
+- O framework versiona um template **`.agents/mcp_config.example.json`** — o usuário copia o conteúdo para `~/.gemini/config/mcp_config.json` e ajusta ao provider ativo.
+- **NUNCA** colar tokens diretamente: usar interpolação `${VAR}` resolvida do `.env`/ambiente.
+- Aprovação/habilitação de MCP servers é feita na configuração do IDE do Antigravity (Allow/Deny/Ask), documentada no getting-started.
+- `/meta-setup-integration` guia a configuração de `.env` + `mcp_config.json` quando aplicável.
+- Eventos de ciclo de vida (ex: detecção de provider antes de invocar workflow) vivem em `.agents/hooks.json` via `PreInvocation` — não no MCP config nem no frontmatter.
 
 ---
 
@@ -199,11 +204,11 @@ Cada provider tem formato preferido para descrições, comentários e payloads. 
 Templates de formatação para cada provider devem viver em:
 
 ```
-.claude/utils/<dominio>/adapters/<provider>.md
-.claude/utils/<dominio>/templates/<provider>-<tipo>.md   # quando aplicável
+docs/reference/<dominio>/adapters/<provider>.md
+docs/reference/<dominio>/templates/<provider>-<tipo>.md   # quando aplicável
 ```
 
-Para ClickUp especificamente, existe documento de referência: `.claude/utils/clickup-formatting.md`.
+Para ClickUp especificamente, existe documento de referência: `docs/reference/task-manager/clickup-formatting.md`.
 
 ---
 
@@ -250,7 +255,7 @@ Ao buscar itens, declarar apenas campos necessários para reduzir payload:
 ### 7.2 Não silenciar
 
 - Adapter nunca deve "engolir" erro sem reportar
-- Comandos chamadores devem propagar erro ao usuário com contexto
+- Workflows chamadores devem propagar erro ao usuário com contexto
 
 ---
 
@@ -258,12 +263,12 @@ Ao buscar itens, declarar apenas campos necessários para reduzir payload:
 
 Ao adicionar suporte a novo provider:
 
-1. Criar `.claude/utils/<dominio>/adapters/<provider>.md` seguindo estrutura de Seção 2.1
+1. Criar `docs/reference/<dominio>/adapters/<provider>.md` seguindo estrutura de Seção 2.1
 2. Atualizar `factory.md` para reconhecer o novo provider
 3. Atualizar `detector.md` se houver detecção automática
 4. Documentar variáveis de ambiente em `.env.example`
-5. Atualizar CLAUDE.md com tabela "Provider → Variáveis → Agente → Adapter"
-6. Criar especialista em `.claude/agents/development/<provider>-specialist.md` (opcional, mas recomendado)
+5. Atualizar a rule `.agents/rules/task-manager-routing.md` com a tabela "Provider → Variáveis → Persona → Adapter"
+6. Declarar a persona especialista do provider em `.agents/AGENTS.md` (opcional, mas recomendado)
 7. Adicionar a esta meta-spec (Seções 4.2 e 5)
 8. Validar com `@metaspec-gate-keeper`
 
@@ -271,10 +276,11 @@ Ao adicionar suporte a novo provider:
 
 ## 9. Proibições explícitas
 
-- **Proibido** integração que requer credencial fora de `.env`
-- **Proibido** invocar API externa diretamente em comando sem passar pelo adapter
+- **Proibido** integração que requer credencial fora de `.env` / `${VAR}` interpolada
+- **Proibido** invocar API externa diretamente em workflow sem passar pelo adapter
 - **Proibido** adapter que vaza tipos específicos do provider para o nível de interface
 - **Proibido** assumir provider sem ler `.env` primeiro
+- **Proibido** colar token literal em `~/.gemini/config/mcp_config.json` ou em `.agents/mcp_config.example.json`
 
 ---
 

@@ -25,8 +25,8 @@ O Sistema de Níveis organiza **comandos e agentes** em 3 categorias baseadas na
 **Tempo de Onboarding**: 15-30 minutos
 
 **Exemplos**:
-- **Business**: `/business/spec`, `/business/task`, `/business/estimate`
-- **Technical**: `/technical/work`, `/technical/plan`, `/technical/pr`
+- **Business**: `/business-spec`, `/business-task`, `/business-estimate`
+- **Technical**: `/technical-work`, `/technical-plan`, `/technical-pr`
 
 ---
 
@@ -43,8 +43,8 @@ O Sistema de Níveis organiza **comandos e agentes** em 3 categorias baseadas na
 **Tempo de Onboarding**: 30-60 minutos
 
 **Exemplos**:
-- **Business**: `/business/feature`, `/business/extract-meeting`, `/business/convert-to-tasks`
-- **Technical**: `/technical/start`, `/technical/pre-pr`, `/technical/build-index`
+- **Business**: `/business-feature`, `/business-extract-meeting`, `/business-convert-to-tasks`
+- **Technical**: `/technical-start`, `/technical-pre-pr`, `/technical-build-index`
 
 ---
 
@@ -61,8 +61,8 @@ O Sistema de Níveis organiza **comandos e agentes** em 3 categorias baseadas na
 **Tempo de Onboarding**: 45-90 minutos
 
 **Exemplos**:
-- **Business**: `/business/presentation`, `/business/analyze-pain-price`
-- **Technical**: `/technical/bump`, `/technical/e2e`, `/technical/release-*`
+- **Business**: `/business-presentation`, `/business-analyze-pain-price`
+- **Technical**: `/technical-bump`, `/technical-e2e`, `/technical-release-*`
 
 ---
 
@@ -115,20 +115,20 @@ Comandos relacionados ou próximo nível.
 ### Exemplo Real
 
 ```
-/business/spec (starter)
+/business-spec (starter)
   └─ 🚀 Próximos Passos
-      ├─ /business/estimate (starter)
-      ├─ /business/task (starter)
-      └─ /technical/start (intermediate)
+      ├─ /business-estimate (starter)
+      ├─ /business-task (starter)
+      └─ /technical-start (intermediate)
 
-/business/feature (intermediate)
+/business-feature (intermediate)
   ├─ 📚 Pré-requisitos
-  │   ├─ /business/spec ✓
-  │   ├─ /business/estimate ✓
-  │   └─ /business/task ✓
+  │   ├─ /business-spec ✓
+  │   ├─ /business-estimate ✓
+  │   └─ /business-task ✓
   └─ 🚀 Próximos Passos
-      ├─ /business/task-check
-      └─ /technical/start
+      ├─ /business-task-check
+      └─ /technical-start
 ```
 
 ---
@@ -141,16 +141,16 @@ Comandos relacionados ou próximo nível.
 **Objetivo**: Conhecer comandos starter do seu contexto principal.
 
 **Business**:
-1. Execute `/business/help`
-2. Pratique `/business/spec "test-feature"`
-3. Teste `/business/estimate "test-feature"`
-4. Experimente `/business/task "test-feature"`
+1. Execute `/business-help`
+2. Pratique `/business-spec "test-feature"`
+3. Teste `/business-estimate "test-feature"`
+4. Experimente `/business-task "test-feature"`
 
 **Technical**:
-1. Execute `/technical/help`
-2. Pratique `/technical/plan "test-feature"`
-3. Teste `/technical/work "test-task"`
-4. Experimente `/technical/pr`
+1. Execute `/technical-help`
+2. Pratique `/technical-plan "test-feature"`
+3. Teste `/technical-work "test-task"`
+4. Experimente `/technical-pr`
 
 **Resultado**: Produtivo em workflows básicos.
 
@@ -243,8 +243,8 @@ Comandos intermediate/advanced assumem familiaridade.
 ### 5. Consulte o Help
 Sistema de help é seu melhor amigo.
 ```bash
-/business/help                    # Ver comandos por nível
-/technical/help --level=starter   # Focar em starter
+/business-help                    # Ver comandos por nível
+/technical-help --level=starter   # Focar em starter
 /help                             # Visão geral do sistema
 ```
 
@@ -341,12 +341,12 @@ Tecnicamente sim, mas não recomendado. Pré-requisitos existem por uma razão -
 ### Documentação
 - **Visão Geral**: `docs/knowledge-base/frameworks/onion-multi-context-orchestrator-vision.md`
 - **Ciclo Completo**: `docs/knowledge-base/frameworks/onion-complete-cycle-understanding.md`
-- **READMEs**: `.onion/contexts/{business,technical}/README.md`
+- **READMEs**: `.agents/workflows/` (workflows organizados por prefixo de categoria)
 
 ### Comandos Help
 - `/help` - Visão geral do sistema
-- `/business/help` - Comandos business por nível
-- `/technical/help` - Comandos technical por nível
+- `/business-help` - Comandos business por nível
+- `/technical-help` - Comandos technical por nível
 
 ### Agentes
 - `@onion` - Orquestrador principal, ajuda com navegação

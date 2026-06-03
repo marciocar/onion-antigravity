@@ -1,3 +1,5 @@
+> ℹ️ **Nota histórica:** este release-note descreve o Onion na plataforma Claude Code (`.claude/`). A plataforma migrou posteriormente para o **Google Antigravity** (`.agents/`) em 2026-06 — ver [ADR-001](../analysis/onion-antigravity-migration-adr-2026-06.md). O conteúdo abaixo é preservado como registro histórico.
+
 # 🎉 Onion v4.0 Beta - Release Notes
 
 > **Status**: Beta Release | **Data**: 2025-12-20 | **71% Completo**

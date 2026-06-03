@@ -1,3 +1,5 @@
+> ℹ️ **Nota histórica:** descreve o Onion na plataforma Claude Code (`.claude/`). A plataforma migrou posteriormente para o **Google Antigravity** (`.agents/`) em 2026-06 — ver [ADR-001](../analysis/onion-antigravity-migration-adr-2026-06.md). Preservado como registro histórico.
+
 # ✅ Beta Release Complete - v4.0.0-beta.1-docs
 
 **Data**: 2025-12-21  

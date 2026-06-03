@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "clickup": {
+      "command": "npx",
+      "args": ["-y", "@taazkareem/clickup-mcp-server"],
+      "env": {
+        "CLICKUP_API_TOKEN": "${CLICKUP_API_TOKEN}",
+        "CLICKUP_TEAM_ID": "${CLICKUP_WORKSPACE_ID}"
+      }
+    },
+    "atlassian": {
+      "serverUrl": "https://mcp.atlassian.com/v1/sse"
+    }
+  }
+}

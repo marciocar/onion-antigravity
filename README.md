@@ -6,9 +6,9 @@
 
 ## O que é
 
-O Onion é um **framework template em `.claude/`** que se instala em qualquer projeto — novo, legado ou regulado — para orquestrar o ciclo completo de desenvolvimento com Claude Code. Separa **decisão de negócio**, **execução técnica** e **governança/compliance** em contextos distintos, conectados por fluxos e padrões repetíveis. Comandos, agentes especializados e documentação passam a conversar entre si em vez de competir por atenção no chat ou em arquivos soltos.
+O Onion é um **framework template em `.agents/`** que se instala em qualquer projeto — novo, legado ou regulado — para orquestrar o ciclo completo de desenvolvimento com o **Google Antigravity**. Separa **decisão de negócio**, **execução técnica** e **governança/compliance** em contextos distintos, conectados por fluxos e padrões repetíveis. Workflows, personas especializadas e documentação passam a conversar entre si em vez de competir por atenção no chat ou em arquivos soltos.
 
-O Onion **não é produto npm**, **não é distribuído publicamente** e **não tem CLI standalone**. Plataforma única: Claude Code.
+O Onion **não é produto npm**, **não é distribuído publicamente** e **não tem CLI standalone próprio**. Plataforma única: Google Antigravity.
 
 ---
 
@@ -25,7 +25,7 @@ O Onion **não é produto npm**, **não é distribuído publicamente** e **não 
 
 - Menos retrabalho por decisões perdidas ou mal comunicadas.
 - **Contexto explícito** antes de cada ação: todo mundo sabe em qual dimensão está trabalhando (produto, engenharia ou compliance).
-- **Workflows faseados retomáveis** para especificar, desenvolver, validar e documentar — com sessões persistentes que permitem pausar e continuar.
+- **Workflows faseados retomáveis** para especificar, desenvolver, validar e documentar — com artifacts persistentes que permitem pausar e continuar.
 - Documentação e fluxo de trabalho **mais próximos do que o time realmente faz**.
 - Práticas de **configuração e segurança** integradas ao processo (credenciais fora do repositório, templates seguros).
 

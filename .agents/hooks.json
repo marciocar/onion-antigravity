@@ -1,0 +1,30 @@
+{
+  "onion-task-manager-detect": {
+    "PreInvocation": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -f .env && grep -E '^TASK_MANAGER_PROVIDER=' .env | head -1 || echo 'TASK_MANAGER_PROVIDER=none'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "onion-lint-on-write": {
+    "PostToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -x ./scripts/lint.sh && ./scripts/lint.sh || true",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 # 📚 Índice Central de Documentação
 
-> **Última atualização**: 2026-05-18 | **Gerado por**: `/docs:build-index` | **Revisado**: auditoria manual
+> **Última atualização**: 2026-06-03 | **Gerado por**: `/docs-build-index` | **Revisado**: auditoria manual (migração Claude Code → Google Antigravity)
 
 Bem-vindo ao índice central de documentação do projeto. Este documento serve como hub de navegação para toda a documentação disponível.
 
@@ -8,14 +8,14 @@ Bem-vindo ao índice central de documentação do projeto. Este documento serve 
 
 ## 🎯 Visão Geral
 
-Este projeto é o **Sistema Onion** — um framework de comandos `.claude/` para uso interno com:
+Este projeto é o **Sistema Onion** — um framework de workflows `.agents/` para Google Antigravity, de uso interno, com:
 
-- 🤖 **78 comandos invocáveis** Claude Code em 9 categorias (+ 12 fragmentos compartilhados em `common/` e 3 READMEs)
-- 🎯 **49 agentes de IA especializados** em 9 categorias
-- 🧩 **4 skills** em `.claude/skills/` (`onion` — cérebro do sistema; `onion-patterns`; `onion-validation`; `language-standards`)
+- 🤖 **78 workflows invocáveis** (`.agents/workflows/`, achatados com prefixo de categoria → `/cat-cmd`)
+- 🎯 **Personas / subagents** consolidados a partir dos 49 agentes especializados (em `.agents/AGENTS.md`)
+- 🧩 **2 skills** em `.agents/skills/` (`onion` — cérebro do sistema; `onion-validation`) + **4 rules** always-on em `.agents/rules/`
 - 📚 **Knowledge Bases estruturadas** para consumo por IA
-- 🧅 **Skill + Comando `/onion`** — ponto de entrada inteligente com ativação automática
-- 🔗 **Task Manager Abstraction** plugável (Jira, ClickUp, Asana, Linear)
+- 🧅 **Skill + Workflow `/onion`** — ponto de entrada inteligente com ativação automática
+- 🔗 **Task Manager Abstraction** plugável (Jira, ClickUp, Asana, Linear) — em `docs/reference/task-manager/`
 - 🏗️ **Spec as Code Multi-Context** — separação entre business, technical e meta-specs
 
 ---
@@ -25,46 +25,57 @@ Este projeto é o **Sistema Onion** — um framework de comandos `.claude/` para
 ### Documentação Principal
 - **64 arquivos markdown** em `docs/`
 - **26 arquivos** em `docs/onion/` (Sistema Onion)
-- **25 arquivos** em `docs/knowledge-base/` (Knowledge Bases)
+- **26 arquivos** em `docs/knowledge-base/` (Knowledge Bases)
   - 13 arquivos em `concepts/` (Conceitos fundamentais)
   - 7 arquivos em `frameworks/` (Frameworks e metodologias)
   - 3 arquivos em `tools/` (Ferramentas, incl. Agent Skills)
-  - 1 arquivo em `platforms/` (Plataformas)
+  - 2 arquivos em `platforms/` (Plataformas)
   - 1 `index.md`
 - **1 arquivo** em `docs/meta-specs/` (Meta Especificações)
 - Arquivos adicionais em `docs/analysis/`, `docs/plans/`, `docs/business-context/`, `docs/technical-context/`
 
-### Sistema Onion (`.claude/`)
-- **78 comandos invocáveis** Claude Code distribuídos em:
-  - 20 em `product/` (gestão de produto e descoberta)
-  - 12 em `git/` (GitFlow e versionamento)
-  - 11 em `engineer/` (engenharia e desenvolvimento)
-  - 11 em `docs/` (geração e validação de documentação)
-  - 11 em `meta/` (meta-comandos, criadores e validação)
-  - 6 em `validate/` (validação e testes)
-  - 3 em `test/` (unit, integration, e2e)
-  - 1 em `development/`, 1 em `quick/`
-  - 2 no root: `onion.md`, `warm-up.md`
-  - **não-invocáveis**: 12 fragmentos em `common/` (5 templates + 7 prompts) e 3 READMEs de categoria
-- **4 skills** em `.claude/skills/` (`onion`, `onion-patterns`, `onion-validation`, `language-standards`)
-- **49 agentes** IA distribuídos em:
-  - 20 em `development/` (frontend, backend, infra, integrações)
-  - 8 em `product/` (gestão e narrativa)
-  - 5 em `compliance/` (ISO 27001, ISO 22301, SOC2, PMBOK, governance)
-  - 5 em `meta/` (orquestração, criação, validação, skills)
-  - 4 em `git/` (review pré-PR)
-  - 3 em `testing/`, 2 em `review/`
-  - 1 em `research/`, 1 em `deployment/`
+### Sistema Onion (`.agents/`)
+- **78 workflows invocáveis** (`.agents/workflows/`, flat com prefixo de categoria → `/cat-cmd`), originados das 9 categorias:
+  - `product-*` (gestão de produto e descoberta)
+  - `git-*` (GitFlow e versionamento, com feature/hotfix/release achatados)
+  - `engineer-*` (engenharia e desenvolvimento)
+  - `docs-*` (geração e validação de documentação)
+  - `meta-*` (criação de artefatos do Onion e validação)
+  - `validate-*` (validação e testes)
+  - `test-*` (unit, integration, e2e)
+  - `development-*`, `quick-*`
+  - root: `onion.md`, `warm-up.md`
+  - **fragmentos compartilhados** (templates/prompts) acompanham as skills em `.agents/skills/`
+- **2 skills** em `.agents/skills/` (`onion`, `onion-validation`) + **4 rules** always-on em `.agents/rules/` (`onion-identity`, `language-standards`, `task-manager-routing`, `onion-conventions`)
+- **Personas / subagents** em `.agents/AGENTS.md`, consolidados a partir dos 49 agentes especializados que cobrem development, product, compliance, meta, git, testing, review, research e deployment
 
 ### Total
 - **64 arquivos** de documentação markdown
-- **78 comandos invocáveis** em 9 categorias + root (+ 12 fragmentos `common/` + 3 READMEs)
-- **49 agentes** especializados em 9 categorias
-- **4 skills** (`.claude/skills/`)
+- **78 workflows invocáveis** (`.agents/workflows/`) achatados com prefixo de categoria
+- **Personas / subagents** consolidados de 49 agentes (`.agents/AGENTS.md`)
+- **2 skills** + **4 rules** (`.agents/skills/`, `.agents/rules/`)
 
 ---
 
-## 📁 Estrutura de Documentação
+## 📁 Estrutura do Framework
+
+### Operacional — `.agents/` (consumido pelo Google Antigravity)
+
+```
+.agents/
+├── AGENTS.md                   # Personas / "equipe de IA" (subagents)
+├── rules/                      # System instructions always-on (4 rules)
+├── workflows/                  # Saved prompts /-invocáveis (78, flat + prefixo)
+├── skills/                     # Conhecimento contextual on-demand (onion, onion-validation)
+├── hooks.json                  # Hooks de ciclo de vida (Pre/PostToolUse, Pre/PostInvocation)
+└── mcp_config.example.json     # Template MCP → ~/.gemini/config/mcp_config.json
+```
+
+> Config global do Antigravity (não versionada) vive em `~/.gemini/`
+> (`mcp_config.json`, `GEMINI.md`, skills compartilhadas). Estado de workflows
+> faseados usa Artifacts do Antigravity + (opcional) `docs/sessions/<feature>/`.
+
+### Documentação — `docs/`
 
 ```
 docs/
@@ -109,7 +120,8 @@ docs/
 │   │   ├── onion-multi-context-orchestrator-vision.md
 │   │   ├── onion-system-critical-analysis-2025.md
 │   │   └── spec-driven-development-tools-2025.md
-│   ├── platforms/              # Plataformas e tecnologias (1 arquivo)
+│   ├── platforms/              # Plataformas e tecnologias (2 arquivos)
+│   │   ├── antigravity.md      # Google Antigravity — agentic coding platform ✨ NOVO
 │   │   └── runflow.md
 │   ├── providers/              # Provedores de serviços (1 arquivo)
 │   │   └── microsoft-graph-teams-api-guia-completo.md
@@ -117,20 +129,27 @@ docs/
 │       ├── claude-code-commands-best-practices-2025.md
 │       └── whisper.md          # Knowledge base do Whisper
 │
-├── meta-specs/                 # Meta Especificações (1 arquivo)
-│   └── index.md                # Índice de meta specs
+├── meta-specs/                 # Meta Especificações (constituição L0)
+│   ├── index.md · agents.md · commands.md · architecture.md
+│   └── code-standards.md · integrations.md
 │
-├── analysis/                   # Análises
-│   └── unleash-alternatives-analysis.md
+├── analysis/                   # Análises críticas datadas + ADRs
+│   ├── onion-antigravity-migration-adr-2026-06.md  # ADR migração de plataforma ✨ NOVO
+│   └── [demais análises]
 │
 ├── plans/                      # Planos de execução
 │   └── [arquivos de planejamento]
 │
+├── reference/                  # Task Manager Abstraction + utilitários (consumidos por workflows) ✨ NOVO
+│   └── task-manager/           # interface, types, detector, factory, adapters/
+│
 ├── sdaal/                      # Specification-Driven AI Abstraction Layer
 │   └── [documentação SDAAL]
 │
-└── tools/                      # Ferramentas e recursos
-    └── [documentação de ferramentas]
+├── sessions/                   # (opcional) contexto versionado de features
+│
+└── onion/                      # Documentação operacional (guias, referências, releases)
+    └── [guias e referências]
 ```
 
 ---
@@ -149,7 +168,7 @@ docs/
 #### Integrações e Configuração
 - **[Configuração Inicial](onion/getting-started.md)** - Setup completo do sistema
 - **[Instalação](onion/INSTALLATION.md)** - Guia de instalação do Sistema Onion
-- Integração com Task Manager (Jira/ClickUp/Asana/Linear): use `/meta:setup-integration` — adapters em `.claude/utils/task-manager/adapters/`
+- Integração com Task Manager (Jira/ClickUp/Asana/Linear): use `/meta-setup-integration` — adapters em `docs/reference/task-manager/adapters/`
 
 #### Referências Técnicas
 - **[Exemplos Práticos](onion/practical-examples.md)** - Casos de uso reais com exemplos
@@ -173,7 +192,7 @@ docs/
 3. **[Exemplos Práticos](onion/practical-examples.md)** - Veja casos de uso reais
 4. **[Sistema de Níveis](onion/levels-system.md)** - Entenda a descoberta progressiva (v4.0) ✨ NOVO
 
-**Comando de entrada:**
+**Workflow de entrada:**
 ```bash
 /onion "Sou novo aqui, me ajude a começar"
 ```
@@ -208,7 +227,8 @@ Knowledge Bases estruturadas para consumo por IA e referência técnica:
 - **Onion System Critical Analysis 2025** - Análise crítica do sistema
 - **Spec-Driven Development Tools 2025** - Ferramentas e análise
 
-### Plataformas e Tecnologias (1 arquivo)
+### Plataformas e Tecnologias (2 arquivos)
+- **Google Antigravity** - Plataforma de coding agêntico da Google (MCP, Skills, Hooks, Subagents) ✨ NOVO
 - **Runflow** - Documentação da plataforma
 
 ### Provedores de Serviços (1 arquivo)
@@ -277,11 +297,11 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
 5. [Sistema de Níveis](onion/levels-system.md) - Descoberta progressiva ✨ NOVO
 
 **Comandos essenciais:**
-- `/engineer/start` - Iniciar desenvolvimento
-- `/engineer/work` - Trabalhar em feature
-- `/engineer/pr` - Criar Pull Request
-- `/test/unit` - Testes unitários
-- `/test/integration` - Testes de integração
+- `/engineer-start` - Iniciar desenvolvimento
+- `/engineer-work` - Trabalhar em feature
+- `/engineer-pr` - Criar Pull Request
+- `/test-unit` - Testes unitários
+- `/test-integration` - Testes de integração
 
 **Agentes especializados:**
 - `@react-developer` - Desenvolvimento React
@@ -299,15 +319,15 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
 4. [Knowledge Base - Spec-Driven Development](knowledge-base/concepts/spec-driven-development.md) ✨ NOVO
 
 **Comandos essenciais:**
-- `/product/task` - Criar tasks estruturadas
-- `/product/spec` - Especificações técnicas
-- `/product/estimate` - Estimar story points
-- `/product/extract-meeting` - Extrair insights de reuniões
-- `/product/consolidate-meetings` - Consolidação de múltiplas reuniões
-- `/product/convert-to-tasks` - Converter documentos consolidados em tasks
-- `/product/whisper` - Facilitador para uso do Whisper
-- `/docs/consolidate-documents` - Consolidar múltiplos documentos
-- `/validate/collab/three-amigos` - Sessões colaborativas
+- `/product-task` - Criar tasks estruturadas
+- `/product-spec` - Especificações técnicas
+- `/product-estimate` - Estimar story points
+- `/product-extract-meeting` - Extrair insights de reuniões
+- `/product-consolidate-meetings` - Consolidação de múltiplas reuniões
+- `/product-convert-to-tasks` - Converter documentos consolidados em tasks
+- `/product-whisper` - Facilitador para uso do Whisper
+- `/docs-consolidate-documents` - Consolidar múltiplos documentos
+- `/validate-collab-three-amigos` - Sessões colaborativas
 
 **Agentes especializados:**
 - `@product-agent` - Orquestração de produto
@@ -325,12 +345,12 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
 3. [Guia de Comandos](onion/commands-guide.md) - Seção "Comandos de Validação"
 
 **Comandos essenciais:**
-- `/test/unit` - Testes unitários (White-box)
-- `/test/integration` - Testes de integração (Grey-box)
-- `/test/e2e` - Testes end-to-end (Black-box)
-- `/validate/test-strategy/create` - Criar estratégias de teste
-- `/validate/qa-points/estimate` - Estimar QA points
-- `/validate/collab/pair-testing` - Teste em par
+- `/test-unit` - Testes unitários (White-box)
+- `/test-integration` - Testes de integração (Grey-box)
+- `/test-e2e` - Testes end-to-end (Black-box)
+- `/validate-test-strategy-create` - Criar estratégias de teste
+- `/validate-qa-points-estimate` - Estimar QA points
+- `/validate-collab-pair-testing` - Teste em par
 
 **Agentes especializados:**
 - `@test-agent` - Estratégias completas de teste
@@ -346,7 +366,7 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
 
 **Recursos:**
 - Agentes de arquitetura: `@c4-architecture-specialist`, `@mermaid-specialist`
-- Comandos de documentação: `/docs/build-tech-docs`, `/docs/reverse-consolidate`
+- Comandos de documentação: `/docs-build-tech-docs`, `/docs-reverse-consolidate`
 - Knowledge Bases: [SDAAL](knowledge-base/concepts/specification-driven-ai-abstraction-layer.md), [Spec-Driven Development](knowledge-base/concepts/spec-driven-development.md) ✨ NOVO
 
 ### 🔧 Para Administradores do Sistema
@@ -357,9 +377,9 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
 3. [Referência de Ferramentas](onion/tools-reference.md)
 
 **Comandos essenciais:**
-- `/meta:setup-integration` - Configurar Task Manager (Jira/ClickUp/Asana/Linear) e demais integrações
-- `/meta:all-tools` - Listar todas as ferramentas
-- `/docs:build-index` - Reconstruir índices
+- `/meta-setup-integration` - Configurar Task Manager (Jira/ClickUp/Asana/Linear) e demais integrações
+- `/meta-all-tools` - Listar todas as ferramentas
+- `/docs-build-index` - Reconstruir índices
 
 ### 🛡️ Para Compliance/Security
 
@@ -389,29 +409,29 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
 | 📋 **Planos** | `docs/plans/` | Planos de execução |
 | 🔧 **SDAAL** | `docs/sdaal/` | Specification-Driven AI Abstraction Layer |
 
-### Por Categoria de Comando
+### Por Categoria de Workflow
 
-| Categoria | Comandos | Documentação |
+| Categoria | Workflows | Documentação |
 |-----------|---------|--------------|
-| 🔧 **Engenharia** | `/engineer/*` | [Guia de Comandos](onion/commands-guide.md#-comandos-de-engenharia) |
-| 📋 **Produto** | `/product/*` | [Guia de Comandos](onion/commands-guide.md#-comandos-de-produto) |
-| 🧪 **Testes** | `/test/*` | [Sistema de Testes](onion/testing-validation-system.md) |
-| ✅ **Validação** | `/validate/*` | [Sistema de Testes](onion/testing-validation-system.md) |
-| 📚 **Documentação** | `/docs/*` | [Guia de Comandos](onion/commands-guide.md#-comandos-de-documentação) |
-| 🌿 **Git** | `/git/*` | [Guia de Comandos](onion/commands-guide.md#-comandos-git) |
-| ⚙️ **Meta** | `/meta/*` | [Guia de Comandos](onion/commands-guide.md#-comandos-meta) |
-| 🧅 **Onion** | `/onion/*` | [Sistema Onion](onion/) |
-| ⚡ **Quick** | `/quick/*` | [Guia de Comandos](onion/commands-guide.md) |
+| 🔧 **Engenharia** | `/engineer-*` | [Guia de Comandos](onion/commands-guide.md#-comandos-de-engenharia) |
+| 📋 **Produto** | `/product-*` | [Guia de Comandos](onion/commands-guide.md#-comandos-de-produto) |
+| 🧪 **Testes** | `/test-*` | [Sistema de Testes](onion/testing-validation-system.md) |
+| ✅ **Validação** | `/validate-*` | [Sistema de Testes](onion/testing-validation-system.md) |
+| 📚 **Documentação** | `/docs-*` | [Guia de Comandos](onion/commands-guide.md#-comandos-de-documentação) |
+| 🌿 **Git** | `/git-*` | [Guia de Comandos](onion/commands-guide.md#-comandos-git) |
+| ⚙️ **Meta** | `/meta-*` | [Guia de Comandos](onion/commands-guide.md#-comandos-meta) |
+| 🧅 **Onion** | `/onion` | [Sistema Onion](onion/) |
+| ⚡ **Quick** | `/quick-*` | [Guia de Comandos](onion/commands-guide.md) |
 
-### Por Categoria de Agente
+### Por Categoria de Persona / Subagent
 
-| Categoria | Agentes | Documentação |
+| Categoria | Personas | Documentação |
 |-----------|---------|--------------|
-| 🛡️ **Compliance** | `compliance/` (5) | [Referência de Agentes](onion/agents-reference.md#️-agentes-de-compliance) |
-| 🔴 **Meta** | `meta/` (4) | [Referência de Agentes](onion/agents-reference.md#-agentes-meta) |
-| ⚙️ **Deployment** | `deployment/` (1) | [Referência de Agentes](onion/agents-reference.md) |
-| 🟣 **Pesquisa** | `research/` (1) | [Referência de Agentes](onion/agents-reference.md#-agentes-de-pesquisa) |
-| 🟢 **Review** | `review/` (1) | [Referência de Agentes](onion/agents-reference.md#-agentes-de-review) |
+| 🛡️ **Compliance** | `compliance` (5) | [Referência de Agentes](onion/agents-reference.md#️-agentes-de-compliance) |
+| 🔴 **Meta** | `meta` (4) | [Referência de Agentes](onion/agents-reference.md#-agentes-meta) |
+| ⚙️ **Deployment** | `deployment` (1) | [Referência de Agentes](onion/agents-reference.md) |
+| 🟣 **Pesquisa** | `research` (1) | [Referência de Agentes](onion/agents-reference.md#-agentes-de-pesquisa) |
+| 🟢 **Review** | `review` (1) | [Referência de Agentes](onion/agents-reference.md#-agentes-de-review) |
 
 ---
 
@@ -432,12 +452,13 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
 - [AI Agent Design Patterns](knowledge-base/concepts/ai-agent-design-patterns.md)
 - [Spec-as-Code Strategy](knowledge-base/concepts/spec-as-code-strategy.md)
 - [Spec-Driven Development](knowledge-base/concepts/spec-driven-development.md) ✨ NOVO
+- [Google Antigravity](knowledge-base/platforms/antigravity.md) - Plataforma agentic coding Google ✨ NOVO
 - [Whisper](knowledge-base/tools/whisper.md) - Transcrição de áudio
 
 ### Configuração
 - [Configuração Inicial](onion/getting-started.md)
 - [Instalação](onion/INSTALLATION.md)
-- [Adapters de Task Manager](../.claude/utils/task-manager/adapters/) (Jira, ClickUp, Asana, Linear)
+- [Adapters de Task Manager](reference/task-manager/adapters/) (Jira, ClickUp, Asana, Linear)
 
 ---
 
@@ -468,11 +489,11 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
   - Suporte multi-IDE
 
 - **Comandos de Produto Expandidos**
-  - `/product/extract-meeting` - Extração inteligente de insights de reuniões
-  - `/product/consolidate-meetings` - Consolidação de múltiplas reuniões
-  - `/product/convert-to-tasks` - Converter documentos consolidados em tasks
-  - `/product/whisper` - Facilitador para uso do Whisper
-  - `/docs/consolidate-documents` - Consolidar múltiplos documentos
+  - `/product-extract-meeting` - Extração inteligente de insights de reuniões
+  - `/product-consolidate-meetings` - Consolidação de múltiplas reuniões
+  - `/product-convert-to-tasks` - Converter documentos consolidados em tasks
+  - `/product-whisper` - Facilitador para uso do Whisper
+  - `/docs-consolidate-documents` - Consolidar múltiplos documentos
   - Agente `@meeting-consolidator` - Consolidação avançada de reuniões
   - Agente `@whisper-specialist` - Especialista em transcrição de áudio
   - Knowledge Base Whisper - Documentação completa do Whisper
@@ -489,28 +510,28 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
 4. **Instalação**: Consulte [Instalação](onion/INSTALLATION.md) ✨ NOVO
 5. **Testes**: Consulte [Sistema de Testes e Validação](onion/testing-validation-system.md)
 
-### 🔧 Comandos de Debug
+### 🔧 Workflows de Debug
 
 ```bash
 /onion "ajuda"                  # Ponto de entrada inteligente
-/meta/all-tools                 # Lista todos os comandos
-/docs/build-index               # Reconstruir este índice
-@onion "sua pergunta"           # Agente orquestrador master
+/meta-all-tools                 # Lista todos os workflows
+/docs-build-index               # Reconstruir este índice
+@onion "sua pergunta"           # Persona orquestradora master
 ```
 
 ---
 
 ## 🔄 Manutenção
 
-Este índice é gerado automaticamente pelo comando `/docs/build-index`.
+Este índice é gerado automaticamente pelo workflow `/docs-build-index`.
 
 **Para atualizar:**
 ```bash
-/docs/build-index              # Reconstruir índice principal
-/docs/build-index onion        # Reconstruir índice da seção onion
+/docs-build-index              # Reconstruir índice principal
+/docs-build-index onion        # Reconstruir índice da seção onion
 ```
 
-**Última atualização:** 2026-05-15
+**Última atualização:** 2026-06-03
 **Mantido por:** Sistema Onion
 
 ---

@@ -17,18 +17,18 @@ O Sistema Onion é um **framework template** que se materializa em cada projeto-
 Cada guia documenta:
 
 - Pré-requisitos
-- Passo a passo desde clone/init até primeiro comando útil
+- Passo a passo desde clone/init até primeiro workflow útil
 - Decisão sobre quais dos três contextos spec-as-code ativar (business, technical, compliance)
-- Comandos específicos do cenário
+- Workflows específicos do cenário
 - Troubleshooting
 
 ---
 
 ## Pré-requisitos comuns a todos os cenários
 
-1. **Claude Code instalado** — plataforma única do Onion
+1. **Google Antigravity instalado** — plataforma única do Onion (config global em `~/.gemini/`)
 2. **Git** instalado e funcional
-3. **Acesso ao repositório do Onion** (este repositório) para copiar `.claude/` e estrutura `docs/`
+3. **Acesso ao repositório do Onion** (este repositório) para copiar `.agents/` e estrutura `docs/`
 4. **Conta em pelo menos um Task Manager** (Jira, ClickUp, Asana ou Linear) se o projeto usar tasks
 
 ---

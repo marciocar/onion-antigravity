@@ -1,375 +1,173 @@
-# 📦 Instalação do Onion v4.0 Beta
+# 📦 Instalação do Sistema Onion (Google Antigravity)
 
-> **Status**: Beta Release | **Versão**: 4.0.0-beta.1 | **Data**: 2025-12-20
+> **Plataforma**: Google Antigravity | **Estrutura**: `.agents/` + `docs/` | **Data**: 2026-06-03
+
+> **Nota**: versões anteriores deste guia descreviam um CLI npm (`onion init`) e a estrutura `.onion/`. Ambos foram **abandonados** (CLI/`.onion/` em 2026-05-18; migração de plataforma Claude Code → Antigravity em 2026-06, ver [ADR-001](../analysis/onion-antigravity-migration-adr-2026-06.md)). O Onion **não é produto npm** e **não tem CLI standalone**: é um framework instalável copiando `.agents/` e `docs/` para o projeto-alvo.
 
 ---
 
 ## 🎯 Pré-requisitos
 
-Antes de instalar o Onion v4.0, certifique-se de ter:
+Antes de instalar o Sistema Onion, certifique-se de ter:
 
-| Requisito | Versão Mínima | Verificar |
-|-----------|---------------|-----------|
-| **Node.js** | >= 16.0.0 | `node --version` |
-| **pnpm** | >= 8.0.0 | `pnpm --version` |
+| Requisito | Observação | Verificar |
+|-----------|------------|-----------|
+| **Google Antigravity** | IDE/runtime do Onion | Config global em `~/.gemini/` |
 | **Git** | >= 2.20.0 | `git --version` |
-| **IDE** | Claude Code (recomendado) | - |
+| **Task Manager (opcional)** | Jira / ClickUp / Asana / Linear via MCP | Configurado em `~/.gemini/config/mcp_config.json` |
 
 ---
 
-## 🚀 Métodos de Instalação
+## 🚀 Instalação
 
-### Método 1: Instalação Local (Beta)
+O Sistema Onion é instalado **copiando ou clonando** `.agents/` e `docs/` para a raiz do projeto-alvo. Não há build, npm install ou link global.
 
-**Recomendado para testadores beta**
-
-```bash
-# 1. Clone o repositório
-git clone https://github.com/your-org/onion-v4.git
-cd onion-v4
-
-# 2. Instale dependências
-pnpm install
-
-# 3. Build o CLI
-cd packages/onion-cli
-pnpm install
-
-# 4. Link globalmente
-pnpm link --global
-
-# 5. Verifique a instalação
-onion --version
-# Esperado: 4.0.0-beta.1
-```
-
-### Método 2: NPM (Futuro - Após Feedback Beta)
+### Método 1: Clonar e copiar
 
 ```bash
-# Disponível após release estável
-npm install -g @onion/cli
+# 1. Clone o repositório do framework
+git clone https://github.com/your-org/onion.git /tmp/onion
 
-# Ou com pnpm
-pnpm add -g @onion/cli
+# 2. Copie .agents/ e docs/ para o projeto-alvo
+cp -r /tmp/onion/.agents  /caminho/do/seu-projeto/
+cp -r /tmp/onion/docs     /caminho/do/seu-projeto/   # opcional (spec-as-code)
+
+# 3. Copie o template de ambiente
+cp /tmp/onion/.env.example /caminho/do/seu-projeto/.env
 ```
+
+### Método 2: Submódulo / template
+
+Você também pode usar o repositório como **template do GitHub** ou adicionar `.agents/` como submódulo, conforme a política da sua equipe.
 
 ---
 
 ## ✅ Verificação da Instalação
 
-### 1. Verificar Versão
+### 1. Verificar estrutura `.agents/`
 
 ```bash
-onion --version
+ls -la .agents/
+# Esperado: AGENTS.md, rules/, workflows/, skills/, hooks.json, mcp_config.example.json
 ```
 
-**Esperado**: `4.0.0-beta.1`
-
-### 2. Verificar Comandos Disponíveis
+### 2. Verificar workflows disponíveis
 
 ```bash
-onion --help
+ls .agents/workflows/   # 78 workflows (flat + prefixo de categoria)
 ```
 
-**Esperado**:
+No agente do Antigravity, os workflows ficam disponíveis via `/` (ex.: `/onion`, `/engineer-start`, `/product-task`).
+
+### 3. Teste básico (no agente do Antigravity)
+
+```markdown
+/onion          # Ponto de entrada inteligente / navegação
+/warm-up        # Preparação geral de contexto
 ```
-Usage: onion [options] [command]
-
-Onion CLI - Multi-Context Development Orchestrator
-
-Options:
-  -V, --version          output the version number
-  -h, --help             display help for command
-
-Commands:
-  init [options]         Initialize new Onion project
-  add [options]          Add context or IDE to existing project
-  migrate [options]      Migrate from Onion v3 to v4
-  validate [options]     Validate Onion structure (coming soon)
-  help [command]         display help for command
-```
-
-### 3. Teste Básico
-
-```bash
-# Criar diretório de teste
-mkdir test-onion && cd test-onion
-
-# Inicializar projeto
-onion init
-
-# Escolher opções no wizard:
-# - Project type: Single App
-# - Contexts: Business, Technical
-# - IDEs: Claude Code
-# - Task Manager: ClickUp (ou None)
-
-# Verificar estrutura criada
-ls -la .onion/
-```
-
-**Esperado**: Estrutura `.onion/` completa criada
 
 ---
 
-## 🔧 Configuração de IDEs
+## 🔧 Configuração do Antigravity
 
-### Claude Code (Recomendado)
+A camada operacional do Onion vive em `.agents/` (no projeto) + `~/.gemini/` (config global do usuário).
 
-**Automaticamente configurado após `onion init`**
+### Rules e workflows (automático)
 
-1. Abra o projeto no Claude Code
-2. Comandos disponíveis via chat (e.g., `/business/help`)
-3. Agentes disponíveis via `@` (e.g., `@product-agent`)
+1. Abra o projeto no Google Antigravity
+2. As **rules** em `.agents/rules/` carregam always-on (identidade, idioma, roteamento de Task Manager, convenções)
+3. Os **workflows** ficam disponíveis via `/` (ex.: `/product-help`, `/engineer-start`)
+4. As **personas/subagents** documentadas em `.agents/AGENTS.md` ficam acessíveis via `@` (ex.: `@product-agent`, `@onion`)
 
-**Verificar**:
-```bash
-# Comandos devem estar em:
-ls .claude/commands/business/
-ls .claude/commands/technical/
-
-# Agentes devem estar em:
-ls .claude/agents/
-```
-
-### Windsurf / Claude Code (Futuro - FASE 5)
-
-Suporte planejado para próximo release beta.
-
----
-
-## 🔄 Migração de Projeto v3
-
-Se você já tem um projeto Onion v3:
+### MCP e config global (`~/.gemini/`)
 
 ```bash
-# 1. Navegue até o projeto v3
-cd seu-projeto-v3
+# Template versionado no projeto:
+.agents/mcp_config.example.json
 
-# 2. Certifique-se de ter backup (opcional, mas recomendado)
-git commit -am "backup before migration"
-
-# 3. Execute migração
-onion migrate
-
-# 4. Revise o plano apresentado
-# (O sistema mostra o que será migrado)
-
-# 5. Confirme a migração
-# (Digite 'y' quando solicitado)
-
-# 6. Aguarde conclusão
-# (Backup automático criado em .claude-backup/)
-
-# 7. Verifique a migração
-ls .onion/contexts/
-cat docs/onion/MIGRATION-REPORT.md
+# Destino (config global, não versionada):
+~/.gemini/config/mcp_config.json
 ```
+
+Use o workflow `/meta-setup-integration` para configurar com segurança as variáveis de cada provider.
 
 ---
 
 ## 🛠️ Configuração de Integrações (Opcional)
 
-### ClickUp Integration
+### Task Manager (Jira / ClickUp / Asana / Linear)
 
-Se escolheu ClickUp no wizard:
+O Onion é **provider-agnóstico**. Defina o provider ativo em `.env`:
 
-1. **Obter API Token**:
-   - Acesse: https://app.clickup.com/settings/apps
-   - Gere um token pessoal
+```bash
+# .env
+TASK_MANAGER_PROVIDER=clickup   # jira | clickup | asana | linear | none
 
-2. **Configurar no projeto**:
-   ```bash
-   # Crie arquivo .env na raiz
-   echo "CLICKUP_API_TOKEN=seu_token_aqui" > .env
+# Exemplo ClickUp
+CLICKUP_API_TOKEN=pk_xxxxx
+```
+
+1. **Obter API Token** do provider escolhido
+2. **Configurar `.env`** (e o MCP correspondente em `~/.gemini/config/mcp_config.json`)
+3. **Validar** no agente:
+   ```markdown
+   /meta-setup-integration
+   /product-task "criar nova feature"
    ```
 
-3. **Verificar**:
-   ```bash
-   # Comandos que usam ClickUp devem funcionar
-   /business/task "criar nova feature"
-   ```
+> Detalhes por provider: `docs/reference/task-manager/adapters/` (`jira.md`, `clickup.md`, `asana.md`, `linear.md`).
 
 ### Whisper (Transcrição de Áudio)
 
-Para habilitar transcrição de reuniões:
+Para habilitar transcrição de reuniões, configure a chave no `.env`:
 
-1. **Whisper Local** (sem API key):
-   ```bash
-   # Instalar whisper.cpp ou similar
-   # Configurar no .onion-config.yml
-   ```
-
-2. **Whisper Cloud** (OpenAI):
-   ```bash
-   # Adicionar ao .env
-   echo "OPENAI_API_KEY=seu_key_aqui" >> .env
-   ```
+```bash
+# .env
+OPENAI_API_KEY=seu_key_aqui   # Whisper Cloud (OpenAI)
+```
 
 ---
 
 ## 📝 Primeiros Passos Após Instalação
 
-### Para Novo Projeto
-
-```bash
-# 1. Criar e inicializar
-mkdir meu-projeto && cd meu-projeto
-onion init
-
-# 2. Abrir no Claude Code
-claude .
-
-# 3. Explorar comandos
-/business/help
-/technical/help
-
-# 4. Criar primeira spec
-/business/spec "Sistema de autenticação"
-
-# 5. Iniciar desenvolvimento
-/technical/work
-```
-
-### Para Projeto Migrado (v3→v4)
-
-```bash
-# 1. Após migração bem-sucedida
-# 2. Abrir no Claude Code
-claude .
-
-# 3. Testar comandos antigos (via symlinks)
-/engineer/work
-
-# 4. Explorar nova estrutura
-/technical/work
-
-# 5. Verificar novos helps
-/business/help
-/technical/help
+```markdown
+# No agente do Antigravity, na raiz do projeto:
+/onion                                   # Navegação / recomendações
+/product-spec "Sistema de autenticação"  # Criar especificação
+/engineer-start                          # Iniciar desenvolvimento
 ```
 
 ---
 
 ## ❓ Troubleshooting
 
-### Problema: `onion: command not found`
-
-**Solução 1**: Link não funcionou
-```bash
-cd packages/onion-cli
-pnpm link --global
-
-# Ou adicionar ao PATH manualmente
-export PATH="$PATH:$(pwd)/bin"
-```
-
-**Solução 2**: Shell não recarregou
-```bash
-# Recarregar shell
-source ~/.bashrc  # ou ~/.zshrc
-```
-
-### Problema: `Cannot find module 'inquirer'`
-
-**Solução**: Dependências não instaladas
-```bash
-cd packages/onion-cli
-pnpm install
-```
-
-### Problema: `Error: EACCES: permission denied`
-
-**Solução**: Permissões incorretas
-```bash
-# Usar sudo (não recomendado)
-sudo pnpm link --global
-
-# OU configurar npm prefix (recomendado)
-npm config set prefix ~/.npm-global
-export PATH=~/.npm-global/bin:$PATH
-```
-
-### Problema: Comandos não aparecem no Claude Code
-
-**Solução**: `.claude/` não foi criado
-```bash
-# Verificar se existe
-ls -la .claude/
-
-# Se não existe, reexecutar init
-onion init
-
-# Ou criar manualmente
-mkdir -p .claude/commands
-mkdir -p .claude/agents
-```
-
-### Problema: Migração falhou no meio
-
-**Solução**: Restaurar backup
-```bash
-# Backup automático está em .claude-backup/
-rm -rf .claude/
-mv .claude-backup/ .claude/
-
-# Tentar novamente com --debug
-onion migrate --debug
-```
-
----
-
-## 🆘 Suporte
-
-### Reportar Problemas
-
-Se encontrar problemas durante instalação:
-
-1. **GitHub Issues**: https://github.com/your-org/onion-v4/issues
-2. **Incluir**:
-   - Sistema operacional
-   - Versão do Node.js
-   - Comando executado
-   - Erro completo
-   - Logs (se houver)
-
-### Obter Ajuda
-
-- **Discord**: (coming soon)
-- **GitHub Discussions**: (coming soon)
-- **Email**: suporte@onion-system.dev (coming soon)
-
----
-
-## 🔄 Atualização
-
-### Atualizar Beta
+### Problema: Workflows não aparecem via `/`
 
 ```bash
-# 1. Ir para diretório do onion-v4
-cd path/to/onion-v4
+# Verificar se .agents/ existe na raiz do projeto
+ls -la .agents/workflows/
 
-# 2. Pull latest changes
-git pull origin main
-
-# 3. Reinstalar
-cd packages/onion-cli
-pnpm install
-pnpm link --global
-
-# 4. Verificar nova versão
-onion --version
+# Verificar se está na raiz correta
+pwd
 ```
 
-### Desinstalar
+Se `.agents/` não existir, recopie do repositório do framework (ver "Instalação").
+
+### Problema: Task Manager não conecta
 
 ```bash
-# 1. Unlink global
-pnpm unlink --global @onion/cli
+# Verificar provider ativo
+grep TASK_MANAGER_PROVIDER .env
 
-# 2. Remover diretório (opcional)
-rm -rf path/to/onion-v4
+# Validar/reconfigurar via workflow
+/meta-setup-integration
 ```
+
+Confirme que o MCP do provider está em `~/.gemini/config/mcp_config.json` e que as variáveis obrigatórias estão no `.env`.
+
+### Problema: Rules não carregam
+
+Confirme que os arquivos existem em `.agents/rules/` e reabra o projeto no Antigravity para recarregar as system instructions.
 
 ---
 
@@ -377,30 +175,23 @@ rm -rf path/to/onion-v4
 
 Após instalação bem-sucedida:
 
-1. ✅ Leia [Release Notes](../onion/RELEASE-NOTES-v4.0-beta.md)
-2. ✅ Explore [Level System](../onion/levels-system.md)
-3. ✅ Leia [Contributing Guide](../../CONTRIBUTING.md)
-4. ✅ Junte-se à comunidade (links em breve)
-5. ✅ Dê feedback sobre beta!
+1. ✅ Leia o [Getting Started](getting-started.md)
+2. ✅ Explore o [Guia de Workflows](commands-guide.md)
+3. ✅ Conheça as [personas/subagents](agents-reference.md)
+4. ✅ Leia o [Contributing Guide](../../CONTRIBUTING.md)
 
 ---
 
-## 🎉 Parabéns!
+## 🎉 Pronto!
 
-Você instalou com sucesso o **Onion v4.0 Beta**! 🧅🚀
+Você instalou o **Sistema Onion** no Google Antigravity. Agora você tem acesso a:
 
-Agora você tem acesso a:
-- ✅ CLI poderoso (`init`, `add`, `migrate`)
-- ✅ Multi-context architecture
-- ✅ Sistema de níveis com descoberta progressiva
-- ✅ 91 comandos e agentes migrados
-- ✅ Backward compatibility com v3
-
-**Compartilhe seu feedback** para ajudar a melhorar o Onion!
+- ✅ 78 workflows `/`-invocáveis em `.agents/workflows/`
+- ✅ Personas/subagents em `.agents/AGENTS.md` (consolidados de 49 agentes especializados)
+- ✅ 2 skills (`onion`, `onion-validation`) + 4 rules always-on
+- ✅ Task Manager Abstraction multi-provider (Jira, ClickUp, Asana, Linear)
 
 ---
 
-**Última atualização**: 2025-12-20  
-**Versão**: 1.0.0  
-**Status**: Beta Release
-
+**Última atualização**: 2026-06-03
+**Plataforma**: Google Antigravity

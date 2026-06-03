@@ -6,7 +6,7 @@
 
 ## Pré-requisitos
 
-- Claude Code instalado
+- Google Antigravity instalado (config global em `~/.gemini/`)
 - Git instalado
 - Acesso ao repositório do Onion
 - Projeto-alvo já clonado localmente
@@ -42,28 +42,29 @@ git checkout -b chore/apply-onion
 
 Copiar do repositório do Onion:
 
-- `.claude/` integral (se já existir `.claude/` no projeto-alvo, **mesclar com cuidado** — não sobrescrever sem revisão)
+- `.agents/` integral (se já existir `.agents/` no projeto-alvo, **mesclar com cuidado** — não sobrescrever sem revisão)
 - `docs/meta-specs/` (constituição do framework)
+- `docs/reference/` (Task Manager Abstraction + utilitários)
 - `docs/sdaal/` (KB SDAAL)
 - Templates de `docs/business-context/README.md`, `docs/technical-context/README.md`, `docs/compliance-context/README.md`
-- `CLAUDE.md` — se já existir, **mesclar** mantendo regras específicas do projeto-alvo
+- `.agents/AGENTS.md` + `.agents/rules/` — se já existir um `AGENTS.md`, **mesclar** mantendo regras específicas do projeto-alvo
 
-### Mesclagem de CLAUDE.md
+### Mesclagem de AGENTS.md / rules
 
 Estratégia recomendada:
 
-1. Mover `CLAUDE.md` existente para `CLAUDE.legacy.md`
-2. Copiar `CLAUDE.md` do Onion como novo
-3. Identificar seções únicas do projeto-alvo (regras específicas, gotchas, contexto técnico)
-4. Anexar essas seções ao novo `CLAUDE.md` em "## Contexto Específico do Projeto"
-5. Validar e remover `CLAUDE.legacy.md`
+1. Mover `.agents/AGENTS.md` existente para `.agents/AGENTS.legacy.md`
+2. Copiar `.agents/AGENTS.md` do Onion como novo
+3. Identificar seções únicas do projeto-alvo (personas próprias, gotchas, contexto técnico)
+4. Anexar essas seções ao novo `AGENTS.md` (ou a uma rule em `.agents/rules/`) em "## Contexto Específico do Projeto"
+5. Validar e remover `.agents/AGENTS.legacy.md`
 
 ---
 
 ## Passo 3 — Configurar integrações
 
 ```bash
-/meta:setup-integration
+/meta-setup-integration
 ```
 
 Em projetos legados é comum já haver Task Manager em uso — confirmar qual e configurar `TASK_MANAGER_PROVIDER` de acordo.
@@ -75,10 +76,10 @@ Em projetos legados é comum já haver Task Manager em uso — confirmar qual e 
 Esta é a **fase central** de aplicação em projeto legado.
 
 ```bash
-/docs:reverse-consolidate
+/docs-reverse-consolidate
 ```
 
-O comando coordena o `@docs-reverse-engineer` e demais agentes para:
+O workflow coordena o `@docs-reverse-engineer` e demais personas para:
 
 1. **Detectar stack** — linguagens, frameworks, build tools, monorepo ou não
 2. **Mapear estrutura** — diretórios, módulos, componentes principais
@@ -93,12 +94,12 @@ Saída: documentação consolidada inicial em `docs/`.
 ## Passo 5 — Gerar contexto técnico baseado em engenharia reversa
 
 ```bash
-/docs:build-tech-docs
+/docs-build-tech-docs
 ```
 
-Diferentemente do greenfield, em legado o comando:
+Diferentemente do greenfield, em legado o workflow:
 
-1. **Descoberta** — usa o output de `/docs:reverse-consolidate` como base de evidência
+1. **Descoberta** — usa o output de `/docs-reverse-consolidate` como base de evidência
 2. **Discussão** — pergunta sobre decisões **não inferíveis** (por que essa arquitetura? trade-offs aceitos? desafios pendentes?)
 3. **Geração** — preenche `docs/technical-context/` com ADRs retroativas (`adr/000-retroactive-*.md`) capturando o estado atual
 
@@ -109,10 +110,10 @@ Diferentemente do greenfield, em legado o comando:
 Se o projeto-alvo já tem documentação de negócio (specs, OKRs, personas), aproveitar:
 
 ```bash
-/docs:build-business-docs --sources=<paths-de-docs-existentes>
+/docs-build-business-docs --sources=<paths-de-docs-existentes>
 ```
 
-Se não tiver, executar sem fontes e o comando perguntará o necessário.
+Se não tiver, executar sem fontes e o workflow perguntará o necessário.
 
 ---
 
@@ -123,9 +124,9 @@ Em projeto legado, **não substituir** processos existentes imediatamente. Estra
 ### Etapa A: Adotar workflow de produto
 
 ```bash
-/product:task   # Para próximas features, usar o workflow Onion
-/product:estimate
-/product:feature
+/product-task   # Para próximas features, usar o workflow Onion
+/product-estimate
+/product-feature
 ```
 
 Manter tasks legadas no Task Manager intactas; novas tasks seguem padrão Onion.
@@ -133,11 +134,11 @@ Manter tasks legadas no Task Manager intactas; novas tasks seguem padrão Onion.
 ### Etapa B: Adotar workflow de engenharia
 
 ```bash
-/engineer:plan   # Para próximas features
-/engineer:start  # Sessões persistentes
-/engineer:work
-/engineer:pre-pr
-/engineer:pr
+/engineer-plan   # Para próximas features
+/engineer-start  # Sessões persistentes (Artifacts / docs/sessions)
+/engineer-work
+/engineer-pre-pr
+/engineer-pr
 ```
 
 PRs em andamento seguem o processo antigo até serem finalizados.
@@ -148,7 +149,7 @@ Após 2-4 semanas de uso paralelo:
 
 - Migrar tasks legadas ativas para o padrão Onion
 - Documentar diferenças nos guias internos do projeto
-- Atualizar CLAUDE.md com lições aprendidas
+- Atualizar `.agents/AGENTS.md` (e rules) com lições aprendidas
 
 ---
 
@@ -157,7 +158,7 @@ Após 2-4 semanas de uso paralelo:
 Se houver conhecimento técnico crítico que merece documentação estruturada:
 
 ```bash
-/meta:create-knowledge-base
+/meta-create-knowledge-base
 ```
 
 Cria KB em `docs/knowledge-base/<categoria>/` com estrutura padrão.
@@ -170,24 +171,24 @@ Se o projeto legado tiver requisitos regulatórios já existentes (auditorias pa
 
 ```bash
 mkdir -p docs/compliance-context
-/docs:build-compliance-docs
+/docs-build-compliance-docs
 ```
 
-O comando aproveita evidências de auditorias passadas e gaps documentados. Ver [applying-regulated.md](./applying-regulated.md) para detalhes.
+O workflow aproveita evidências de auditorias passadas e gaps documentados. Ver [applying-regulated.md](./applying-regulated.md) para detalhes.
 
 ---
 
 ## Troubleshooting
 
-### Conflito com estrutura existente em `.claude/`
+### Conflito com estrutura existente em `.agents/`
 
 - Comparar arquivo a arquivo antes de sobrescrever
-- Preservar customizações específicas do projeto (ex: agentes ou comandos próprios)
-- Mover customizações para `.claude/agents/development/<projeto>-specialist.md` em vez de modificar agentes Onion canônicos
+- Preservar customizações específicas do projeto (ex: personas ou workflows próprios)
+- Adicionar personas próprias em `.agents/AGENTS.md` (ex: `@<projeto>-specialist`) em vez de modificar as personas Onion canônicas
 
-### `/docs:reverse-consolidate` produz output incompleto
+### `/docs-reverse-consolidate` produz output incompleto
 
-- Verificar que o agente tem acesso a todos os diretórios relevantes
+- Verificar que a persona/subagent tem acesso a todos os diretórios relevantes
 - Limitar escopo via parâmetro (ex: `--paths=src/,packages/`)
 - Iterar: rodar múltiplas vezes com escopos diferentes e consolidar manualmente
 
@@ -201,12 +202,12 @@ O comando aproveita evidências de auditorias passadas e gaps documentados. Ver 
 
 ## Checklist de "Onion aplicado em legado"
 
-- [ ] `.claude/` mesclado sem perder customizações do projeto
-- [ ] CLAUDE.md mesclado, `.legacy` removido após validação
+- [ ] `.agents/` mesclado sem perder customizações do projeto
+- [ ] `.agents/AGENTS.md` mesclado, `.legacy` removido após validação
 - [ ] `.env` configurado
-- [ ] `/docs:reverse-consolidate` executado e output revisado
-- [ ] `/docs:build-tech-docs` gerou ADRs retroativas
-- [ ] `/docs:build-business-docs` executado (com ou sem fontes existentes)
+- [ ] `/docs-reverse-consolidate` executado e output revisado
+- [ ] `/docs-build-tech-docs` gerou ADRs retroativas
+- [ ] `/docs-build-business-docs` executado (com ou sem fontes existentes)
 - [ ] Workflow de produto adotado para próximas features
 - [ ] Workflow de engenharia adotado para próximas features
 - [ ] Equipe alinhada sobre uso paralelo durante transição

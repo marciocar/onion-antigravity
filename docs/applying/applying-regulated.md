@@ -6,7 +6,7 @@
 
 ## Pré-requisitos
 
-- Claude Code instalado
+- Google Antigravity instalado (config global em `~/.gemini/`)
 - Git instalado
 - Acesso ao repositório do Onion
 - **Clareza sobre o framework regulatório aplicável** (ou disposição para descobrir via discovery)
@@ -31,7 +31,7 @@ Mesmo projetos que **podem operar sem compliance** se beneficiam deste guia quan
 
 Use a matriz abaixo como ponto de partida. O `@security-information-master` validará e ajustará durante o discovery.
 
-| Setor / Cenário | Framework primário | Frameworks complementares | Agentes envolvidos |
+| Setor / Cenário | Framework primário | Frameworks complementares | Personas envolvidas |
 |---|---|---|---|
 | SaaS B2B (segurança de clientes) | SOC2 Type II | ISO 27001 | `@soc2-specialist`, `@iso-27001-specialist` |
 | Saúde / health-tech | ISO 27001 + SOC2 | LGPD/HIPAA (cobertura parcial) | `@iso-27001-specialist`, `@soc2-specialist` |
@@ -78,10 +78,10 @@ Sem esse mapeamento, a documentação gerada vira "obra-de-arte" sem dono.
 ## Passo 3 — Gerar contexto de compliance
 
 ```bash
-/docs:build-compliance-docs
+/docs-build-compliance-docs
 ```
 
-O comando passa por:
+O workflow passa por:
 
 ### Fase 3.1 — Detecção de framework aplicável
 
@@ -94,7 +94,7 @@ O comando passa por:
 
 ### Fase 3.2 — Discovery por framework
 
-Para cada framework selecionado, o agente especialista coleta:
+Para cada framework selecionado, a persona especialista coleta:
 
 **ISO 27001 → `@iso-27001-specialist`**:
 
@@ -132,7 +132,7 @@ Para cada framework selecionado, o agente especialista coleta:
 
 ### Fase 3.3 — Geração estruturada
 
-O comando preenche `docs/compliance-context/` seguindo estrutura em [docs/compliance-context/README.md](../compliance-context/README.md):
+O workflow preenche `docs/compliance-context/` seguindo estrutura em [docs/compliance-context/README.md](../compliance-context/README.md):
 
 ```
 docs/compliance-context/
@@ -168,7 +168,7 @@ Esse mapa permite **uma única evidência atender múltiplos frameworks** durant
 Após o build, comparar o estado atual (`as-is`) com o estado-alvo de cada framework (`to-be`):
 
 ```bash
-/product:task --source=docs/compliance-context/05-audit/gaps.md
+/product-task --source=docs/compliance-context/05-audit/gaps.md
 ```
 
 Decompõe gaps em tasks executáveis pela equipe técnica e de processos.
@@ -192,17 +192,17 @@ Compliance **não é silo isolado**. Integrar:
 ### Workflow de Produto + Compliance
 
 ```bash
-/product:spec       # Spec deve referenciar requisitos de compliance aplicáveis
-/product:task       # Tasks de compliance entram no mesmo backlog
-/validate:workflow  # Validação inclui critérios de compliance
+/product-spec       # Spec deve referenciar requisitos de compliance aplicáveis
+/product-task       # Tasks de compliance entram no mesmo backlog
+/validate-workflow  # Validação inclui critérios de compliance
 ```
 
 ### Workflow de Engenharia + Compliance
 
 ```bash
-/engineer:plan      # Plano considera controles aplicáveis (ex: logging, criptografia)
-/engineer:pre-pr    # Validação pré-PR inclui checklist de compliance
-/engineer:pr        # PR description referencia controle implementado
+/engineer-plan      # Plano considera controles aplicáveis (ex: logging, criptografia)
+/engineer-pre-pr    # Validação pré-PR inclui checklist de compliance
+/engineer-pr        # PR description referencia controle implementado
 ```
 
 ### Code review com lente de compliance
@@ -216,7 +216,7 @@ Compliance **não é silo isolado**. Integrar:
 Antes de auditoria externa:
 
 ```bash
-/docs:validate-docs --scope=compliance
+/docs-validate-docs --scope=compliance
 ```
 
 Verifica:
@@ -253,7 +253,7 @@ Verifica:
 ## Checklist de "Onion regulado pronto para auditoria"
 
 - [ ] Framework aplicável definido e aprovado por patrocinador interno
-- [ ] `docs/compliance-context/` populado pelo agente especialista
+- [ ] `docs/compliance-context/` populado pela persona especialista
 - [ ] Mapa cruzado de controles gerado
 - [ ] Gaps identificados e em backlog de implementação
 - [ ] Calendário de compliance ativo

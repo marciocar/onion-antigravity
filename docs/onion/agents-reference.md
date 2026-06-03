@@ -1,8 +1,8 @@
-# 🤖 Referência de Agentes
+# 🤖 Referência de Personas e Subagents
 
-> **Versão**: 4.1.0-beta.1 | **Última atualização**: 2026-05-15 | **Total**: 49 agentes em 9 categorias
+> **Última atualização**: 2026-06-03 | Personas e subagents (consolidados de 49 agentes especializados)
 
-Este guia documenta todos os agentes especializados disponíveis no sistema `.claude/`, suas capacidades e quando utilizá-los.
+Este guia documenta as personas e subagents do Sistema Onion (Google Antigravity), suas capacidades e quando utilizá-las. As personas são definidas em `.agents/AGENTS.md`; expertise reutilizável também vive em skills (`.agents/skills/`) e knowledge bases (`docs/knowledge-base/`). As referências `@nome` permanecem válidas para invocação.
 
 ## 📊 Resumo v3.0
 
@@ -544,7 +544,7 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 -  Performance optimization (batching, caching, query optimization)
 -  Configurações avançadas (webhooks, custom fields, templates)
 -  Time tracking automation e análise de produtividade
--  Integração com comandos `/engineer/*` para automação
+-  Integração com workflows `/engineer-*` para automação
 
 **Ferramentas disponíveis**: `read_file`, `write`, `MultiEdit`, `run_terminal_cmd`, `codebase_search`, `web_search`, **todas as 15+ ferramentas ClickUp MCP**
 
@@ -567,39 +567,39 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 - 📊 **15+ ferramentas ClickUp MCP**: Cobertura completa da API ClickUp
 - 🎯 **7 especialidades técnicas**: workflow-automation, performance-optimization, webhooks
 
-### **claude-code-specialist**
-**Modelo**: Sonnet | **Prioridade**: Alta | **Cor**: Light Blue
+### **antigravity-specialist**
+**Prioridade**: Alta | **Cor**: Light Blue
 
-**Especialidades**: Otimização Claude Code, configuração workspace, troubleshooting, produtividade
+**Especialidades**: Otimização do Google Antigravity, configuração de workspace `.agents/`, troubleshooting, produtividade
 
 **Quando usar**:
--  Resolver problemas de performance do Claude Code
--  Configurar ambiente para novos projetos
--  Otimizar settings para workflows específicos
--  Troubleshoot extension conflicts ou API connectivity
--  Criar `CLAUDE.md` e `.claudeignore` templates
--  Setup automation para comandos `/engineer/*`
+-  Resolver problemas de performance ou configuração do Antigravity
+-  Configurar ambiente para novos projetos (`.agents/` + `~/.gemini/`)
+-  Otimizar rules/workflows/skills/hooks para fluxos específicos
+-  Troubleshoot MCP connectivity ou permissões (Allow/Deny/Ask)
+-  Criar `.agents/AGENTS.md`, rules e `hooks.json`
+-  Setup automation para workflows `/engineer-*`
 
 **Ferramentas disponíveis**: `read_file`, `write`, `MultiEdit`, `run_terminal_cmd`, `codebase_search`, `list_dir`, `glob_file_search`, `web_search`, `read_lints`, `todo_write`
 
 **Exemplo de uso**:
 ```bash
 # Configuração de projeto novo
-@claude-code-specialist "Setup otimizado para projeto React TypeScript com foco em AI development"
+@antigravity-specialist "Setup otimizado para projeto React TypeScript com foco em AI development"
 
 # Troubleshooting
-@claude-code-specialist "Resolver erro 'HTTP/2 blocked by proxy' e otimizar connectivity"
+@antigravity-specialist "Resolver erro de MCP connectivity e otimizar config em ~/.gemini/"
 
 # Performance Issues
-@claude-code-specialist "Claude Code está lento, analisar memory usage e otimizar configurations"
+@antigravity-specialist "Antigravity está lento, analisar context usage e otimizar configurations"
 ```
 
 **Características únicas**:
-- 🎯 **7 especialidades técnicas**: configuration, workspace, extensions, API, performance, productivity, troubleshooting
-- 🚀 **Integração automática**: Chamado automaticamente por outros agentes quando há problemas de IDE
-- 🔧 **Criação de artefatos**: `CLAUDE.md`, `.claudeignore`, workspace settings otimizados
-- ⚡ **Performance focus**: Memory optimization, startup time, context caching
-- 🔗 **Delegation automática**: Integração com comandos `/engineer/*` para setup de ambiente
+- 🎯 **Especialidades técnicas**: configuration, workspace `.agents/`, MCP, permissões, performance, produtividade, troubleshooting
+- 🚀 **Integração automática**: chamado por outras personas quando há problemas de IDE/workspace
+- 🔧 **Criação de artefatos**: `AGENTS.md`, rules, `hooks.json`, `mcp_config.json` otimizados
+- ⚡ **Performance focus**: context usage, startup time, caching
+- 🔗 **Delegation automática**: integração com workflows `/engineer-*` para setup de ambiente
 
 ### **gitflow-specialist**
 **Modelo**: Sonnet | **Prioridade**: Alta | **Cor**: Light Green
@@ -735,7 +735,7 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 @react-developer "criar componente de dashboard"
 
 # Full-stack (coordenação automática)
-/engineer/work "sistema completo de notificações"
+/engineer-work "sistema completo de notificações"
 ```
 
 #### **🧪 Testes**
@@ -788,7 +788,7 @@ Este guia documenta todos os agentes especializados disponíveis no sistema `.cl
 
 #### **🔴 Tarefa Complexa** (múltiplos agentes paralelos)
 ```bash
-/engineer/work "sistema completo de e-commerce"
+/engineer-work "sistema completo de e-commerce"
 # → Coordenação automática de múltiplos agentes
 ```
 
