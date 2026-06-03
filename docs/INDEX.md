@@ -79,7 +79,6 @@ docs/
 │   ├── testing-validation-system.md  # Sistema de testes e validação
 │   ├── tools-reference.md      # Referência de ferramentas
 │   ├── claude-code-commands-architecture.md  # Arquitetura de comandos
-│   ├── consolidated-project-documentation.md  # Documentação consolidada
 │   ├── end-to-end-validation-tests.md  # Testes de validação E2E
 │   ├── sistema-engenharia-reversa-guia-uso.md  # Engenharia reversa
 │   ├── levels-system.md        # Sistema de níveis progressivos
@@ -158,7 +157,6 @@ docs/
 - **[Arquitetura de Comandos](onion/claude-code-commands-architecture.md)** - Estrutura interna dos comandos
 
 #### Documentação Avançada
-- **[Documentação Consolidada](onion/consolidated-project-documentation.md)** - Visão consolidada do projeto
 - **[Testes de Validação E2E](onion/end-to-end-validation-tests.md)** - Testes end-to-end do sistema
 - **[Guia de Engenharia Reversa](onion/sistema-engenharia-reversa-guia-uso.md)** - Engenharia reversa de projetos
 
@@ -343,8 +341,7 @@ Guias de aplicação do Onion em projetos novos, legados ou regulados:
 
 **Comece com:**
 1. [Arquitetura de Comandos](onion/claude-code-commands-architecture.md)
-2. [Documentação Consolidada](onion/consolidated-project-documentation.md)
-3. [Meta Especificações](meta-specs/index.md)
+2. [Meta Especificações](meta-specs/index.md)
 4. [Release Notes v4.0](onion/RELEASE-NOTES-v4.0-beta.md) - Arquitetura Multi-Context ✨ NOVO
 
 **Recursos:**

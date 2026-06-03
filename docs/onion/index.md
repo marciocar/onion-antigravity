@@ -95,11 +95,6 @@ O **Sistema Onion** é um framework de comandos `.claude/` para uso interno com:
    - Estrutura de arquivos
    - Best practices
 
-4. **[Documentação Consolidada](consolidated-project-documentation.md)** - Visão consolidada do projeto
-   - Visão geral técnica
-   - Stack tecnológico
-   - Arquitetura completa
-
 ### 📚 Documentação Avançada
 
 **Para usuários avançados e desenvolvedores do sistema:**
@@ -229,7 +224,6 @@ O **Sistema Onion** é um framework de comandos `.claude/` para uso interno com:
 
 #### 🏗️ Arquitetos
 - Comece com: [Claude Code Commands Architecture](claude-code-commands-architecture.md)
-- Aprenda: [Consolidated Project Documentation](consolidated-project-documentation.md)
 - Explore: [Engineering Flows](engineering-flows.md)
 
 #### 🔧 Administradores

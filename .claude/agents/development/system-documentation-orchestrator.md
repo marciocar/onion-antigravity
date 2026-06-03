@@ -514,7 +514,7 @@ Para visualizar, abra: `docs/architecture/index.md`
 
 **Input do Usuário:**
 ```
-Preciso de documentação completa de arquitetura para o projeto Granaai. 
+Preciso de documentação completa de arquitetura para o projeto your-project. 
 Temos 19 apps e 400+ libs em NX monorepo.
 ```
 

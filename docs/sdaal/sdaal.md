@@ -1,6 +1,6 @@
 ---
 title: "SDAAL — Specification-Driven AI Abstraction Layer"
-author: Marcio Carvalho
+author: Sistema Onion
 version: 1.0.0
 date: 2026-05-16
 status: published
@@ -38,15 +38,15 @@ A premissa é simples e contraintuitiva: **LLMs modernos (Claude, GPT, Gemini) n
 
 ## 2. Origem do Conceito
 
-O padrão **SDAAL foi concebido por mim, Marcio Carvalho**, ao longo de mais de 30 anos desenvolvendo sistemas complexos — passando por bancos, telecom, varejo, agronegócio, fintech e plataformas de inteligência de dados — e nos últimos anos integrando profundamente inteligência artificial nesses ecossistemas.
+O padrão **SDAAL foi concebido no contexto do Sistema Onion**, a partir de mais de 30 anos de experiência acumulada no desenvolvimento de sistemas complexos — passando por bancos, telecom, varejo, agronegócio, fintech e plataformas de inteligência de dados — e da integração profunda de inteligência artificial nesses ecossistemas nos últimos anos.
 
 A gênese veio da convergência de três observações práticas:
 
-1. **Em 1998, ao escrever drivers de banco de dados**, percebi que o valor não estava no SQL específico, mas no **contrato** entre aplicação e persistência. Trocar de Oracle para PostgreSQL era barato quando o contrato existia, caro quando não.
+1. **Em 1998, ao escrever drivers de banco de dados**, ficou claro que o valor não estava no SQL específico, mas no **contrato** entre aplicação e persistência. Trocar de Oracle para PostgreSQL era barato quando o contrato existia, caro quando não.
 
-2. **Entre 2010 e 2020, integrando dezenas de ERPs e CRMs**, codifiquei o mesmo padrão de adapter dezenas de vezes — sempre em código executável, sempre com o mesmo custo de manutenção.
+2. **Entre 2010 e 2020, integrando dezenas de ERPs e CRMs**, o mesmo padrão de adapter foi codificado dezenas de vezes — sempre em código executável, sempre com o mesmo custo de manutenção.
 
-3. **A partir de 2023, ao operar agentes IA em produção**, vi que os LLMs eram surpreendentemente bons em **seguir documentação estruturada** — frequentemente melhores em "executar" um spec bem escrito do que em depurar código gerado por eles mesmos.
+3. **A partir de 2023, ao operar agentes IA em produção**, observou-se que os LLMs eram surpreendentemente bons em **seguir documentação estruturada** — frequentemente melhores em "executar" um spec bem escrito do que em depurar código gerado por eles mesmos.
 
 A pergunta que destravou o padrão foi: *"E se a documentação em Markdown fosse a própria camada de execução, e não apenas o documento que descreve o código que executa?"*
 
@@ -393,7 +393,7 @@ A formulação que captura o espírito do padrão — e que, até a data deste d
 
 > *"O LLM é a VM. O Markdown é o bytecode. Os padrões GoF são a arquitetura."*
 
-Essa frase é a contribuição autoral central. Se ela ressoar com sua experiência, SDAAL provavelmente será útil ao seu contexto.
+Essa frase é a contribuição central do padrão. Se ela ressoar com sua experiência, SDAAL provavelmente será útil ao seu contexto.
 
 ---
 
@@ -610,7 +610,7 @@ title: Task Manager Abstraction
 ```yaml
 ---
 title: Task Manager Abstraction
-owner: marcio@grana.ai
+owner: Sistema Onion
 last_reviewed: 2026-05-10
 review_cadence: trimestral
 status: active
@@ -694,18 +694,17 @@ E um checklist de revisão em `README.md`:
 
 ---
 
-## 17. Sobre o Autor
+## 17. Sobre a Origem
 
-**Marcio Carvalho** é engenheiro de software com mais de **30 anos** projetando e implementando sistemas complexos em domínios que vão de telecom e bancos a varejo, agronegócio, fintech e plataformas de inteligência de dados. Nos últimos anos, dedicou-se à integração profunda de inteligência artificial em ecossistemas operacionais — não como ferramenta acessória, mas como camada arquitetural primária.
+O SDAAL nasceu da experiência acumulada de mais de **30 anos** projetando e implementando sistemas complexos em domínios que vão de telecom e bancos a varejo, agronegócio, fintech e plataformas de inteligência de dados. Nos últimos anos, esse trabalho voltou-se à integração profunda de inteligência artificial em ecossistemas operacionais — não como ferramenta acessória, mas como camada arquitetural primária.
 
-É o criador do **Sistema Onion**, framework de orquestração de produto e engenharia onde o SDAAL foi materializado pela primeira vez como abstração executável. Acredita que o próximo salto de produtividade em desenvolvimento de software não vem de "IA que gera mais código", mas de **arquiteturas onde a IA precisa gerar menos código** — e onde a documentação versionada substitui o que antes precisava ser compilado.
+O padrão foi materializado pela primeira vez como abstração executável no **Sistema Onion**, framework de orquestração de produto e engenharia. A premissa que o sustenta é que o próximo salto de produtividade em desenvolvimento de software não vem de "IA que gera mais código", mas de **arquiteturas onde a IA precisa gerar menos código** — e onde a documentação versionada substitui o que antes precisava ser compilado.
 
-- **Email**: [marcio@grana.ai](mailto:marcio@grana.ai)
-- **Sistema Onion**: https://github.com/grana-ai/onion (referência)
+- **Sistema Onion**: framework de orquestração de produto e engenharia (referência)
 
 ---
 
 > *"O LLM é a VM. O Markdown é o bytecode. Os padrões GoF são a arquitetura."*
-> — Marcio Carvalho
+> — Sistema Onion
 
 **Documento**: SDAAL Whitepaper v1.0.0 · 2026-05-16 · Licença MIT

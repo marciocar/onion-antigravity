@@ -182,7 +182,7 @@ cat migrations.json
 ```bash
 # IMPORTANTE: Usar package manager correto
 
-# Se usa pnpm (como GranaAI):
+# Se usa pnpm:
 pnpm install
 
 # Se usa npm:
@@ -540,7 +540,7 @@ nx run-many --target=build --all
 ## Exemplo 1: Migração Completa Básica
 
 ```bash
-# Cenário: Projeto GranaAI-like (20 apps, 150 libs)
+# Cenário: Projeto de exemplo (20 apps, 150 libs)
 
 # 1. BACKUP
 git checkout -b feat/nx-21-migration
@@ -612,7 +612,7 @@ nx build my-app
 
 // 1. ANTES (NX 19 - arquivo original):
 {
-  "npmScope": "granaai",
+  "npmScope": "myorg",
   "tasksRunnerOptions": {
     "default": {
       "runner": "@nrwl/workspace/tasks-runners/default",

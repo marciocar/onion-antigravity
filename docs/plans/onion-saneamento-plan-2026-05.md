@@ -6,7 +6,6 @@ aprovado-em: 2026-05-18
 executado-em: 2026-05-18
 fonte: docs/analysis/onion-review-2026-05.md
 jira-issue: SACOLA-28
-jira-url: https://marciocar.atlassian.net/browse/SACOLA-28
 ordem-executada: P0 -> P2 -> P1 -> P3
 executado-tambem:
   - T1.5 (refatorar outliers) — concluído em 2026-06-02 (plano de V&V)
