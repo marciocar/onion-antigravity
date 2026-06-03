@@ -1,9 +1,9 @@
 ---
 name: validate-phase-sync
-description: Validar sincronização entre fases do plan.md e subtasks ClickUp.
+description: Validar sincronização entre fases do plan.md e subtasks do Task Manager.
 model: sonnet
 category: engineer
-tags: [validation, sync, clickup]
+tags: [validation, sync, task-manager]
 version: "3.0.0"
 updated: "2025-11-24"
 ---

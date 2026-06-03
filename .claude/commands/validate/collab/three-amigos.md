@@ -10,9 +10,9 @@ parameters:
     description: ID da story no task manager (ex: STORY-123, TASK-456)
     required: true
   - name: task_manager
-    description: Task manager usado (clickup|jira|linear|asana). Default: clickup
+    description: Task manager usado (clickup|jira|linear|asana). Default: TASK_MANAGER_PROVIDER do .env
     required: false
-    default: clickup
+    default: auto
   - name: generate_agenda
     description: Gerar agenda automaticamente antes da sessão
     required: false

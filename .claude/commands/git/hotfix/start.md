@@ -17,7 +17,7 @@ Iniciar correção emergencial criando hotfix branch a partir de main/master par
 ### Emergency Hotfix Workflow
 - Criação imediata de hotfix branch a partir de main/master (produção)
 - Auto-versioning para patch releases emergenciais
-- ClickUp task urgente com prioridade máxima automática
+- Task urgente com prioridade máxima automática no Task Manager configurado (condicional — somente se `TASK_MANAGER_PROVIDER` != `none`; suporta Jira, ClickUp, Asana, Linear)
 - Validações críticas de estado de produção
 - Setup otimizado para correção imediata
 
@@ -29,7 +29,7 @@ Iniciar correção emergencial criando hotfix branch a partir de main/master par
 - Emergency documentation e tracking setup
 
 ### Criticidade e Tracking Urgente
-- Tags de urgência automáticas no ClickUp
+- Tags de urgência automáticas no Task Manager configurado (condicional — somente se `TASK_MANAGER_PROVIDER` != `none`; ex.: ClickUp, Jira, Asana, Linear)
 - Notificações escaladas para team awareness
 - Emergency workflow prioritization
 - Integration com @gitflow-specialist para emergency guidance
@@ -51,14 +51,14 @@ Iniciar correção emergencial criando hotfix branch a partir de main/master par
 2. **Primary Branch Detection**: Detecta main/master automaticamente
 3. **Emergency Override**: Handles uncommitted changes com emergency stashing
 4. **Hotfix Branch Creation**: Cria hotfix/name branch a partir de produção
-5. **ClickUp Emergency Setup**: Cria task urgente com máxima prioridade
+5. **Task Manager Emergency Setup** (condicional): Se `TASK_MANAGER_PROVIDER` != `none`, cria task urgente com máxima prioridade no provider ativo (ex.: ClickUp, Jira, Asana, Linear); caso contrário, etapa é ignorada
 6. **Team Notification**: Alerta equipe sobre emergency fix em andamento
 
 ### Emergency Features
 Durante execução emergencial:
 - Working directory: Emergency stash se necessário
 - Branch detection: Main/master identification automática  
-- Priority escalation: ClickUp task com urgência máxima
+- Priority escalation: task com urgência máxima no Task Manager configurado (condicional — somente se `TASK_MANAGER_PROVIDER` != `none`)
 - Team alerts: Notification automática de emergency workflow
 
 ## 🤝 Integração @gitflow-specialist

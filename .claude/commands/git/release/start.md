@@ -19,7 +19,7 @@ Iniciar processo de release criando branch de release com versionamento automát
 - Auto-detecção e bump inteligente de versionamento (semver)
 - Preparação automática de changelog baseada em commits
 - Validações de estado pré-release (working directory, conflicts)
-- Setup de ClickUp task para release tracking completo
+- Setup de task de release tracking no Task Manager configurado (condicional — somente se `TASK_MANAGER_PROVIDER` != `none`; suporta Jira, ClickUp, Asana, Linear)
 
 ### Versionamento Inteligente e Automação
 - Detecção automática de package.json e version files
@@ -52,7 +52,7 @@ Iniciar processo de release criando branch de release com versionamento automát
 2. **Branch Detection**: Detecta primary branch (main/master) e develop
 3. **Version Processing**: Processa versioning (específica ou auto-bump)
 4. **Release Branch**: Cria release/version branch a partir de develop
-5. **ClickUp Setup**: Cria task de release tracking e atualiza status
+5. **Task Manager Setup** (condicional): Se `TASK_MANAGER_PROVIDER` != `none`, cria task de release tracking e atualiza status no provider ativo (ex.: ClickUp, Jira, Asana, Linear); caso contrário, etapa é ignorada
 6. **Changelog Prep**: Prepara changelog baseado em commits desde última release
 
 ### Version Bump Intelligence

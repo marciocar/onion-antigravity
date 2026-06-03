@@ -1,6 +1,6 @@
 ---
 name: task-check
-description: Verificar se task do ClickUp foi implementada no código.
+description: Verificar se task do Task Manager foi implementada no código.
 model: sonnet
 category: product
 tags: [verification, implementation, audit]
@@ -8,9 +8,9 @@ version: "3.0.0"
 updated: "2025-11-24"
 ---
 
-# 🔎 Verificação de Implementação de Task ClickUp
+# 🔎 Verificação de Implementação de Task
 
-Você é um especialista em validação técnica encarregado de verificar se uma task do ClickUp foi **realmente implementada** no projeto atual. Seu papel é fazer uma auditoria prática comparando o que foi solicitado na task vs o que existe no código/projeto atual.
+Você é um especialista em validação técnica encarregado de verificar se uma task do Task Manager configurado foi **realmente implementada** no projeto atual. Seu papel é fazer uma auditoria prática comparando o que foi solicitado na task vs o que existe no código/projeto atual.
 
 ## 🎯 **Objetivo Principal**
 
@@ -20,10 +20,38 @@ Realizar uma **verificação factual e técnica** para determinar se:
 - ❌ A task **não foi implementada**
 - 🚀 A task está **pronta para próxima fase**
 
+## 🚨 PASSO 0 (OBRIGATÓRIO): Detectar Provedor
+
+**⚠️ CRÍTICO — EXECUTAR ANTES DE QUALQUER OUTRA AÇÃO. NUNCA assumir o provedor.**
+
+1. **Ler `.env`** (`read_file .env`) e extrair `TASK_MANAGER_PROVIDER`
+   (valores: `jira` | `clickup` | `asana` | `linear` | `none`).
+2. **Validar a variável obrigatória do provedor ativo:**
+
+   | Provedor | Variável obrigatória | Ferramentas MCP / Adapter |
+   |----------|----------------------|----------------------------|
+   | `jira` | `JIRA_HOST`, `JIRA_EMAIL`, `JIRA_API_TOKEN` | `.claude/utils/task-manager/adapters/jira.md` |
+   | `clickup` | `CLICKUP_API_TOKEN` | `mcp_ClickUp_*` / `.claude/utils/task-manager/adapters/clickup.md` |
+   | `asana` | `ASANA_ACCESS_TOKEN` | `mcp_asana_*` / `.claude/utils/task-manager/adapters/asana.md` |
+   | `linear` | `LINEAR_API_KEY` | `mcp_Linear_*` / `.claude/utils/task-manager/adapters/linear.md` |
+   | `none` / ausente | — | modo offline (sessões locais em `.claude/sessions/`) |
+
+3. **Validar compatibilidade do task-id** com o provedor ativo via
+   `detectProviderFromTaskId` / `validateProviderMatch` — se houver incompatibilidade,
+   avisar o usuário antes de prosseguir.
+4. **Fallback gracioso:** se a variável obrigatória faltar, avisar em pt-BR qual
+   variável está ausente, sugerir `/meta/setup-integration` e seguir em **modo offline**
+   (usar apenas o contexto local da sessão, sem chamadas de API).
+
+> Detalhes de detecção, parsing do `.env` e validação de ID:
+> `.claude/utils/task-manager/detector.md`.
+
 ## 📋 **Processo de Verificação**
 
 ### **1. Carregamento e Análise da Task**
-- Carregue a task do ClickUp usando o ID fornecido
+- Carregue a task do **Task Manager configurado** usando o ID fornecido
+  (via adapter do provedor ativo: ClickUp / Jira / Asana / Linear; ou contexto
+  local da sessão se `none`)
 - Extraia **todos os requisitos específicos** da descrição
 - Identifique **critérios de aceitação** mensuráveis
 - Mapeie **arquivos/componentes** que deveriam ser afetados
@@ -77,7 +105,8 @@ Liste especificamente:
 ```markdown
 # 🔍 VERIFICAÇÃO DE IMPLEMENTAÇÃO - [NOME DA TASK]
 
-**Task ID**: [ID_CLICKUP]  
+**Task ID**: [TASK_ID]  
+**Provedor**: [jira/clickup/asana/linear/local]  
 **Data da Verificação**: [DATA_ATUAL]  
 **Status Verificado**: [IMPLEMENTADA/PARCIAL/NÃO_IMPLEMENTADA/PRONTA_PARA_PRÓXIMA_FASE]
 
@@ -215,14 +244,18 @@ export const NovoComponente = () => {
 
 ## 🛠️ **Instruções de Uso**
 
-Execute o comando fornecendo o ID da task ClickUp:
+Execute o comando fornecendo o ID da task (no formato do provedor configurado):
 
 ```bash
-/product/task-check 86abzwx0w
+# ClickUp:  /product/task-check 86abzwx0w
+# Jira:     /product/task-check PROJ-123
+# Asana:    /product/task-check 1234567890123456
+# Linear:   /product/task-check DEV-123
+/product/task-check <task-id>
 ```
 
 O sistema irá:
-1. **Carregar** a task do ClickUp automaticamente
+1. **Detectar** o provedor ativo (`.env`) e **carregar** a task via adapter correspondente
 2. **Analisar** todos os requisitos e critérios
 3. **Auditar** o projeto atual buscando implementação
 4. **Comparar** o solicitado vs implementado
@@ -268,14 +301,19 @@ O sistema irá:
 
 ---
 
-## 🔄 **Auto-Update ClickUp**
+## 🔄 **Auto-Update no Task Manager**
 
-Este comando **automaticamente atualiza** a task ClickUp quando executa:
+Este comando **automaticamente atualiza** a task no **provedor ativo** quando executa
+(via adapter correspondente — `.claude/utils/task-manager/adapters/{provedor}.md`).
+No modo `none` (offline), os updates são gravados apenas no `notes.md` da sessão.
 
 ### **✅ Updates Automáticos SEMPRE:**
-- **Comentário de verificação** com resultados detalhados usando formatação Unicode
-- **Tag 'verified'** se verificação passou completamente
-- **Tag 'needs-work'** se há gaps críticos identificados
+- **Comentário de verificação** com resultados detalhados, na formatação do provedor:
+  - **ClickUp** → comentário Unicode (`━━━`, `∟`) conforme template abaixo
+  - **Jira** → comentário em ADF (Atlassian Document Format)
+  - **Asana / Linear** → comentário em HTML/Markdown conforme o adapter
+- **Tag/label 'verified'** se verificação passou completamente
+- **Tag/label 'needs-work'** se há gaps críticos identificados
 - **Atualização do notes.md** da sessão com timestamp e resultados
 
 ### **⚠️ Confirmação Necessária PARA:**
@@ -289,7 +327,9 @@ Este comando **automaticamente atualiza** a task ClickUp quando executa:
 2. **Argumento fornecido**: Usa task-id passado pelo usuário  
 3. **Não identificada**: Pergunta ao usuário qual task verificar
 
-### **💬 Formato do Comentário Automático:**
+### **💬 Formato do Comentário Automático (exemplo ClickUp — Unicode):**
+> Para Jira use ADF, para Asana/Linear use HTML/Markdown; o conteúdo é o mesmo,
+> só a sintaxe muda conforme o adapter do provedor ativo.
 ```
 🔍 VERIFICAÇÃO DE IMPLEMENTAÇÃO
 

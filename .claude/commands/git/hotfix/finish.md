@@ -29,7 +29,7 @@ Finalizar correção emergencial realizando deploy para produção com merge em 
 - Emergency testing validation
 
 ### Critical Operations Management
-- ClickUp task completion com emergency status
+- Conclusão da task com emergency status no Task Manager configurado (condicional — somente se `TASK_MANAGER_PROVIDER` != `none`; suporta Jira, ClickUp, Asana, Linear)
 - Team notification de emergency deployment
 - Emergency documentation automática
 - Production deployment tracking
@@ -51,7 +51,7 @@ Finalizar correção emergencial realizando deploy para produção com merge em 
 4. **Emergency Confirmation**: Solicita confirmação para production release
 5. **Production Merge**: Executa merge para main + back-merge para develop
 6. **Emergency Tagging**: Cria patch tag com emergency release notes
-7. **Production Deploy**: Prepara deployment e atualiza ClickUp status
+7. **Production Deploy**: Prepara deployment e, se `TASK_MANAGER_PROVIDER` != `none`, atualiza status da task no provider ativo (ex.: ClickUp, Jira, Asana, Linear)
 8. **Emergency Cleanup**: Remove hotfix branch e finaliza emergency workflow
 
 ### Emergency Deployment Strategy
@@ -92,5 +92,5 @@ Durante finalização emergencial:
 - **Fix**: Emergency deployment guidance e rollback preparation
 
 ### Team Notification Failed  
-- **Sintoma**: ClickUp ou team notifications não funcionando
-- **Solução**: Manual emergency communication + @gitflow-specialist guidance
+- **Sintoma**: Task Manager configurado (ex.: ClickUp, Jira, Asana, Linear) ou team notifications não funcionando
+- **Solução**: Verificar `TASK_MANAGER_PROVIDER` e credenciais via `/meta/setup-integration`; manual emergency communication + @gitflow-specialist guidance

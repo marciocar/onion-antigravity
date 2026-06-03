@@ -1,21 +1,49 @@
 ---
 name: validate-task
-description: Validar e analisar task existente do ClickUp.
+description: Validar e analisar task existente do Task Manager.
 model: sonnet
 category: product
-tags: [validation, clickup, analysis]
+tags: [validation, task-manager, analysis]
 version: "3.0.0"
 updated: "2025-11-24"
 ---
 
-# 🔍 Validação de Task ClickUp
+# 🔍 Validação de Task
 
-Você é um especialista em produto e arquitetura encarregado de carregar, analisar e validar tasks existentes do ClickUp. Seu papel é fazer uma avaliação crítica abrangente da task, alinhá-la com o projeto atual e fornecer recomendações estratégicas para implementação.
+Você é um especialista em produto e arquitetura encarregado de carregar, analisar e validar tasks existentes do Task Manager configurado. Seu papel é fazer uma avaliação crítica abrangente da task, alinhá-la com o projeto atual e fornecer recomendações estratégicas para implementação.
+
+## 🚨 PASSO 0 (OBRIGATÓRIO): Detectar Provedor
+
+**⚠️ CRÍTICO — EXECUTAR ANTES DE QUALQUER OUTRA AÇÃO. NUNCA assumir o provedor.**
+
+1. **Ler `.env`** (`read_file .env`) e extrair `TASK_MANAGER_PROVIDER`
+   (valores: `jira` | `clickup` | `asana` | `linear` | `none`).
+2. **Validar a variável obrigatória do provedor ativo:**
+
+   | Provedor | Variável obrigatória | Ferramentas MCP / Adapter |
+   |----------|----------------------|----------------------------|
+   | `jira` | `JIRA_HOST`, `JIRA_EMAIL`, `JIRA_API_TOKEN` | `.claude/utils/task-manager/adapters/jira.md` |
+   | `clickup` | `CLICKUP_API_TOKEN` | `mcp_ClickUp_*` / `.claude/utils/task-manager/adapters/clickup.md` |
+   | `asana` | `ASANA_ACCESS_TOKEN` | `mcp_asana_*` / `.claude/utils/task-manager/adapters/asana.md` |
+   | `linear` | `LINEAR_API_KEY` | `mcp_Linear_*` / `.claude/utils/task-manager/adapters/linear.md` |
+   | `none` / ausente | — | modo offline (sessões locais em `.claude/sessions/`) |
+
+3. **Validar compatibilidade do task-id** com o provedor ativo via
+   `detectProviderFromTaskId` / `validateProviderMatch` — se houver incompatibilidade,
+   avisar o usuário antes de prosseguir.
+4. **Fallback gracioso:** se a variável obrigatória faltar, avisar em pt-BR qual
+   variável está ausente, sugerir `/meta/setup-integration` e seguir em **modo offline**
+   (usar apenas o contexto local da sessão, sem chamadas de API).
+
+> Detalhes de detecção, parsing do `.env` e validação de ID:
+> `.claude/utils/task-manager/detector.md`.
 
 ## 📋 **Processo de Validação**
 
 ### **1. Carregamento da Task**
-- Carregue a task do ClickUp usando o ID fornecido
+- Carregue a task do **Task Manager configurado** usando o ID fornecido
+  (via adapter do provedor ativo: ClickUp / Jira / Asana / Linear; ou contexto
+  local da sessão se `none`)
 - Identifique se é uma task simples, task com subtasks, ou subtask
 - Analise toda a hierarquia (task pai, subtasks, dependências)
 - Extraia informações completas: descrição, critérios de aceitação, tags, prioridade, assignees
@@ -76,7 +104,8 @@ Após a análise, apresente um relatório estruturado no seguinte formato:
 ```markdown
 # 📊 RELATÓRIO DE VALIDAÇÃO - [NOME DA TASK]
 
-**Task ID**: [ID_CLICKUP]  
+**Task ID**: [TASK_ID]  
+**Provedor**: [jira/clickup/asana/linear/local]  
 **Tipo**: [Task/Subtask/Task com Subtasks]  
 **Prioridade**: [PRIORIDADE_ATUAL]  
 **Status**: [STATUS_ATUAL]
@@ -194,14 +223,18 @@ Após a análise, apresente um relatório estruturado no seguinte formato:
 
 ## 🛠️ **Instruções de Uso**
 
-Execute o comando fornecendo o ID da task ClickUp:
+Execute o comando fornecendo o ID da task (no formato do provedor configurado):
 
 ```bash
-/product/validate-task 86abzwx0w
+# ClickUp:  /product/validate-task 86abzwx0w
+# Jira:     /product/validate-task PROJ-123
+# Asana:    /product/validate-task 1234567890123456
+# Linear:   /product/validate-task DEV-123
+/product/validate-task <task-id>
 ```
 
 O sistema irá:
-1. Carregar automaticamente a task do ClickUp
+1. Detectar o provedor ativo (`.env`) e carregar a task via adapter correspondente
 2. Analisar sua estrutura e conteúdo
 3. Validar contra o projeto atual
 4. Gerar relatório de validação completo
@@ -233,14 +266,19 @@ O sistema irá:
 
 ---
 
-## 🔄 **Auto-Update ClickUp**
+## 🔄 **Auto-Update no Task Manager**
 
-Este comando **automaticamente atualiza** a task ClickUp quando executa:
+Este comando **automaticamente atualiza** a task no **provedor ativo** quando executa
+(via adapter correspondente — `.claude/utils/task-manager/adapters/{provedor}.md`).
+No modo `none` (offline), os updates são gravados apenas no `notes.md` da sessão.
 
 ### **✅ Updates Automáticos SEMPRE:**
-- **Comentário de validação** com análise estratégica detalhada usando formatação Unicode
-- **Tag 'validated'** após análise completa
-- **Tag 'needs-refinement'** se requisitos precisam ser melhorados
+- **Comentário de validação** com análise estratégica detalhada, na formatação do provedor:
+  - **ClickUp** → comentário Unicode (`━━━`, `∟`) conforme template abaixo
+  - **Jira** → comentário em ADF (Atlassian Document Format)
+  - **Asana / Linear** → comentário em HTML/Markdown conforme o adapter
+- **Tag/label 'validated'** após análise completa
+- **Tag/label 'needs-refinement'** se requisitos precisam ser melhorados
 - **Atualização do notes.md** da sessão com insights e decisões
 
 ### **⚠️ Confirmação Necessária PARA:**
@@ -254,7 +292,9 @@ Este comando **automaticamente atualiza** a task ClickUp quando executa:
 2. **Argumento fornecido**: Usa task-id passado pelo usuário
 3. **Não identificada**: Pergunta ao usuário qual task validar
 
-### **💬 Formato do Comentário Automático:**
+### **💬 Formato do Comentário Automático (exemplo ClickUp — Unicode):**
+> Para Jira use ADF, para Asana/Linear use HTML/Markdown; o conteúdo é o mesmo,
+> só a sintaxe muda conforme o adapter do provedor ativo.
 ```
 📊 VALIDAÇÃO ESTRATÉGICA
 

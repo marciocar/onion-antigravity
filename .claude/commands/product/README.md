@@ -28,10 +28,10 @@ flowchart TD
 ## 🛠️ **Comandos Disponíveis**
 
 ### 1. **`/product/task <description>`** 🚀
-**Objetivo**: Criar task no ClickUp + Setup completo para desenvolvimento
+**Objetivo**: Criar task no Task Manager configurado (ClickUp/Jira/Asana/Linear) + Setup completo para desenvolvimento
 
 **O que faz**:
-- ✅ Cria task estruturada no ClickUp
+- ✅ Cria task estruturada no Task Manager configurado (conforme `TASK_MANAGER_PROVIDER`: ClickUp/Jira/Asana/Linear)
 - ✅ Cria feature branch `feature/<slug>`
 - ✅ Inicializa sessão em `.claude/sessions/<slug>/`
 - ✅ Cria arquivos: `context.md`, `plan.md`, `notes.md`
@@ -42,7 +42,7 @@ flowchart TD
 **Objetivo**: Verificar se task foi realmente implementada
 
 **O que faz**:
-- ✅ Carrega task do ClickUp
+- ✅ Carrega task do Task Manager configurado (ClickUp/Jira/Asana/Linear)
 - ✅ Audita projeto atual buscando implementação
 - ✅ Compara requisitos vs código real
 - ✅ Determina se pode avançar para próxima fase
@@ -77,9 +77,9 @@ flowchart TD
 - **`/product/collect`**: Coleta de informações
 - **`/product/refine`**: Refinamento de requisitos
 
-## 🔄 **Sistema de Auto-Update ClickUp**
+## 🔄 **Sistema de Auto-Update do Task Manager**
 
-Todos os comandos seguem uma **estratégia consistente de atualização automática** do ClickUp:
+Todos os comandos seguem uma **estratégia consistente de atualização automática** do **Task Manager configurado** (ClickUp/Jira/Asana/Linear, conforme `TASK_MANAGER_PROVIDER`):
 
 ### **✅ Updates Automáticos (Sem Confirmação)**
 - **Comments informativos** com progresso e resultados
@@ -166,7 +166,7 @@ Todos os comandos seguem uma **estratégia consistente de atualização automát
 
 # 2. Apresentação a partir de task
 /product/presentation Transforme task #86abzwx0w em case study para stakeholders
-# ↳ AUTO: Busca task ClickUp + gera apresentação + comenta na task
+# ↳ AUTO: Busca task no Task Manager configurado + gera apresentação + comenta na task
 
 # 3. Apresentação técnica
 /product/presentation Converta docs/architecture.md em apresentação para time técnico
@@ -219,10 +219,10 @@ Depois de criar uma task com `/product/task`:
 
 ## 💡 **Benefícios da Estratégia**
 
-1. **Rastreabilidade Total**: Cada ação gera histórico automático no ClickUp
+1. **Rastreabilidade Total**: Cada ação gera histórico automático no Task Manager configurado
 2. **Produtividade Máxima**: Elimina atualizações manuais repetitivas  
 3. **Controle Inteligente**: Confirma apenas mudanças críticas
-4. **Sincronização**: Sessões locais sempre sincronizadas com ClickUp
+4. **Sincronização**: Sessões locais sempre sincronizadas com o Task Manager configurado
 5. **Visibilidade**: Stakeholders veem progresso em tempo real
 
 ---

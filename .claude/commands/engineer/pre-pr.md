@@ -12,9 +12,9 @@ updated: "2025-11-24"
 
 Estamos nos aproximando de finalizar o trabalho nesta branch e nos preparar para um pull request. Agora, é hora de fazer verificações finais e limpezas para garantir que estamos alinhados com nossos padrões e objetivos.
 
-## 🔄 **Auto-Update ClickUp**
+## 🔄 **Auto-Update do Task Manager**
 
-Este comando **automaticamente atualiza** a task ClickUp durante preparação para PR:
+Este comando **automaticamente atualiza** a task no **Task Manager configurado** durante preparação para PR. Antes de operar, carregue o `.env` e leia `TASK_MANAGER_PROVIDER` (`jira` | `clickup` | `asana` | `linear` | `none`) para rotear ao provider e adapter corretos. Se `none`, gere o relatório de validação localmente sem persistir.
 
 ### **✅ Updates Automáticos SEMPRE:**
 - **Validação de critérios de aceitação** - Verifica todos os checkboxes
@@ -25,26 +25,15 @@ Este comando **automaticamente atualiza** a task ClickUp durante preparação pa
 
 ### **💬 Formato do Comentário de Pre-PR:**
 
-**Chamar abstrações MCP para validação automatizada:**
+O comentário de validação deve conter: resultado da validação de critérios de aceitação (completo? cobertura? critérios pendentes?), checks técnicos (meta specs, code review, testes) e indicador `readyForPR`.
 
-```typescript
-// 1. Validar Critérios de Aceitação
-const validation = await validateAcceptanceCriteria(taskId);
-// Retorna: { isComplete, coverage, criteria[], pendingCriteria[] }
+**Roteamento por provider** (carregar `.env` → ler `TASK_MANAGER_PROVIDER` → seguir o adapter):
 
-// 2. Criar comentário de validação com resultado
-await commentPrePRValidation(taskId, {
-  validationResult: validation,
-  technicalChecks: { metaSpecs: true, codeReview: true, tests: true },
-  readyForPR: validation.isComplete
-});
-```
-
-**Referências:**
-- **Padrões de formatação**: `.claude/commands/common/prompts/clickup-patterns.md`
-- **Abstrações MCP**: 
-  - `validateAcceptanceCriteria()` em `.claude/utils/clickup-mcp-wrappers.md` (linhas 534-600)
-  - `commentPrePRValidation()` em `.claude/utils/clickup-mcp-wrappers.md` (linhas 603-629)
+- **`clickup`** → comentário em formatação Unicode via `@clickup-specialist`. Adapter: `.claude/utils/task-manager/adapters/clickup.md`. Padrões: `.claude/commands/common/prompts/clickup-patterns.md`. Abstrações MCP de referência: `validateAcceptanceCriteria()` (linhas 534-600) e `commentPrePRValidation()` (linhas 603-629) em `.claude/utils/clickup-mcp-wrappers.md`.
+- **`jira`** → comentário em ADF via `@jira-specialist`. Adapter: `.claude/utils/task-manager/adapters/jira.md`.
+- **`asana`** → comentário (story) via `@task-specialist`. Adapter: `.claude/utils/task-manager/adapters/asana.md`.
+- **`linear`** → comentário em Markdown via `@task-specialist`. Adapter: `.claude/utils/task-manager/adapters/linear.md`.
+- **`none`** → gerar relatório localmente, sem persistir.
 
 ### **📋 Identificação da Task:**
 1. **Context.md**: Lê task-id da sessão ativa
@@ -66,7 +55,7 @@ await commentPrePRValidation(taskId, {
 
 ### 📋 AUTO-UPDATE:
 5. **Validar critérios de aceitação** - Verificar todos os checkboxes
-6. **Adicionar comentário de preparação** no ClickUp automaticamente
+6. **Adicionar comentário de preparação** no Task Manager configurado automaticamente (conforme `TASK_MANAGER_PROVIDER`)
 7. **Aplicar tags** (ready-for-pr ou needs-fixes)
 8. **Atualizar progresso** para 90%
 

@@ -50,7 +50,7 @@ Você **conhece profundamente** a arquitetura de comandos:
 - **Padrões de workflows** estabelecidos (engineer, product, git)
 - **24+ agentes** que podem ser invocados por comandos
 - **Diferença crítica** entre Claude Code Commands vs Terminal Commands
-- **Integrações** com ClickUp, Git, Sessions
+- **Integrações** com Task Manager (provider-agnóstico: Jira/ClickUp/Asana/Linear), Git, Sessions
 
 ### Claude Code Commands Philosophy
 
@@ -122,7 +122,7 @@ codebase_search "padrão de workflow similar" [".claude/commands/"]
 - Categoria e nome
 - Workflow principal
 - Agentes invocados
-- Integrações (ClickUp, Git, Sessions)
+- Integrações (Task Manager, Git, Sessions)
 - Padrões de UX
 
 **Identificar:**
@@ -159,7 +159,7 @@ read_file docs/onion/commands-guide.md
 **Compreender:**
 - Fluxo de execução de comandos
 - Padrões de UX (modern-cli-ux.sh)
-- Integrações com ClickUp MCP
+- Integrações com Task Manager (via abstração `TASK_MANAGER_PROVIDER`: jira/clickup/asana/linear)
 - Session management
 - Estrutura de diretórios
 
@@ -201,7 +201,7 @@ Olá! Analisei o ambiente de comandos e encontrei:
   - Development: [listar]
   - Compliance: [listar]
   
-- **Integrações:** ClickUp MCP, Sessions, Git Flow
+- **Integrações:** Task Manager (provider-agnóstico via `TASK_MANAGER_PROVIDER`), Sessions, Git Flow
 
 ### 🔍 Análise do Seu Pedido:
 **Você quer criar:** [resumir pedido do usuário]
@@ -244,7 +244,7 @@ O comando deve:
 - **A) Invocar agente específico** - Delegar para especialista
 - **B) Executar workflow automatizado** - Steps bem definidos
 - **C) Orquestrar múltiplos agentes** - Coordenação complexa
-- **D) Integrar com ClickUp** - Criar/atualizar tasks
+- **D) Integrar com Task Manager** - Criar/atualizar tasks no provider configurado
 - **E) Gerenciar Git Flow** - Branches e commits
 
 #### 3️⃣ **Invocação de Agentes**
@@ -259,7 +259,7 @@ O comando deve invocar:
 
 #### 4️⃣ **Integrações Necessárias**
 O comando precisa de:
-- **ClickUp MCP** (gestão de tasks)
+- **Task Manager** (gestão de tasks via abstração — Jira/ClickUp/Asana/Linear)
 - **Session Management** (contexto de desenvolvimento)
 - **Git Operations** (branches, commits)
 - **File Operations** (criar/editar arquivos)
@@ -279,7 +279,7 @@ O comando deve usar:
 ---
 
 ### 📝 Responda as questões acima
-Formato: `1B, 2A, 3-único, 4-clickup+session, 5-média, 6-modern`
+Formato: `1B, 2A, 3-único, 4-taskmanager+session, 5-média, 6-modern`
 
 Ou simplesmente diga **"prosseguir com sugestões"** para usar minhas recomendações.
 ```
@@ -456,26 +456,31 @@ Analise o contexto atual e proponha [solução]
 
 #### 3.4. Integrações
 
-**ClickUp MCP Integration:**
+**Task Manager Integration (provider-agnóstico):**
 ```markdown
-## Integração ClickUp
+## Integração com Task Manager
+
+> Detecte o provider ativo (`TASK_MANAGER_PROVIDER`: jira | clickup | asana | linear)
+> e opere via abstração em `.claude/utils/task-manager/`, delegando ao especialista
+> correto (`@jira-specialist`, `@clickup-specialist` ou `@task-specialist`).
 
 ### Leitura de Task
 ```bash
-# Obter task do contexto ou solicitar ao usuário
-TASK_ID=$(clickup_get_task_id_from_session || read_task_id_from_user)
+# Carregar provider e obter task do contexto ou solicitar ao usuário
+set -a; source .env; set +a   # TASK_MANAGER_PROVIDER
+TASK_ID=$(task_manager_get_task_id_from_session || read_task_id_from_user)
 
-# Ler detalhes da task
-TASK_DETAILS=$(clickup_get_task $TASK_ID)
+# Ler detalhes da task (via abstração — roteia para o provider ativo)
+TASK_DETAILS=$(task_manager_get_task "$TASK_ID")
 ```
 
 ### Atualização de Task
 ```bash
-# Adicionar comentário
-clickup_add_comment $TASK_ID "Comando /[categoria]/[comando] executado"
+# Adicionar comentário (formatação adequada ao provider: ADF no Jira, Markdown/Unicode no ClickUp)
+task_manager_add_comment "$TASK_ID" "Comando /[categoria]/[comando] executado"
 
-# Atualizar status
-clickup_update_task_status $TASK_ID "in progress"
+# Atualizar status (no Jira, sempre via transitions)
+task_manager_update_status "$TASK_ID" "in progress"
 ```
 ```
 
@@ -603,7 +608,7 @@ fi
 
 [SE APLICÁVEL]
 
-### ClickUp
+### Task Manager (provider configurado)
 - Leitura: [o que lê]
 - Escrita: [o que atualiza]
 
@@ -670,7 +675,7 @@ Após executar este comando, você pode:
 **Categoria:** [categoria]
 **Complexidade:** [Simples|Média|Alta]
 **Agentes Invocados:** [@agente-1, @agente-2]
-**Integrações:** [ClickUp, Git, Sessions]
+**Integrações:** [Task Manager, Git, Sessions]
 **Versão:** 1.0
 **Última Atualização:** [data]
 ```
@@ -745,7 +750,7 @@ write .claude/commands/[categoria]/[sub-categoria]/[comando].md
 - [ ] Formato de resposta esperado está definido
 
 ### ✓ Integrações
-- [ ] ClickUp MCP usado apropriadamente (se aplicável)
+- [ ] Task Manager usado via abstração (provider-agnóstico), se aplicável
 - [ ] Git operations validadas (se aplicável)
 - [ ] Session management implementado (se aplicável)
 - [ ] Integrações documentadas na seção apropriada
@@ -798,7 +803,7 @@ Para testar o novo comando, use no **chat da Claude Code**:
 1. ✅ O comando é reconhecido pela Claude Code
 2. ✅ O workflow executa corretamente
 3. ✅ Agentes são invocados apropriadamente
-4. ✅ Integrações funcionam (ClickUp, Git, etc.)
+4. ✅ Integrações funcionam (Task Manager, Git, etc.)
 5. ✅ Validações detectam erros esperados
 6. ✅ Próximos passos são claros
 7. ✅ Documentação está completa
@@ -846,7 +851,7 @@ Após criar o comando, **SEMPRE** documente:
 - **Categoria:** [categoria]
 - **Complexidade:** [Simples|Média|Alta]
 - **Agentes Invocados:** [@agente-1, @agente-2]
-- **Integrações:** [ClickUp, Git, Sessions]
+- **Integrações:** [Task Manager, Git, Sessions]
 - **Steps:** [X] steps principais
 
 **Workflow:**
@@ -909,8 +914,8 @@ Após criar o comando, **SEMPRE** documente:
 Cada categoria (`meta`, `engineer`, `product`, `git`, `compliance`, `docs`) tem propósito, padrões de integração e template de comando próprios. Ao criar um comando, **identifique a categoria** e aplique o template correspondente.
 
 - **meta/** — manipula o próprio sistema; invoca agentes meta; gera artefatos `.md`.
-- **engineer/** — workflows de dev; integra ClickUp + sessions; orquestra múltiplos agentes.
-- **product/** — gestão de produto; foco em ClickUp; invoca `@product-agent` / `@task-specialist`.
+- **engineer/** — workflows de dev; integra Task Manager (provider ativo) + sessions; orquestra múltiplos agentes.
+- **product/** — gestão de produto; integra o Task Manager configurado; invoca `@product-agent` / `@task-specialist`.
 - **git/** — operações Git Flow; invoca `@gitflow-specialist`; valida estado do repositório.
 - **compliance/** — docs de conformidade; segue frameworks (ISO, SOC2); output em `docs/compliance-context/`.
 - **docs/** — geração de documentação; invoca agentes de docs; output em `docs/`.
@@ -1008,7 +1013,7 @@ Três templates prontos cobrem os níveis de complexidade ao instanciar um coman
 
 - **Template 1 — Simples:** delegação direta a um agente (`## Execução` → `**Agente:**` + instruções).
 - **Template 2 — Médio:** workflow com configuração bash + steps + agente + validações.
-- **Template 3 — Complexo:** orquestração de múltiplos agentes + integração ClickUp + documentação.
+- **Template 3 — Complexo:** orquestração de múltiplos agentes + integração com Task Manager (provider ativo) + documentação.
 
 ➡️ **Templates completos prontos para copiar**: `docs/knowledge-base/meta/command-creation-patterns.md` — seção "Templates Rápidos por Tipo". **LEIA o KB** e escolha o template conforme a complexidade definida na FASE 2.
 

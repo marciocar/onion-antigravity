@@ -19,7 +19,7 @@ Este comando agora inclui **sync automático pós-merge** usando:
 - **Performance otimizada** (cache + operações paralelas) 
 - **Cleanup inteligente** baseado na estratégia de branch
 - **Session archiving** automático
-- **ClickUp auto-update** para status "Done"
+- **Task Manager auto-update** para status "Done" (no provider configurado em `TASK_MANAGER_PROVIDER`)
 
 ---
 
@@ -36,25 +36,19 @@ Agora é solicitado que você faça um PR. Siga estes passos cuidadosamente para
    b. Faça commit das mudanças que você fez. Use uma mensagem de commit clara e concisa que resuma as alterações.
    c. Push dos commits para a feature branch.
 
-3. Mova a task do ClickUp associada com esta tarefa para o status "in progress" e adicione a tag "under-review".
+3. Mova a task associada no **Task Manager configurado** para o status "in progress" e adicione a tag "under-review". Antes, carregue o `.env` e leia `TASK_MANAGER_PROVIDER` (`jira` | `clickup` | `asana` | `linear` | `none`) para saber qual provider operar. Se `none`, pule esta etapa (não há persistência remota).
 
-4. Adicione um comentário na task do ClickUp documentando o PR:
+4. Adicione um comentário na task documentando o PR, no **Task Manager configurado**:
 
-**Chamar abstração MCP para comentário automatizado:**
+**Roteamento por provider** (carregar `.env` → ler `TASK_MANAGER_PROVIDER` → seguir o adapter):
 
-```typescript
-// Ao criar PR, chamar:
-await commentPRCreated(taskId, {
-  prUrl: "[PR_URL]",
-  branch: "[branch-name]",
-  changesDescription: "[descrição das mudanças]",
-  testsStatus: "passing|review|pending"
-});
-```
+- **`clickup`** → comentário em formatação Unicode via `@clickup-specialist`. Adapter: `.claude/utils/task-manager/adapters/clickup.md`. Abstração MCP de referência: `commentPRCreated()` em `.claude/utils/clickup-mcp-wrappers.md` (linhas 632-661). Padrões: `.claude/commands/common/prompts/clickup-patterns.md`.
+- **`jira`** → comentário em ADF via `@jira-specialist`. Adapter: `.claude/utils/task-manager/adapters/jira.md`.
+- **`asana`** → comentário (story) via `@task-specialist`. Adapter: `.claude/utils/task-manager/adapters/asana.md`.
+- **`linear`** → comentário em Markdown via `@task-specialist`. Adapter: `.claude/utils/task-manager/adapters/linear.md`.
+- **`none`** → não persistir comentário remoto.
 
-**Referências:**
-- **Padrões de formatação**: `.claude/commands/common/prompts/clickup-patterns.md`
-- **Abstração MCP**: `commentPRCreated()` em `.claude/utils/clickup-mcp-wrappers.md` (linhas 632-661) 
+O conteúdo do comentário deve documentar: URL do PR, branch, descrição das mudanças e status dos testes (passing | review | pending).
 
 5. Abra um Pull Request (PR) com os detalhes da implementação:
 
@@ -80,7 +74,7 @@ await commentPRCreated(taskId, {
     - ⚡ **Performance otimizada** (cache + operações paralelas)
     - 🧹 **Cleanup inteligente** baseado na estratégia GitFlow
     - 📁 **Session management** automático com archiving
-    - 🔗 **ClickUp auto-update** para status "Done"
+    - 🔗 **Task Manager auto-update** para status "Done" (no provider configurado em `TASK_MANAGER_PROVIDER`)
     
     O sync será executado automaticamente com a estratégia otimizada baseada no tipo de branch e workflow detectado.
 
@@ -92,7 +86,7 @@ Seu output final deve ser uma mensagem para o usuário, formatada da seguinte fo
 Tarefa completada:
 - Testes estão passando
 - Mudanças commitadas
-- Task do ClickUp [INSERT TASK ID] movida para "in progress" com tag "under-review"
+- Task [INSERT TASK ID] movida para "in progress" com tag "under-review" no Task Manager configurado ([INSERT PROVIDER])
 - PR aberto: [INSERT PR TITLE]
 - Comentários do code review automatizado abordados e correções pushed
 - 🤖 GitFlow integration: Auto-sync configurado para pós-merge
@@ -104,7 +98,7 @@ O PR está agora pronto para sua revisão final e merge manual.
    ∟ Performance otimizada (cache + operações paralelas)
    ∟ Cleanup inteligente baseado na estratégia GitFlow
    ∟ Session archiving automático
-   ∟ ClickUp auto-update para status "Done"
+   ∟ Task Manager auto-update para status "Done" (provider configurado em TASK_MANAGER_PROVIDER)
 
 [INSERT PR LINK]
 </task_completion_message>

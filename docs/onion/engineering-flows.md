@@ -2,13 +2,18 @@
 
 > **Versão**: 3.0.0 | **Última atualização**: 2025-11-24
 
-Este guia documenta os workflows completos de desenvolvimento, desde a concepção até a entrega, com integração total ao ClickUp MCP.
+Este guia documenta os workflows completos de desenvolvimento, desde a concepção até a entrega, com integração ao **Task Manager Abstraction**. Todos os fluxos funcionam com qualquer provedor ativo (`TASK_MANAGER_PROVIDER`: `jira` | `clickup` | `asana` | `linear` | `none`); onde um detalhe for específico de um provedor, ele está marcado como tal.
+
+> **Convenção de exemplos:** ao longo do guia usamos um ID genérico de task (`AUTH-123`). No provedor ativo isso corresponde a uma issue do Jira (`AUTH-123`), uma task do ClickUp, uma task do Asana ou uma issue do Linear. O ID exato segue o formato do provedor configurado.
 
 ## 🆕 Novidades v3.0
 
 - **Sessions estruturadas** em `.claude/sessions/<feature-slug>/`
-- **Comentários duais** no ClickUp (detalhado + resumido)
+- **Comentários de progresso** na task do provedor ativo (detalhado + resumido)
+  - _Específico do ClickUp:_ comentários duais usam formatação visual Unicode (ver adapter ClickUp)
+  - _Específico do Jira:_ comentários e descrições são renderizados em ADF (Atlassian Document Format)
 - **Mapeamento fase→subtask** automático
+  - _Específico do ClickUp:_ o mapeamento usa subtasks nativas do ClickUp; em Jira corresponde a sub-tasks/issue links, em Linear a sub-issues, em Asana a subtasks
 - **Prompts modulares** em `common/prompts/`
 
 ## 📋 Índice de Fluxos
@@ -18,7 +23,7 @@ Este guia documenta os workflows completos de desenvolvimento, desde a concepç�
 - [📚 Fluxo de Documentação](#-fluxo-de-documentação)
 - [🔧 Fluxo de Refatoração](#-fluxo-de-refatoração)
 - [⚡ Fluxo de Hotfix](#-fluxo-de-hotfix)
-- [🎯 Integrações ClickUp por Fluxo](#-integrações-clickup-por-fluxo)
+- [🎯 Integração com Task Manager por Fluxo](#-integração-com-task-manager-por-fluxo)
 - [🤖 Workflows com Agentes Especializados](#-workflows-com-agentes-especializados)
 
 ---
@@ -34,20 +39,20 @@ Este guia documenta os workflows completos de desenvolvimento, desde a concepç�
 
 **O que acontece**:
 -  Sistema analisa requisitos e contexto do projeto
--  Cria task estruturada no ClickUp com:
+-  Cria task estruturada no **provedor ativo** com:
   - Título descritivo
-  - Descrição detalhada
+  - Descrição detalhada (em ADF no Jira Cloud, Markdown no ClickUp/Linear, notes no Asana)
   - Critérios de aceitação
   - Estimativa inicial
-  - Tags relevantes (`feature`, `auth`, `oauth2`)
--  Task fica com status `to do` no ClickUp
+  - Tags/labels relevantes (`feature`, `auth`, `oauth2`)
+-  Task fica com status normalizado `to do` no provedor
 
-**Output esperado**:
+**Output esperado** (exemplo com provedor ativo):
 ```
-✅ Task criada no ClickUp: AUTH-123
+✅ Task criada (provider=jira): AUTH-123
 📋 Título: "🔐 Implementar sistema de autenticação OAuth2"
 📝 Descrição: Funcionalidade completa de autenticação...
-🏷️ Tags: feature, auth, oauth2, high-priority
+🏷️ Tags/labels: feature, auth, oauth2, high-priority
 📊 Estimativa: 8-12 horas
 ```
 
@@ -68,12 +73,12 @@ Este guia documenta os workflows completos de desenvolvimento, desde a concepç�
 /engineer/start
 ```
 
-**Input necessário**: ID da task ClickUp (`AUTH-123`)
+**Input necessário**: ID da task no provedor ativo (`AUTH-123`)
 
 **O que acontece**:
 -  Verifica se está em feature branch apropriada
 -  Cria pasta `.claude/sessions/auth-oauth2/`
--  Busca detalhes da task no ClickUp
+-  Busca detalhes da task no provedor ativo
 -  Analisa contexto, objetivos e dependências
 -  Identifica arquivos e componentes necessários
 -  Cria plan.md inicial
@@ -131,7 +136,7 @@ graph LR
 Durante o desenvolvimento, o sistema:
 - 🔍 Executa testes automaticamente após mudanças
 - 📝 Atualiza documentação conforme necessário
-- 🔗 Mantém rastreabilidade com task ClickUp
+- 🔗 Mantém rastreabilidade com a task no provedor ativo
 - 📊 Monitora progresso e estima tempo restante
 
 ### **Fase 4: Preparação para Review**
@@ -147,7 +152,7 @@ Durante o desenvolvimento, o sistema:
 -  Linting sem erros
 -  Documentação atualizada
 -  Commits organizados
--  Task ClickUp sincronizada
+-  Task sincronizada no provedor ativo
 
 #### 4.2 Criação do Pull Request
 ```bash
@@ -157,11 +162,11 @@ Durante o desenvolvimento, o sistema:
 **O que acontece**:
 1. ✅ Execução final de todos os testes
 2. ✅ Commit final com mensagem padronizada
-3. ✅ **Atualização ClickUp**: Task → `in progress` + tag `under-review`
+3. ✅ **Atualização no provedor ativo**: Task → `in_progress` + tag/label `under-review` (no Jira, via transition — nunca seta `status` direto)
 4. ✅ Criação do PR com:
    - Descrição detalhada da implementação
    - Checklist de validações
-   - Link para task ClickUp
+   - Link para a task no provedor ativo
    - Screenshots/demos se aplicável
 5. ✅ Aguarda feedback automatizado (3 min)
 6. ✅ Processa comentários e sugere correções
@@ -176,14 +181,14 @@ Durante o desenvolvimento, o sistema:
 - Criados testes unitários e de integração
 
 ### 🔗 Relacionado
-- ClickUp Task: AUTH-123
+- Task (provedor ativo): AUTH-123
 - Sessão: .claude/sessions/auth-oauth2/
 
 ### ✅ Checklist
 - [x] Testes passando
 - [x] Documentação atualizada
 - [x] Linting sem erros
-- [x] Task ClickUp atualizada
+- [x] Task atualizada no provedor ativo
 ```
 
 ### **Fase 5: Review e Finalização**
@@ -198,7 +203,7 @@ Quando feedback é recebido:
 #### 5.2 Merge e Finalização
 Após aprovação:
 - 🔄 Merge do PR
--  **Atualização ClickUp**: Task → `done`
+-  **Atualização no provedor ativo**: Task → `done` (no Jira, via transition)
 - 📝 Adição de comentário final com resumo
 - 🏷️ Adição de tags de conclusão
 - 📊 Atualização de métricas de tempo
@@ -281,10 +286,10 @@ Após aprovação:
 - 🤖 Contexto otimizado para IA
 - 📋 Guias de desenvolvimento
 
-**Integração ClickUp**:
--  Cria task de documentação
-- 📊 Organiza por workspace/space
-- 🏷️ Tags por tipo de documentação
+**Integração com Task Manager**:
+-  Cria task de documentação no provedor ativo
+- 📊 Organiza por workspace/space/projeto (conforme o provedor)
+- 🏷️ Tags/labels por tipo de documentação
 
 ### **Documentação de Negócio**
 ```bash
@@ -333,11 +338,11 @@ Após aprovação:
 /engineer/work "correção sistema pagamento"
 /engineer/pr     # PR de emergência
 
-# ClickUp: Task marcada como URGENT + notificações
+# Provedor ativo: Task marcada como URGENT + notificações
 ```
 
 **Características do fluxo de hotfix**:
-- 🚨 Prioridade máxima no ClickUp
+- 🚨 Prioridade máxima no provedor ativo
 - ⚡ Branch `hotfix/*` automaticamente
 - 🧪 Testes mínimos mas críticos
 - 📢 Notificações para todos stakeholders
@@ -345,32 +350,40 @@ Após aprovação:
 
 ---
 
-## 🎯 Integrações ClickUp por Fluxo
+## 🎯 Integração com Task Manager por Fluxo
 
-### **Estados da Task no ClickUp**
+A integração abaixo é descrita em termos de **status normalizados**, que a abstração mapeia para o vocabulário de cada provedor. Itens marcados como _"específico do provedor X"_ não são universais.
+
+### **Estados normalizados da Task (qualquer provedor)**
 
 ```mermaid
 graph LR
-    A[to do] --> B[in progress]
-    B --> C[in progress + under-review]
+    A[todo] --> B[in_progress]
+    B --> C[in_progress + under-review]
     C --> D[done]
-    
+
     A --> E[blocked]
     E --> A
     C --> B
 ```
 
-### **Mapeamento de Comandos → Estados ClickUp**
+Status normalizados: `backlog` → `todo` → `in_progress` → `in_review` → `done` (mais `blocked` e `cancelled`). A abstração traduz para os status reais do provedor.
 
-| Comando | Estado Inicial | Estado Final | Tags Adicionadas |
+> **Específico do Jira:** mudanças de status nunca são setadas diretamente — são executadas via `POST /issue/{key}/transitions`, respeitando o workflow configurado.
+
+### **Mapeamento de Comandos → Estados (status normalizados)**
+
+| Comando | Estado Inicial | Estado Final | Tags/Labels Adicionadas |
 |---------|---------------|-------------|------------------|
-| `/product/task` | - | `to do` | Baseado no tipo |
-| `/engineer/start` | `to do` | `in progress` | `development` |
-| `/engineer/pr` | `in progress` | `in progress` | `under-review` |
-| **Após merge** | `in progress + under-review` | `done` | `completed` |
-| **Se blockeado** | Qualquer | `blocked` | `blocked` + razão |
+| `/product/task` | - | `todo` | Baseado no tipo |
+| `/engineer/start` | `todo` | `in_progress` | `development` |
+| `/engineer/pr` | `in_progress` | `in_progress` | `under-review` |
+| **Após merge** | `in_progress + under-review` | `done` | `completed` |
+| **Se bloqueado** | Qualquer | `blocked` | `blocked` + razão |
 
-### **Comentários Automáticos no ClickUp**
+### **Comentários Automáticos na Task**
+
+O conteúdo dos comentários é o mesmo em qualquer provedor; o **formato de renderização** varia:
 
 | Evento | Comentário Adicionado |
 |--------|----------------------|
@@ -380,10 +393,29 @@ graph LR
 | PR aprovado | "✅ Pull Request aprovado e merged - Funcionalidade entregue" |
 | Bug encontrado | "🐛 Bug identificado durante desenvolvimento: [detalhes]" |
 
+**Formatação por provedor:**
+- _Específico do ClickUp:_ comentários usam formatação visual Unicode (`━━━`, `∟`, `▶`, `◆`, `✅`) com timestamp + status obrigatórios — ver `.claude/utils/task-manager/adapters/clickup.md`
+- _Específico do Jira:_ comentários e descrições são enviados em ADF (JSON estruturado) — ver `adapters/jira.md`
+- _Asana:_ notes em HTML (subset) ou plain text — ver `adapters/asana.md`
+- _Linear:_ Markdown nativo (suporte rico) — ver `adapters/linear.md`
+
+### **Subtasks por fase (hierarquia)**
+
+O mapeamento fase→subtask existe em todos os provedores, com nomenclatura própria:
+
+| Provedor | Mecanismo |
+|----------|-----------|
+| **Jira** | Sub-tasks ou issue links |
+| **ClickUp** | Subtasks nativas (_específico do ClickUp:_ checklists nativos também são suportados via `/product/checklist-sync`) |
+| **Asana** | Subtasks |
+| **Linear** | Sub-issues |
+
 ### **Campos Customizados Sincronizados**
 
-| Campo ClickUp | Origem | Atualização |
-|---------------|--------|-------------|
+> **Específico do provedor:** a sincronização granular de campos abaixo está implementada para o **ClickUp** (custom fields). Em Jira, mapeia-se para campos customizados / story points; em Asana, para custom fields do projeto; em Linear, para estimates/labels. Verifique o adapter do provedor para a cobertura exata.
+
+| Campo | Origem | Atualização |
+|-------|--------|-------------|
 | **Tempo Estimado** | `/product/task` análise | Refinado durante desenvolvimento |
 | **Tempo Real** | Timer automático | Durante `/engineer/work` |
 | **Branch** | `/engineer/start` | Nome da branch Git |
@@ -410,7 +442,7 @@ graph LR
 - 📈 Velocity da equipe (story points/sprint)
 - 🐛 Taxa de bugs encontrados pós-deploy
 
-### **Dashboards ClickUp Sugeridos**
+### **Dashboards / Relatórios Sugeridos** (qualquer provedor)
 1. **Desenvolvimento Ativo**: Tasks in progress + tempo decorrido
 2. **Pipeline de Review**: PRs aguardando review + tempo de espera
 3. **Bugs e Hotfixes**: Tasks críticas + tempo de resolução
@@ -427,12 +459,13 @@ graph LR
 4. ✅ **Faça commits pequenos e frequentes** durante o desenvolvimento
 5. ✅ **Use `/engineer/pre-pr`** antes de submeter para review
 
-### **Para Integração ClickUp Otimizada**
-1. 🏷️ **Use tags consistentes** para facilitar filtros e busca
+### **Para Integração com Task Manager Otimizada** (qualquer provedor)
+1. 🏷️ **Use tags/labels consistentes** para facilitar filtros e busca
 2. 📝 **Mantenha descrições atualizadas** durante o desenvolvimento
 3. 🔗 **Vincule sempre** PRs às tasks correspondentes
 4. 📊 **Monitore métricas** para identificar bottlenecks
 5. 📢 **Configure notificações** adequadas para sua equipe
+6. 🚀 **Bulk-first**: ao operar em lote, prefira endpoints de bulk (ex.: Jira `/issue/bulk`) para evitar N+1 calls
 
 ### **Para Qualidade de Código**
 1. 🧪 **Testes primeiro** - escreva testes antes da implementação
@@ -522,14 +555,25 @@ graph LR
 /git/feature/finish
 ```
 
-#### **ClickUp Specialist Integration**
-```bash
-# Otimização de integrações ClickUp
-@clickup-specialist "Configurar automações avançadas ClickUp"
+#### **Task Manager Specialist Integration (específico do provedor ativo)**
 
-# Melhorias técnicas específicas
-/engineer/work "otimizar sincronização ClickUp MCP"
+O roteamento para o especialista depende de `TASK_MANAGER_PROVIDER`:
+
+```bash
+# Jira (provider=jira)
+@jira-specialist "Configurar JQL, transitions e bulk operations"
+
+# ClickUp (provider=clickup)
+@clickup-specialist "Configurar automações avançadas e custom fields"
+
+# Asana / Linear (provider=asana | linear)
+@task-specialist "Decompor e sincronizar tasks no provedor ativo"
+
+# Melhoria técnica genérica (qualquer provedor)
+/engineer/work "otimizar sincronização com o Task Manager ativo"
 ```
+
+> Estratégia/priorização → `@product-agent`; decomposição agnóstica → `@task-specialist`; operação técnica do provedor → especialista do provedor (`@jira-specialist`, `@clickup-specialist`).
 
 ### **Coordenação Multi-Agente**
 
@@ -551,4 +595,4 @@ graph LR
 
 ---
 
-**Próximo**: [Integração ClickUp Detalhada →](clickup-integration.md)
+**Próximo**: [Task Manager Abstraction →](../knowledge-base/concepts/task-manager-abstraction.md) · Adapters por provedor em `.claude/utils/task-manager/adapters/` (`jira.md`, `clickup.md`, `asana.md`, `linear.md`)

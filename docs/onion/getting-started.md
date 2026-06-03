@@ -33,9 +33,11 @@ O Sistema Onion oferece um comando interativo para configurar todas as integraç
 
 # Ou especificar integração diretamente
 /meta/setup-integration task-manager  # Configurar gerenciador de tarefas
+/meta/setup-integration jira          # Configurar Jira especificamente
 /meta/setup-integration clickup       # Configurar ClickUp especificamente
-/meta/setup-integration asana        # Configurar Asana especificamente
-/meta/setup-integration gamma        # Configurar Gamma.App
+/meta/setup-integration asana         # Configurar Asana especificamente
+/meta/setup-integration linear        # Configurar Linear especificamente
+/meta/setup-integration gamma         # Configurar Gamma.App
 ```
 
 **O que o comando faz:**
@@ -46,7 +48,7 @@ O Sistema Onion oferece um comando interativo para configurar todas as integraç
 - ✅ **Fornece instruções** específicas para cada provedor
 
 **Integrações suportadas:**
-- **Task Managers**: ClickUp, Asana, Linear (via Task Manager Abstraction)
+- **Task Managers**: Jira, ClickUp, Asana, Linear (via Task Manager Abstraction)
 - **Gamma.App**: API para apresentações
 - **PostgreSQL**: Banco de dados
 
@@ -54,20 +56,36 @@ O Sistema Onion oferece um comando interativo para configurar todas as integraç
 
 Se preferir configurar manualmente, edite o arquivo `.env`:
 
+A primeira variável define **qual provedor está ativo**. Configure apenas o bloco
+do provedor escolhido — os demais ficam comentados.
+
 ```bash
 # ═══════════════════════════════════════
-# GERENCIADOR DE TAREFAS (escolha um)
+# GERENCIADOR DE TAREFAS (escolha UM provedor)
 # ═══════════════════════════════════════
-TASK_MANAGER_PROVIDER=clickup  # clickup | asana | linear | none
+TASK_MANAGER_PROVIDER=jira  # jira | clickup | asana | linear | none
 
-# ClickUp
-CLICKUP_API_TOKEN=pk_xxxxx
-CLICKUP_DEFAULT_WORKSPACE=your_workspace_id
-CLICKUP_DEFAULT_LIST=your_list_id
+# ─── Opção: Jira ───
+JIRA_HOST=https://your-domain.atlassian.net
+JIRA_EMAIL=you@example.com
+JIRA_API_TOKEN=xxxxx
+# JIRA_PROJECT_KEY=PROJ
+# JIRA_AUTH_TYPE=basic   # basic | bearer
+# JIRA_API_VERSION=3     # 3 (Cloud) | 2 (Server/DC)
 
-# Asana (alternativa)
+# ─── Opção: ClickUp ───
+# CLICKUP_API_TOKEN=pk_xxxxx
+# CLICKUP_WORKSPACE_ID=your_workspace_id
+# CLICKUP_DEFAULT_LIST_ID=your_list_id
+
+# ─── Opção: Asana ───
 # ASANA_ACCESS_TOKEN=1/xxxxx
-# ASANA_DEFAULT_WORKSPACE=1234567890
+# ASANA_WORKSPACE_ID=1234567890
+# ASANA_DEFAULT_PROJECT_ID=1234567890
+
+# ─── Opção: Linear ───
+# LINEAR_API_KEY=lin_api_xxxxx
+# LINEAR_TEAM_ID=your_team_id
 
 # ═══════════════════════════════════════
 # OUTRAS INTEGRAÇÕES
@@ -75,6 +93,10 @@ CLICKUP_DEFAULT_LIST=your_list_id
 GITHUB_TOKEN=ghp_xxxxx
 GAMMA_API_KEY=gm_xxxxx
 ```
+
+> **💡 Para trocar de provedor:** altere `TASK_MANAGER_PROVIDER`, descomente o
+> bloco correspondente e comente o anterior. Nenhum comando ou workflow precisa
+> mudar — a abstração resolve o roteamento.
 
 > **💡 Dica:** Use `/meta/setup-integration` para garantir que todas as variáveis estão corretas e o `.env` está protegido no `.gitignore`.
 
@@ -91,12 +113,13 @@ O Sistema Onion v3.0 usa uma **camada de abstração** que permite trabalhar com
 
 **Provedores suportados:**
 
-| Provedor | Status | Configuração | Notas |
-|----------|--------|--------------|-------|
-| **ClickUp** | ✅ Completo | `TASK_MANAGER_PROVIDER=clickup` | Via ClickUp MCP |
-| **Asana** | ✅ Completo | `TASK_MANAGER_PROVIDER=asana` | Via Asana MCP |
-| **Linear** | 📝 Stub | `TASK_MANAGER_PROVIDER=linear` | Em desenvolvimento |
-| **None** | ✅ Offline | `TASK_MANAGER_PROVIDER=none` | Modo local sem sincronização |
+| Provedor | Configuração | Agente / roteamento | Notas |
+|----------|--------------|---------------------|-------|
+| **Jira** | `TASK_MANAGER_PROVIDER=jira` | `@jira-specialist` | REST v3/v2, JQL, ADF, transitions, bulk |
+| **ClickUp** | `TASK_MANAGER_PROVIDER=clickup` | `@clickup-specialist` | Via ClickUp MCP, formatação Unicode |
+| **Asana** | `TASK_MANAGER_PROVIDER=asana` | `@task-specialist` (agnóstico) | Notes HTML / plain text |
+| **Linear** | `TASK_MANAGER_PROVIDER=linear` | `@task-specialist` (agnóstico) | Markdown nativo |
+| **None** | `TASK_MANAGER_PROVIDER=none` | `@task-specialist` (offline) | Modo local sem sincronização |
 
 **Vantagens da abstração:**
 - 🎯 **Flexibilidade**: Escolha o gerenciador que sua equipe já usa
@@ -116,7 +139,7 @@ Após configurar o Task Manager, valide a configuração:
 
 # Testar integração de Task Manager (se configurado)
 /product/task "Task de teste do sistema"
-# → Deve criar task no gerenciador configurado (ClickUp, Asana, etc)
+# → Deve criar task no provedor ativo (Jira, ClickUp, Asana ou Linear)
 
 # Validar conectividade (depende do provedor configurado)
 /warm-up  # Valida conectividade do Task Manager configurado
@@ -125,9 +148,11 @@ Após configurar o Task Manager, valide a configuração:
 **Se algo não funcionar:**
 - Execute `/meta/setup-integration` novamente para revisar configuração
 - Verifique se `.env` está no `.gitignore` (o comando faz isso automaticamente)
-- Consulte especialistas específicos:
-  - `@clickup-specialist` para problemas com ClickUp
-  - Para Asana, verifique variáveis `ASANA_*` no `.env`
+- Consulte o roteamento conforme o provedor ativo:
+  - `@jira-specialist` para problemas com Jira (verifique `JIRA_HOST`, `JIRA_EMAIL`, `JIRA_API_TOKEN`)
+  - `@clickup-specialist` para problemas com ClickUp (verifique `CLICKUP_API_TOKEN`)
+  - Para Asana, verifique a variável `ASANA_ACCESS_TOKEN` no `.env` (roteamento via `@task-specialist`)
+  - Para Linear, verifique a variável `LINEAR_API_KEY` no `.env` (roteamento via `@task-specialist`)
   - Para modo offline, certifique-se que `TASK_MANAGER_PROVIDER=none`
 
 ---
@@ -250,7 +275,7 @@ Você completou seu primeiro ciclo completo de desenvolvimento com integração 
 
 ## 📊 Integração com Task Manager - Visão Rápida
 
-O Sistema Onion sincroniza automaticamente com seu Task Manager configurado (ClickUp, Asana, etc), atualizando status, comentários e tags conforme você desenvolve.
+O Sistema Onion sincroniza automaticamente com o Task Manager ativo (Jira, ClickUp, Asana ou Linear), atualizando status, comentários e tags conforme você desenvolve.
 
 ### **Estados Automáticos**
 ```mermaid
@@ -276,7 +301,7 @@ graph LR
 - 🔍 PR criado com detalhes
 - ✅ Conclusão com métricas
 
-**Nota:** Todos esses recursos funcionam igualmente com ClickUp, Asana ou qualquer outro provedor suportado através da abstração.
+**Nota:** Todos esses recursos funcionam igualmente com Jira, ClickUp, Asana ou Linear através da abstração. A *forma* de cada recurso adapta-se ao provedor — por exemplo, descrições em ADF no Jira (Cloud), Markdown nativo no ClickUp/Linear e notes HTML no Asana —, mas o comportamento do workflow permanece o mesmo.
 
 ---
 
@@ -296,18 +321,22 @@ pwd  # Deve estar na raiz do projeto com .claude/
 # Validar configuração
 /warm-up
 
-# Se falhar, verificar variáveis conforme o provedor:
+# Verificar provedor configurado primeiro:
+echo $TASK_MANAGER_PROVIDER
+
+# Se falhar, verificar variáveis conforme o provedor ativo:
+
+# Para Jira:
+echo $JIRA_HOST; echo $JIRA_EMAIL; echo $JIRA_API_TOKEN
 
 # Para ClickUp:
-echo $CLICKUP_API_TOKEN
-echo $CLICKUP_WORKSPACE_ID
+echo $CLICKUP_API_TOKEN; echo $CLICKUP_WORKSPACE_ID
 
 # Para Asana:
-echo $ASANA_ACCESS_TOKEN
-echo $ASANA_DEFAULT_WORKSPACE
+echo $ASANA_ACCESS_TOKEN; echo $ASANA_WORKSPACE_ID
 
-# Verificar provedor configurado:
-echo $TASK_MANAGER_PROVIDER
+# Para Linear:
+echo $LINEAR_API_KEY; echo $LINEAR_TEAM_ID
 ```
 
 ### **❌ Problema: Task não encontrada**
@@ -369,16 +398,16 @@ npm test  # ou comando apropriado do projeto
 2. **[Referência de Ferramentas](tools-reference.md)** - Todas as ferramentas disponíveis em TypeScript
 3. **[Fluxos de Engenharia](engineering-flows.md)** - Workflows detalhados  
 4. **[Task Manager Abstraction](../knowledge-base/concepts/task-manager-abstraction.md)** - Entenda como funciona a abstração
-5. **[Integração ClickUp](clickup-integration.md)** - Configuração avançada do ClickUp (se usar)
+5. **Adapters por provedor** - Detalhes específicos de cada um em `.claude/utils/task-manager/adapters/` (`jira.md`, `clickup.md`, `asana.md`, `linear.md`)
 
 ### **🎯 Cenários Avançados**
 1. **[Exemplos Práticos](practical-examples.md)** - Casos reais de uso
 2. **[Referência de Agentes](agents-reference.md)** - Especialistas disponíveis
 
 ### **🔧 Personalização**
-1. Configurar webhooks do Task Manager (ClickUp, Asana, etc)
+1. Configurar webhooks do Task Manager (Jira, ClickUp, Asana ou Linear)
 2. Customizar templates de PR
-3. Criar dashboards específicos no seu gerenciador
+3. Criar dashboards/relatórios específicos no seu gerenciador
 4. Ajustar notificações e workflows
 
 ---
@@ -389,14 +418,14 @@ npm test  # ou comando apropriado do projeto
 1. **Comandos**: `/meta/all-tools` lista tudo disponível
 2. **Status**: `/warm-up` valida configuração do Task Manager
 3. **Documentação**: Arquivos nesta pasta `docs/`
-4. **Task Manager**: Interface web do seu gerenciador (ClickUp, Asana, etc) para validar dados
+4. **Task Manager**: Interface web do seu gerenciador (Jira, ClickUp, Asana ou Linear) para validar dados
 
 ### **🐛 Reportar Problemas**
 Se algo não funciona:
 1. Execute `/warm-up` e cole o resultado
 2. Descreva o comando executado
 3. Inclua mensagem de erro completa
-4. Mencione ID da task e provedor configurado (ClickUp, Asana, etc)
+4. Mencione ID da task e provedor configurado (Jira, ClickUp, Asana ou Linear)
 5. Verifique se `TASK_MANAGER_PROVIDER` está configurado corretamente
 
 ### **💬 Comunidade**
@@ -413,7 +442,7 @@ Agora você tem tudo para ser produtivo com o sistema Onion:
 -  **Setup validado** e funcionando
 -  **Primeiros comandos** executados com sucesso  
 -  **Fluxos principais** compreendidos
--  **Task Manager configurado** e sincronizando (ClickUp, Asana ou modo offline)
+-  **Task Manager configurado** e sincronizando (Jira, ClickUp, Asana, Linear ou modo offline)
 -  **Troubleshooting** na ponta da língua
 
 **Comece pequeno, pratique os fluxos básicos, e gradualmente explore funcionalidades mais avançadas!**
@@ -481,23 +510,27 @@ pwd  # Deve estar na raiz com .claude/
 # 1. Verificar provedor configurado
 echo $TASK_MANAGER_PROVIDER
 
-# 2. Verificar variáveis de ambiente conforme provedor:
+# 2. Verificar variáveis de ambiente conforme provedor ativo:
+
+# Se usando Jira:
+echo $JIRA_HOST; echo $JIRA_EMAIL; echo $JIRA_API_TOKEN
 
 # Se usando ClickUp:
-echo $CLICKUP_API_TOKEN
-echo $CLICKUP_WORKSPACE_ID
-echo $CLICKUP_DEFAULT_LIST_ID
+echo $CLICKUP_API_TOKEN; echo $CLICKUP_WORKSPACE_ID; echo $CLICKUP_DEFAULT_LIST_ID
 
 # Se usando Asana:
-echo $ASANA_ACCESS_TOKEN
-echo $ASANA_DEFAULT_WORKSPACE
+echo $ASANA_ACCESS_TOKEN; echo $ASANA_WORKSPACE_ID
+
+# Se usando Linear:
+echo $LINEAR_API_KEY; echo $LINEAR_TEAM_ID
 
 # 3. Testar conectividade
 /warm-up
 
-# 4. Invocar especialista conforme provedor:
+# 4. Invocar roteamento conforme provedor ativo:
+@jira-specialist "integração não funciona"     # Para Jira
 @clickup-specialist "integração não funciona"  # Para ClickUp
-# Para Asana, verifique documentação ou execute /meta/setup-integration asana
+# Para Asana/Linear, use @task-specialist ou execute /meta/setup-integration <provedor>
 ```
 
 ---

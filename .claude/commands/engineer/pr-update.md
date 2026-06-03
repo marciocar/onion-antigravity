@@ -28,7 +28,7 @@ Atualizar um Pull Request existente com mudanças adicionais. Este comando autom
 
 ### Sincronização Automática
 - Push automático para branch do PR existente
-- Atualização do ClickUp com comentário detalhado
+- Atualização do Task Manager configurado com comentário detalhado (conforme `TASK_MANAGER_PROVIDER`)
 - Validação de que PR foi atualizado com sucesso
 - Timestamp e métricas das mudanças aplicadas
 
@@ -46,7 +46,9 @@ Atualizar um Pull Request existente com mudanças adicionais. Este comando autom
 /engineer/pr-update --dry-run               # Preview sem executar
 ```
 
-## 🤝 Integração ClickUp MCP
+## 🤝 Integração com o Task Manager
+
+Antes de operar com a task, carregue o `.env` e leia `TASK_MANAGER_PROVIDER` (`jira` | `clickup` | `asana` | `linear` | `none`) para rotear ao provider e adapter corretos. Se `none`, pule a atualização remota (apenas commit + push).
 
 ### Detecção de Task Ativa
 - Lê task ID do arquivo `.claude/sessions/[slug]/context.md`
@@ -55,23 +57,15 @@ Atualizar um Pull Request existente com mudanças adicionais. Este comando autom
 
 ### Comentário Automático Padronizado
 
-**Chamar abstração MCP para documentação de atualização:**
+O comentário de atualização deve documentar: tipo do commit (fix | feat | refactor | docs | chore), hash do commit, arquivos modificados, linhas adicionadas/removidas e descrição das mudanças.
 
-```typescript
-// Ao atualizar PR com novos commits, chamar:
-await commentPRUpdated(taskId, {
-  commitType: "fix|feat|refactor|docs|chore",
-  commitHash: "[hash do commit]",
-  filesModified: N,
-  linesAdded: N,
-  linesRemoved: N,
-  description: "[descrição das mudanças]"
-});
-```
+**Roteamento por provider** (carregar `.env` → ler `TASK_MANAGER_PROVIDER` → seguir o adapter):
 
-**Referências:**
-- **Padrões de formatação**: `.claude/commands/common/prompts/clickup-patterns.md`
-- **Abstração MCP**: `commentPRUpdated()` em `.claude/utils/clickup-mcp-wrappers.md` (linhas 632-661)
+- **`clickup`** → comentário em formatação Unicode via `@clickup-specialist`. Adapter: `.claude/utils/task-manager/adapters/clickup.md`. Padrões: `.claude/commands/common/prompts/clickup-patterns.md`. Abstração MCP de referência: `commentPRUpdated()` em `.claude/utils/clickup-mcp-wrappers.md` (linhas 632-661).
+- **`jira`** → comentário em ADF via `@jira-specialist`. Adapter: `.claude/utils/task-manager/adapters/jira.md`.
+- **`asana`** → comentário (story) via `@task-specialist`. Adapter: `.claude/utils/task-manager/adapters/asana.md`.
+- **`linear`** → comentário em Markdown via `@task-specialist`. Adapter: `.claude/utils/task-manager/adapters/linear.md`.
+- **`none`** → não persistir comentário remoto.
 
 ## ⚙️ Processo Automático
 
@@ -80,7 +74,7 @@ await commentPRUpdated(taskId, {
 3. **Geração de Commit**: Cria mensagem contextual e descritiva
 4. **Staging Inteligente**: Adiciona apenas arquivos relevantes
 5. **Commit & Push**: Executa commit + push para branch do PR
-6. **Atualização ClickUp**: Documenta mudanças com comentário formatado
+6. **Atualização do Task Manager**: Documenta mudanças com comentário formatado no provider configurado (`TASK_MANAGER_PROVIDER`)
 7. **Validação Final**: Confirma que PR foi atualizado com sucesso
 
 ## 🧠 Detecção Inteligente de Tipos
@@ -126,7 +120,7 @@ git pull origin [branch-name]  # Sincronizar primeiro
 /engineer/pr-update           # Depois atualizar
 ```
 
-### Problema: "Task ClickUp não encontrada"
+### Problema: "Task do Task Manager não encontrada"
 **Solução**: Verificar context.md da sessão ativa
 - Confirmar task ID no arquivo `.claude/sessions/[slug]/context.md`
 - Validar se task existe e está acessível
@@ -168,7 +162,7 @@ git pull origin [branch-name]  # Sincronizar primeiro
 ## 🔗 Integração com Workflow
 
 ### Fluxo Padrão Completo
-1. `/product/task` - Criar task ClickUp
+1. `/product/task` - Criar task no Task Manager configurado
 2. `/engineer/start` - Iniciar desenvolvimento  
 3. `/engineer/work` - Desenvolver features
 4. `/engineer/pre-pr` - Validações finais
@@ -184,13 +178,13 @@ git pull origin [branch-name]  # Sincronizar primeiro
 
 ---
 
-**🎯 VALOR AGREGADO: Este comando elimina o processo manual de atualização de PRs, automatizando commit inteligente, push, e documentação ClickUp em uma única operação otimizada.**
+**🎯 VALOR AGREGADO: Este comando elimina o processo manual de atualização de PRs, automatizando commit inteligente, push, e documentação no Task Manager configurado em uma única operação otimizada.**
 
 ## 📈 Benefícios
 
 - ⚡ **Automação completa** do processo de update
 - 🧠 **Commits inteligentes** com mensagens contextuais
-- 📝 **Documentação automática** no ClickUp
+- 📝 **Documentação automática** no Task Manager configurado
 - 🔄 **Consistência** no workflow de PRs
 - ⏰ **Economia de tempo** significativa
 - 🎯 **Redução de erros** manuais

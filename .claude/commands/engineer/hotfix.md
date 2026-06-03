@@ -1,7 +1,7 @@
 ---
 name: hotfix
 description: |
-  Emergency workflow completo: task ClickUp + branch hotfix + desenvolvimento.
+  Emergency workflow completo: task no Task Manager + branch hotfix + desenvolvimento.
   Use para correções urgentes em produção.
 model: sonnet
 

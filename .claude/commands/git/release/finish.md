@@ -10,7 +10,7 @@ updated: "2025-11-24"
 
 # ✅ Git Flow - Finalizar Release
 
-Finalizar processo de release realizando merge seguro para main/master e develop, criação de tags, publicação e cleanup. Workflow completo de release deployment com validações automáticas e ClickUp integration.
+Finalizar processo de release realizando merge seguro para main/master e develop, criação de tags, publicação e cleanup. Workflow completo de release deployment com validações automáticas e integração com o Task Manager configurado (se houver).
 
 ## 🎯 Funcionalidades
 
@@ -24,7 +24,7 @@ Finalizar processo de release realizando merge seguro para main/master e develop
 ### Publishing e Deployment Integration  
 - Tag publishing para remote repository
 - Release notes generation baseada em changelog
-- ClickUp task completion e status updates
+- Conclusão da task e atualização de status no Task Manager configurado (condicional — somente se `TASK_MANAGER_PROVIDER` != `none`; suporta Jira, ClickUp, Asana, Linear)
 - Team notification via release completion workflow
 - Integration com CI/CD pipelines através de tags
 
@@ -52,7 +52,7 @@ Finalizar processo de release realizando merge seguro para main/master e develop
 5. **Merge Strategy**: Executa merge para main + back-merge para develop
 6. **Tag Creation**: Cria tag anotada com release notes automáticas
 7. **Publishing**: Publica tags e atualiza remote branches
-8. **Cleanup**: Remove release branch e atualiza ClickUp completion
+8. **Cleanup**: Remove release branch e, se `TASK_MANAGER_PROVIDER` != `none`, registra completion da task no provider ativo (ex.: ClickUp, Jira, Asana, Linear)
 
 ### Merge Strategy Intelligence
 Durante execução, aplica strategy inteligente:
